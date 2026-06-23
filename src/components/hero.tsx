@@ -1,49 +1,62 @@
 import { Button } from "@/components/ui/button";
-import { Mail, FileText } from "lucide-react";
+import { Mail, FileText, ArrowDown } from "lucide-react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 
 export function Hero() {
   return (
-    <section id="hero" className="min-h-screen flex items-center">
-      <div className="space-y-8">
-        <div className="size-20 rounded-full bg-muted flex items-center justify-center text-2xl font-semibold text-muted-foreground">
-          AS
+    <section id="hero" className="min-h-screen flex flex-col justify-center py-20">
+      <div className="space-y-10">
+        <div className="flex items-center gap-3">
+          <span className="size-2 rounded-full bg-green-500 animate-pulse" />
+          <span className="font-mono text-xs text-muted-foreground tracking-wider uppercase">
+            Available for graduate roles · 2026 / 2027
+          </span>
         </div>
 
-        <div className="space-y-4">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-            Agrim Sharma
+        <div className="space-y-6">
+          <p className="font-mono text-sm text-muted-foreground">Hi, my name is</p>
+          <h1 className="text-6xl md:text-8xl font-bold tracking-tight leading-[0.95]">
+            Agrim Sharma.
           </h1>
-          <p className="text-lg text-muted-foreground leading-relaxed">
-            Final-year Computer Science student at the University of Adelaide, majoring in Artificial Intelligence. Building AI products for small businesses, coaching tennis on the side. Open to graduate roles in software, data, analytics, and applied AI.
-          </p>
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight leading-[1.05] text-muted-foreground">
+            I build software that sits between systems and people.
+          </h2>
         </div>
 
-        <div className="flex flex-wrap gap-3">
-          <Button asChild>
+        <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl">
+          Final-year Computer Science student at Adelaide University, majoring in Artificial Intelligence. My focus is software engineering and AI, shaped as much by leading teams through hard transitions as by writing code.
+        </p>
+
+        <div className="flex flex-wrap gap-3 pt-2">
+          <Button asChild size="lg" className="h-12 px-6">
             <a href="/resume.pdf" target="_blank" rel="noopener noreferrer">
               <FileText className="size-4" />
               Resume
             </a>
           </Button>
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" size="lg" className="h-12 px-6">
             <a href="https://github.com/Agrim1305" target="_blank" rel="noopener noreferrer">
               <FaGithub className="size-4" />
               GitHub
             </a>
           </Button>
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" size="lg" className="h-12 px-6">
             <a href="https://www.linkedin.com/in/agrim-sharma-821788302/" target="_blank" rel="noopener noreferrer">
               <FaLinkedin className="size-4" />
               LinkedIn
             </a>
           </Button>
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" size="lg" className="h-12 px-6">
             <a href="mailto:agrimsh22@gmail.com">
               <Mail className="size-4" />
               Email
             </a>
           </Button>
+        </div>
+
+        <div className="pt-12 flex items-center gap-2 text-xs font-mono text-muted-foreground">
+          <ArrowDown className="size-3 animate-bounce" />
+          <span className="tracking-wider uppercase">Scroll to explore</span>
         </div>
       </div>
     </section>

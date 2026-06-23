@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Agrim Sharma | Final-year CS (AI) student",
-  description: "Final-year Computer Science (AI) student at the University of Adelaide. Building AI products for small businesses, coaching tennis on the side.",
+  title: "Agrim Sharma | Software Engineering & AI",
+  description: "Final-year Computer Science (AI) student at Adelaide University. I solve problems that sit between systems and people. Open to graduate roles in software engineering, AI, data, and analytics.",
 };
 
 export default function RootLayout({
@@ -23,11 +23,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en" className="dark">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {children}
+      </body>
     </html>
   );
 }
