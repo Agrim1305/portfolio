@@ -2,8 +2,8 @@ import { Card } from "@/components/ui/card";
 import { Code2, Trophy, GraduationCap, MapPin } from "lucide-react";
 
 const stats = [
-  { icon: GraduationCap, label: "University", value: "Adelaide" },
-  { icon: Code2, label: "Major", value: "CS (AI)" },
+  { icon: GraduationCap, label: "University", value: "Adelaide University" },
+  { icon: Code2, label: "Major", value: "Computer Science (AI)" },
   { icon: Trophy, label: "Graduating", value: "Dec 2026" },
   { icon: MapPin, label: "Based in", value: "Adelaide, AU" },
 ];

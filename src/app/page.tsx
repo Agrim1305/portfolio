@@ -13,7 +13,7 @@ export default function Home() {
   return (
     <>
       <Nav />
-      <main className="mx-auto max-w-6xl px-6 lg:px-8 pt-28">
+      <main className="mx-auto max-w-6xl px-6 lg:px-8 pt-24 sm:pt-28">
         <Hero />
         <FadeIn><About /></FadeIn>
         <FadeIn><Currently /></FadeIn>
