@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Agrim Sharma | Software Engineering & AI",
-  description: "Final-year Computer Science (AI) student at Adelaide University. I solve problems that sit between systems and people. Open to graduate roles in software engineering, AI, data, and analytics.",
+  title: "Agrim Sharma | Software Engineer & AI",
+  description: "Final-year Computer Science (AI) student at Adelaide University. Software engineer and applied AI builder. Open to graduate roles in software engineering, AI, data, and analytics for 2027.",
 };
 
 export default function RootLayout({

@@ -13,7 +13,7 @@ export default function Home() {
   return (
     <>
       <Nav />
-      <main className="mx-auto max-w-5xl px-6">
+      <main className="mx-auto max-w-6xl px-6 lg:px-8">
         <Hero />
         <FadeIn><About /></FadeIn>
         <FadeIn><Currently /></FadeIn>
@@ -23,8 +23,8 @@ export default function Home() {
         <FadeIn><Awards /></FadeIn>
         <FadeIn><Contact /></FadeIn>
       </main>
-      <footer className="border-t border-border/60 mt-12">
-        <div className="mx-auto max-w-5xl px-6 py-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-2 text-sm text-muted-foreground">
+      <footer className="mx-auto max-w-6xl px-6 lg:px-8 border-t border-white/10 mt-12">
+        <div className="py-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-2 text-sm text-white/60">
           <span>© 2026 Agrim Sharma</span>
           <span className="font-mono text-xs tracking-wider">Built with Next.js · Deployed on Vercel</span>
         </div>
