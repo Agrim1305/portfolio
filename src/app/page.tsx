@@ -5,6 +5,7 @@ import { Currently } from "@/components/currently";
 import { Projects } from "@/components/projects";
 import { Experience } from "@/components/experience";
 import { Certifications } from "@/components/certifications";
+import { HowIWork } from "@/components/how-i-work";
 import { Awards } from "@/components/awards";
 import { Contact } from "@/components/contact";
 import { FadeIn } from "@/components/fade-in";
@@ -15,13 +16,14 @@ export default function Home() {
       <Nav />
       <main className="mx-auto max-w-6xl px-6 lg:px-8 pt-24 sm:pt-28">
         <Hero />
-        <FadeIn><About /></FadeIn>
-        <FadeIn><Currently /></FadeIn>
-        <FadeIn><Projects /></FadeIn>
-        <FadeIn><Experience /></FadeIn>
-        <FadeIn><Certifications /></FadeIn>
-        <FadeIn><Awards /></FadeIn>
-        <FadeIn><Contact /></FadeIn>
+        <FadeIn direction="up"><About /></FadeIn>
+        <FadeIn direction="up"><Currently /></FadeIn>
+        <Projects />
+        <FadeIn direction="up"><Experience /></FadeIn>
+        <FadeIn direction="up"><Certifications /></FadeIn>
+        <FadeIn direction="up"><HowIWork /></FadeIn>
+        <Awards />
+        <FadeIn direction="up"><Contact /></FadeIn>
       </main>
       <footer className="mx-auto max-w-6xl px-6 lg:px-8 border-t border-white/10 mt-12">
         <div className="py-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-2 text-sm text-white/60">
