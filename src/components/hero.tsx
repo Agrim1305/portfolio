@@ -31,13 +31,14 @@ export function Hero() {
             </h1>
             {/* Fixed height reserves space for the longest phrase so the
                 typing animation never reflows the layout below it. */}
-            <h2 className="hero-rise hero-rise-delay-2 text-2xl md:text-4xl font-bold tracking-tight leading-[1.15] text-white/55 max-w-2xl h-[5.2rem] md:h-[5rem]">
+            <h2 className="hero-rise hero-rise-delay-2 text-2xl md:text-4xl font-bold tracking-tight leading-[1.15] text-white/55 max-w-2xl h-[5.4rem] md:h-[5.8rem]">
               I build{" "}
               <Typewriter
                 phrases={[
                   "full-stack web apps.",
-                  "with Vue, Node, and SQL.",
-                  "products people actually use.",
+                  "AI into real products.",
+                  "tools that turn data into decisions.",
+                  "software people actually use.",
                 ]}
                 className="text-white/80"
               />
@@ -75,7 +76,6 @@ export function Hero() {
             >
               <FaGithub className="size-5" />
             </a>
-
             <a
               href="https://www.linkedin.com/in/agrim-sharma-821788302/"
               target="_blank"
@@ -85,7 +85,6 @@ export function Hero() {
             >
               <FaLinkedin className="size-5" />
             </a>
-
             <a
               href="mailto:agrimsh22@gmail.com"
               className="size-11 rounded-lg bg-white/5 border border-white/10 hover:border-accent-gold/40 hover:bg-accent-gold/5 flex items-center justify-center text-white/70 hover:text-accent-gold transition-all"
