@@ -29,20 +29,22 @@ export function Hero() {
             <h1 className="hero-rise hero-rise-delay-1 text-5xl md:text-7xl xl:text-8xl font-bold tracking-tight leading-[0.95] text-white">
               Agrim Sharma<span className="text-accent-gold">.</span>
             </h1>
-            <h2 className="hero-rise hero-rise-delay-2 text-2xl md:text-4xl font-bold tracking-tight leading-[1.15] text-white/55 max-w-2xl min-h-[2.6em] md:min-h-[1.3em]">
+            {/* Fixed height reserves space for the longest phrase so the
+                typing animation never reflows the layout below it. */}
+            <h2 className="hero-rise hero-rise-delay-2 text-2xl md:text-4xl font-bold tracking-tight leading-[1.15] text-white/55 max-w-2xl h-[5.2rem] md:h-[5rem]">
               I build{" "}
               <Typewriter
                 phrases={[
-                  "software that sits between systems and people.",
-                  "full-stack products end to end.",
-                  "things for people I've actually met.",
+                  "full-stack web apps.",
+                  "with Vue, Node, and SQL.",
+                  "products people actually use.",
                 ]}
                 className="text-white/80"
               />
             </h2>
           </div>
 
-          <div className="hero-rise hero-rise-delay-3 flex flex-wrap gap-3 pt-2">
+          <div className="hero-rise hero-rise-delay-3 flex flex-wrap gap-3 pt-6">
             <Button
               asChild
               className="h-13 px-7 text-sm font-bold uppercase tracking-wider bg-accent-gold hover:bg-accent-gold/90 text-background shadow-lg shadow-accent-gold/20 hover:shadow-accent-gold/40 hover:scale-[1.02] transition-all"
@@ -73,6 +75,7 @@ export function Hero() {
             >
               <FaGithub className="size-5" />
             </a>
+
             <a
               href="https://www.linkedin.com/in/agrim-sharma-821788302/"
               target="_blank"
@@ -82,6 +85,7 @@ export function Hero() {
             >
               <FaLinkedin className="size-5" />
             </a>
+
             <a
               href="mailto:agrimsh22@gmail.com"
               className="size-11 rounded-lg bg-white/5 border border-white/10 hover:border-accent-gold/40 hover:bg-accent-gold/5 flex items-center justify-center text-white/70 hover:text-accent-gold transition-all"

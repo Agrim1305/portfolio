@@ -13,10 +13,10 @@ export function Contact() {
           Get in Touch<span className="text-accent-gold">.</span>
         </h2>
         <p className="mt-8 text-lg md:text-xl text-white/75 leading-relaxed">
-          I&apos;m looking for graduate and internship opportunities in software
-          engineering, AI, data, and analytics. Best reached by email — I read
-          everything and reply within a day. Based in Adelaide, open to
-          relocating within Australia.
+          I&apos;m looking for graduate and internship roles in software
+          engineering, AI, data, and analytics. Email is the best way to reach
+          me. I&apos;m based in Adelaide and happy to
+          relocate within Australia.
         </p>
         <p className="mt-4 text-sm text-white/55 leading-relaxed font-mono">
           Full working rights from 15 December 2026 · eligible for a Temporary

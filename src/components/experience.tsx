@@ -27,7 +27,7 @@ const experiences: Experience[] = [
     short: "AU",
     dates: "Aug 2024 — Mar 2026",
     description:
-      "Took over a dormant club and rebuilt it from the ground up. Led the merger of two university tennis clubs during the Adelaide–UniSA consolidation, co-authored the new constitution, recruited an eight-member committee, and secured facility upgrades through grants. The hardest part wasn't logistics — it was getting two groups who didn't trust each other to build something together.",
+      "I took over a club that had gone quiet and rebuilt it from scratch. I led the merger of two university tennis clubs during the Adelaide and UniSA consolidation, co-authored the new constitution, brought together an eight-member committee, and won grants for facility upgrades. The real challenge was getting two groups who didn't know each other to trust the process and work as one.",
     tags: ["Leadership", "Governance", "Operations", "Stakeholder Management"],
     stats: [
       { value: 100, prefix: "10 → ", suffix: "+", label: "active members" },
@@ -42,7 +42,7 @@ const experiences: Experience[] = [
     short: "TTG",
     dates: "Mar 2024 — Jun 2026",
     description:
-      "Coach junior and adult players across skill levels through one-on-one and group sessions. Plan lesson structure, adapt feedback to ability, and track progress. The role sharpened how I explain things three different ways until they land, read a room, and keep people improving when motivation dips.",
+      "I coach juniors and adults at all skill levels, both one-on-one and in groups. I plan each session, adjust my feedback to the player, and track their progress over time. It's made me good at explaining the same idea a few different ways until it clicks, and at keeping people motivated when they're finding it hard.",
     tags: ["Communication", "Mentoring", "Planning"],
   },
   {
@@ -51,7 +51,7 @@ const experiences: Experience[] = [
     short: "IGA",
     dates: "Feb 2024 — Sep 2024",
     description:
-      "Part-time customer service across two locations alongside full-time study. Maintained service standards in a high-volume retail environment.",
+      "Part-time customer service across two stores while studying full-time. Busy retail floor, steady standards, and a lot of practice juggling work and uni at the same time.",
     tags: ["Customer Service", "Teamwork"],
   },
 ];

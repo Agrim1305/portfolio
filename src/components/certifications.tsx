@@ -13,19 +13,19 @@ const certs: Cert[] = [
   {
     name: "Technology Job Simulation",
     issuer: "Deloitte Australia",
-    year: "2025",
+    year: "2026",
     skills: ["Coding", "Development", "Dev Tools"],
   },
   {
     name: "Data Analytics Job Simulation",
     issuer: "Deloitte Australia",
-    year: "2025",
+    year: "2026",
     skills: ["Data Analysis", "Tableau", "Forensic Tech"],
   },
   {
     name: "Partnering with AI in the Workplace",
     issuer: "Datacom",
-    year: "2025",
+    year: "2026",
     skills: ["Applied AI", "Workflow Design"],
   },
   {

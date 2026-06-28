@@ -15,13 +15,13 @@ const items: Item[] = [
     title: "Sydney Humanitarian AI Hackathon",
     status: "Participating",
     icon: Sparkles,
-    description: "Joining a 48-hour build focused on applying AI to humanitarian challenges. Looking to collaborate with engineers and domain experts on something genuinely useful.",
+    description: "A 48-hour hackathon building AI tools for humanitarian problems. I am joining to work with other engineers and learn from people who know the problem space.",
   },
   {
     title: "Microsoft Azure AZ-900",
     status: "In progress",
     icon: Cloud,
-    description: "Working through cloud fundamentals to round out the AI specialisation with practical platform knowledge.",
+    description: "Studying cloud fundamentals so I can work confidently with Azure alongside my AI coursework.",
   },
 ];
 

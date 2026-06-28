@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { SectionHeading } from "@/components/section-heading";
 import { Card } from "@/components/ui/card";
 import { FadeIn } from "@/components/fade-in";
@@ -20,7 +19,7 @@ const projects: Project[] = [
     title: "MetaPlay",
     status: "Live · 2025",
     description:
-      "A community-driven web platform where gamers search, track, and review video games using live data from the RAWG API. Built end to end with secure authentication (local + Google OAuth), role-based access, and personal collections.",
+      "A web app where gamers can search for titles, track what they're playing, and leave reviews. It pulls live game data from the RAWG API. I built the whole thing: the MySQL database, login with email and Google sign-in, user roles, and an admin dashboard.",
     stack: ["Vue.js", "Node.js", "Express", "MySQL", "Passport.js"],
     href: "https://github.com/Agrim1305/Metaplay",
     live: "https://metaplay-production.up.railway.app/",
@@ -30,14 +29,14 @@ const projects: Project[] = [
     title: "Baseline",
     status: "In development",
     description:
-      "A tool that lets tennis coaches log sessions by talking instead of typing, transcribing voice notes into structured logs and flagging clients who've gone quiet. Born from my own coaching practice.",
+      "A tool for tennis coaches to log sessions by talking instead of typing. It turns voice notes into structured records and flags clients who haven't booked in a while. I'm building it from my own coaching work.",
     stack: ["Next.js", "TypeScript", "FastAPI", "Whisper", "PostgreSQL"],
   },
   {
     title: "Receipt Extractor",
     status: "In development",
     description:
-      "A scanner that pulls GST, vendor, and line-item data from Australian receipts and invoices. Built for sole traders preparing quarterly BAS.",
+      "A scanner that reads Australian receipts and invoices and pulls out the GST, vendor, and line items. Built to save sole traders time when they prepare their quarterly BAS.",
     stack: ["Next.js", "TypeScript", "FastAPI", "Vision LLM"],
   },
 ];
@@ -112,33 +111,37 @@ export function Projects() {
           <FadeIn key={project.title} delay={i * 90}>
             <Card className="glass-panel overflow-hidden hover:border-white/25 transition-all group">
               {project.image ? (
-                // Featured layout: screenshot beside the text
+                // Featured layout: styled logo panel beside the text
                 <div className="grid md:grid-cols-2 items-stretch">
-                  <a
-                    href={project.live ?? project.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="relative block min-h-[220px] md:min-h-full overflow-hidden bg-accent-blue/5 border-b md:border-b-0 md:border-r border-white/10"
-                    aria-label={`Open ${project.title}`}
-                  >
-                    <Image
-                      src={project.image}
-                      alt=""
-                      fill
-                      sizes="(max-width: 768px) 100vw, 360px"
-                      className="object-cover object-left-top transition-transform duration-700 group-hover:scale-[1.04]"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-card/40 via-transparent to-transparent" />
-                    {project.live && (
-                      <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-background/80 backdrop-blur px-3 py-1.5 text-xs font-mono text-white border border-white/15">
-                        <span className="relative flex size-2">
-                          <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" />
-                          <span className="relative inline-flex size-2 rounded-full bg-emerald-400" />
+                  <div className="p-4 md:pr-0">
+                    <a
+                      href={project.live ?? project.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative flex items-center justify-center aspect-[4/3] md:aspect-auto md:h-full md:min-h-[240px] overflow-hidden rounded-xl ring-1 ring-white/10 bg-gradient-to-br from-[#1a1320] via-card to-[#0d1420]"
+                      aria-label={`Open ${project.title}`}
+                    >
+                      {/* Soft glow accent */}
+                      <div className="absolute -inset-10 bg-gradient-to-tr from-rose-500/10 via-transparent to-accent-blue/10 blur-2xl" />
+                      <div className="relative text-center px-6">
+                        <p className="text-3xl md:text-4xl font-bold tracking-tight text-rose-400 transition-transform duration-500 group-hover:scale-105">
+                          MetaPlay
+                        </p>
+                        <p className="mt-2 font-mono text-[11px] text-white/50 uppercase tracking-[0.2em]">
+                          Live games dashboard
+                        </p>
+                      </div>
+                      {project.live && (
+                        <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-background/80 backdrop-blur px-3 py-1.5 text-xs font-mono text-white border border-white/15">
+                          <span className="relative flex size-2">
+                            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" />
+                            <span className="relative inline-flex size-2 rounded-full bg-emerald-400" />
+                          </span>
+                          Live
                         </span>
-                        Live
-                      </span>
-                    )}
-                  </a>
+                      )}
+                    </a>
+                  </div>
                   <div className="p-6">
                     <ProjectMeta project={project} />
                   </div>
