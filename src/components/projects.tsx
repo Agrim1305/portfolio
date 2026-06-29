@@ -169,18 +169,19 @@ function ProjectMeta({ project }: { project: Project }) {
 function FlagshipCard({ project }: { project: Project }) {
   return (
     <Card className="glass-panel overflow-hidden hover:border-white/25 transition-all group">
-      <div className="grid md:grid-cols-2 items-start">
-        <div className="p-4 md:pr-0">
+      <div className="grid md:grid-cols-2 items-stretch">
+        {/* Left column: logo panel + stack + actions, filling the height */}
+        <div className="p-4 md:pr-2 flex flex-col gap-4">
           <a
             href={project.live ?? project.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="relative flex items-center justify-center aspect-[16/10] md:aspect-auto md:h-[200px] overflow-hidden rounded-xl ring-1 ring-white/10 bg-gradient-to-br from-[#1a1320] via-card to-[#0d1420]"
+            className="relative flex items-center justify-center aspect-[16/10] overflow-hidden rounded-xl ring-1 ring-white/10 bg-gradient-to-br from-[#1a1320] via-card to-[#0d1420]"
             aria-label={`Open ${project.title}`}
           >
             <div className="absolute -inset-10 bg-gradient-to-tr from-rose-500/10 via-transparent to-accent-blue/10 blur-2xl" />
             <div className="relative text-center px-6">
-              <p className="text-2xl md:text-3xl font-bold tracking-tight text-rose-400 transition-transform duration-500 group-hover:scale-105">
+              <p className="text-3xl md:text-4xl font-bold tracking-tight text-rose-400 transition-transform duration-500 group-hover:scale-105">
                 MetaPlay
               </p>
               <p className="mt-2 font-mono text-[10px] text-white/50 uppercase tracking-[0.2em]">
@@ -197,9 +198,36 @@ function FlagshipCard({ project }: { project: Project }) {
               </span>
             )}
           </a>
+
+          {/* Stack tags fill the space under the logo */}
+          <div className="flex flex-wrap gap-2">
+            {project.stack.map((tech) => (
+              <span
+                key={tech}
+                className="px-3 py-1 rounded-full text-xs font-mono bg-accent-blue/10 text-accent-blue/90 border border-accent-blue/20"
+              >
+                {tech}
+              </span>
+            ))}
+          </div>
+
+          {/* Action buttons anchored to the bottom of the left column */}
+          <div className="mt-auto">
+            <ActionButtons project={project} />
+          </div>
         </div>
-        <div className="p-6">
-          <ProjectMeta project={project} />
+
+        {/* Right column: title + Problem / Approach / Impact */}
+        <div className="p-6 md:pl-4">
+          <div className="flex items-start justify-between gap-4 mb-1">
+            <h3 className="text-lg font-bold text-white">{project.title}</h3>
+            <span className="font-mono text-[10px] text-white/50 uppercase tracking-wider shrink-0">
+              {project.status}
+            </span>
+          </div>
+          <StarBlock label="Problem" text={project.problem} />
+          <StarBlock label="Approach" text={project.approach} />
+          <StarBlock label="Impact" text={project.impact} />
         </div>
       </div>
     </Card>
@@ -251,10 +279,8 @@ export function Projects() {
           <TierLabel>Other engineering work</TierLabel>
           <div className="grid md:grid-cols-2 gap-4 items-stretch">
             {engineering.map((project, i) => (
-              <FadeIn key={project.title} delay={i * 90}>
-                <div className="h-full">
-                  <TextCard project={project} />
-                </div>
+              <FadeIn key={project.title} delay={i * 90} className="h-full">
+                <TextCard project={project} />
               </FadeIn>
             ))}
           </div>
@@ -266,10 +292,8 @@ export function Projects() {
           <TierLabel>Currently building</TierLabel>
           <div className="grid md:grid-cols-2 gap-4 items-stretch">
             {building.map((project, i) => (
-              <FadeIn key={project.title} delay={i * 90}>
-                <div className="h-full">
-                  <TextCard project={project} />
-                </div>
+              <FadeIn key={project.title} delay={i * 90} className="h-full">
+                <TextCard project={project} />
               </FadeIn>
             ))}
           </div>
