@@ -36,7 +36,7 @@ const principles: Principle[] = [
   {
     n: "06",
     title: "I take ownership",
-    body: "If I build something, I see it through. That means testing it properly, handling the edge cases, and following up after it ships instead of moving on the moment it works on my machine.",
+    body: "If I build something, I see it through. I test it thoroughly myself, work through the edge cases, and keep an eye on it after it ships instead of moving on the moment it works on my machine.",
   },
 ];
 
