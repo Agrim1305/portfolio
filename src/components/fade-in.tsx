@@ -16,10 +16,12 @@ export function FadeIn({
   children,
   direction = "up",
   delay = 0,
+  className = "",
 }: {
   children: React.ReactNode;
   direction?: Direction;
   delay?: number;
+  className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -61,7 +63,7 @@ export function FadeIn({
         transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
         transitionDuration: "900ms",
       }}
-      className={`transition-all will-change-[transform,opacity] motion-reduce:transition-none ${
+      className={`transition-all will-change-[transform,opacity] motion-reduce:transition-none ${className} ${
         visible
           ? "opacity-100 translate-x-0 translate-y-0"
           : `opacity-0 ${offsets[direction]}`

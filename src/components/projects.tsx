@@ -130,10 +130,10 @@ function ActionButtons({ project }: { project: Project }) {
 
 function StarBlock({ label, text }: { label: string; text: string }) {
   return (
-    <div className="mt-3 first:mt-4">
-      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-accent-gold/70 mb-1">
+    <div className="mt-4 first:mt-4 pl-3 border-l-2 border-accent-gold/30">
+      <span className="inline-block font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-accent-gold bg-accent-gold/10 px-2 py-0.5 rounded mb-1.5">
         {label}
-      </p>
+      </span>
       <p className="text-[15px] leading-relaxed text-white/75">{text}</p>
     </div>
   );
@@ -169,21 +169,21 @@ function ProjectMeta({ project }: { project: Project }) {
 function FlagshipCard({ project }: { project: Project }) {
   return (
     <Card className="glass-panel overflow-hidden hover:border-white/25 transition-all group">
-      <div className="grid md:grid-cols-2 items-stretch">
+      <div className="grid md:grid-cols-2 items-start">
         <div className="p-4 md:pr-0">
           <a
             href={project.live ?? project.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="relative flex items-center justify-center aspect-[4/3] md:aspect-auto md:h-full md:min-h-[260px] overflow-hidden rounded-xl ring-1 ring-white/10 bg-gradient-to-br from-[#1a1320] via-card to-[#0d1420]"
+            className="relative flex items-center justify-center aspect-[16/10] md:aspect-auto md:h-[200px] overflow-hidden rounded-xl ring-1 ring-white/10 bg-gradient-to-br from-[#1a1320] via-card to-[#0d1420]"
             aria-label={`Open ${project.title}`}
           >
             <div className="absolute -inset-10 bg-gradient-to-tr from-rose-500/10 via-transparent to-accent-blue/10 blur-2xl" />
             <div className="relative text-center px-6">
-              <p className="text-3xl md:text-4xl font-bold tracking-tight text-rose-400 transition-transform duration-500 group-hover:scale-105">
+              <p className="text-2xl md:text-3xl font-bold tracking-tight text-rose-400 transition-transform duration-500 group-hover:scale-105">
                 MetaPlay
               </p>
-              <p className="mt-2 font-mono text-[11px] text-white/50 uppercase tracking-[0.2em]">
+              <p className="mt-2 font-mono text-[10px] text-white/50 uppercase tracking-[0.2em]">
                 Live games dashboard
               </p>
             </div>
@@ -208,7 +208,7 @@ function FlagshipCard({ project }: { project: Project }) {
 
 function TextCard({ project }: { project: Project }) {
   return (
-    <Card className="glass-panel overflow-hidden hover:border-white/25 transition-all group">
+    <Card className="glass-panel overflow-hidden hover:border-white/25 transition-all group h-full">
       <div className="p-6">
         <ProjectMeta project={project} />
       </div>
@@ -249,10 +249,12 @@ export function Projects() {
       {engineering.length > 0 && (
         <>
           <TierLabel>Other engineering work</TierLabel>
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4 items-stretch">
             {engineering.map((project, i) => (
               <FadeIn key={project.title} delay={i * 90}>
-                <TextCard project={project} />
+                <div className="h-full">
+                  <TextCard project={project} />
+                </div>
               </FadeIn>
             ))}
           </div>
@@ -262,10 +264,12 @@ export function Projects() {
       {building.length > 0 && (
         <>
           <TierLabel>Currently building</TierLabel>
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-4 items-stretch">
             {building.map((project, i) => (
               <FadeIn key={project.title} delay={i * 90}>
-                <TextCard project={project} />
+                <div className="h-full">
+                  <TextCard project={project} />
+                </div>
               </FadeIn>
             ))}
           </div>

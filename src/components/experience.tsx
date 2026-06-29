@@ -82,7 +82,7 @@ export function Experience() {
                   {exp.dates}
                 </p>
                 <h3 className="text-lg font-bold text-white group-hover:text-accent-gold transition-colors">
-                  {exp.role} · {exp.org}
+                  {exp.role}, {exp.org}
                 </h3>
                 <p className="mt-3 text-base text-white/75 leading-relaxed">
                   {exp.description}
