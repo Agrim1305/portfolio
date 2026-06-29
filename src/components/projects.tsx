@@ -27,7 +27,7 @@ const projects: Project[] = [
     problem:
       "Gamers track what they play across scattered notes, spreadsheets, and memory. Our brief was a single place to discover games, build a collection, and review them, backed by real game data rather than a static seed list.",
     approach:
-      "I worked in a five-person team and owned the front-end and back-end integration. I built the authentication layer (email and password plus Google sign-in) with three roles — admin, user, and guest — and designed a normalised MySQL schema across eight tables. After the course ended, I went back alone, fixed the remaining issues end to end, wired it to live RAWG game data, and deployed it to production.",
+      "I worked in a five-person team and owned the front-end and back-end integration. I built the authentication layer, with email and password login plus Google sign-in across three roles (admin, user, and guest), and designed a normalised MySQL schema across eight tables. After the course ended I came back to it on my own, fixed the remaining issues end to end, wired it up to live RAWG game data, and deployed it to production.",
     impact:
       "It runs live today with personalised dashboards, collections, reviews, and an admin panel, pulling real-time data from the RAWG API. It is the deployed version of a team project that I took the rest of the way and shipped myself.",
     stack: ["Vue.js", "Node.js", "Express", "MySQL", "Passport.js"],
@@ -40,20 +40,20 @@ const projects: Project[] = [
     status: "C++ · 2025",
     tier: "engineering",
     problem:
-      "The task was to model a working restaurant — staff, menus, orders, and inventory — in C++, in a way that stayed maintainable as new staff types and behaviours were added, rather than collapsing into one giant switch statement.",
+      "The task was to model a working restaurant in C++, covering staff, menus, orders, and inventory. The tricky part was keeping it maintainable as new staff types and behaviours got added, instead of letting it collapse into one giant switch statement.",
     approach:
       "I designed an object-oriented hierarchy with a Person base class extended by Employee, Chef, and Head Chef, using inheritance and virtual methods so each role defines its own behaviour through a shared interface. State is persisted to and reloaded from files so a session can be saved and resumed.",
     impact:
-      "A command-line simulation that runs a full restaurant cycle and stays open to extension — adding a new staff type means adding a class, not rewriting existing logic. It is the project where I learned to think in terms of clean class boundaries and polymorphism.",
+      "A command-line simulation that runs a full restaurant cycle and stays easy to extend. Adding a new staff type just means adding a class, with no need to rewrite the existing logic. This is the project where I learned to think in terms of clean class boundaries and polymorphism.",
     stack: ["C++", "OOP", "Makefile"],
     href: "https://github.com/Agrim1305/Virtual_Restaurant_Simulator",
   },
   {
-    title: "Wumpus World AI Agent",
+    title: "Pathfinder AI Agent",
     status: "Python · 2026",
     tier: "engineering",
     problem:
-      "An agent is dropped into a grid it cannot fully see, with hidden hazards. It has to reason from limited clues — not brute-force every path — to reach the goal without dying, which means representing what it knows and inferring what it can safely do next.",
+      "An agent is dropped into a grid it cannot fully see, with hidden hazards scattered around it. It has to reach the goal without dying by reasoning from limited clues rather than blindly trying every path, which means it needs to track what it knows and work out what is safe to do next.",
     approach:
       "I built a propositional knowledge base that records facts the agent senses, with inference rules that deduce which neighbouring cells are safe. On top of that I wrote a search strategy that picks the next move under uncertainty, preferring proven-safe cells and only taking a calculated risk when forced.",
     impact:
@@ -77,7 +77,7 @@ const projects: Project[] = [
     status: "In development",
     tier: "building",
     problem:
-      "I coach tennis, and logging each session by typing is friction nobody keeps up — so coaches lose the record of what they worked on and which clients are drifting away. Solo coaches have no lightweight tool built for how they actually work.",
+      "I coach tennis, and logging each session by typing is the kind of friction nobody keeps up with. Coaches end up losing track of what they worked on and which clients are quietly drifting away. There is no lightweight tool built for how a solo coach actually works.",
     approach:
       "I am building a mobile-first tool where a coach talks instead of types: voice notes are transcribed and turned into structured session records. It flags clients who have not booked in a while so they can be followed up before they churn.",
     impact:
@@ -130,11 +130,11 @@ function ActionButtons({ project }: { project: Project }) {
 
 function StarBlock({ label, text }: { label: string; text: string }) {
   return (
-    <div className="mt-4 first:mt-4 pl-3 border-l-2 border-accent-gold/30">
-      <span className="inline-block font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-accent-gold bg-accent-gold/10 px-2 py-0.5 rounded mb-1.5">
+    <div className="mt-4 first:mt-4 pl-3 border-l-2 border-accent-gold/40">
+      <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-accent-gold bg-accent-gold/15 px-2.5 py-1 rounded mb-2">
         {label}
       </span>
-      <p className="text-[15px] leading-relaxed text-white/75">{text}</p>
+      <p className="text-[15px] leading-relaxed text-white/80">{text}</p>
     </div>
   );
 }
