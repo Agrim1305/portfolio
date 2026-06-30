@@ -71,6 +71,7 @@ const projects: Project[] = [
     impact:
       "A real-time dashboard that updates cleanly as new data arrives, with no shared mutable state and nineteen passing unit tests verifying its behaviour. It is where I learned to handle streaming data and event-driven design properly.",
     stack: ["Java", "Sodium FRP", "JUnit"],
+    href: "https://github.com/Agrim1305/gps-frp-tracker",
   },
   {
     title: "Baseline",
