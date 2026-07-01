@@ -40,6 +40,19 @@ export function AskAgrim() {
     if (open) inputRef.current?.focus();
   }, [open]);
 
+  // Lock background scroll while the panel is open on mobile, so the
+  // widget feels like a contained sheet rather than the page shifting
+  // underneath it.
+  useEffect(() => {
+    if (open) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [open]);
+
   async function sendMessage(text: string) {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
@@ -110,7 +123,7 @@ export function AskAgrim() {
       {/* Chat panel */}
       {open && (
         <div
-          className="fixed z-50 bottom-24 right-5 left-5 sm:left-auto sm:w-[400px] h-[min(560px,70vh)] rounded-2xl shadow-2xl shadow-black/60 border border-white/10 backdrop-blur-2xl flex flex-col overflow-hidden"
+          className="fixed z-50 inset-x-3 bottom-3 top-16 sm:inset-x-auto sm:top-auto sm:bottom-24 sm:right-5 sm:left-auto sm:w-[400px] sm:h-[min(560px,70vh)] rounded-2xl shadow-2xl shadow-black/60 border border-white/10 backdrop-blur-2xl flex flex-col overflow-hidden"
           style={{ background: "hsl(220 25% 8% / 0.97)" }}
         >
           {/* Header */}
@@ -118,16 +131,23 @@ export function AskAgrim() {
             <div className="size-9 rounded-xl bg-gradient-to-br from-accent-gold/20 to-accent-blue/10 border border-white/10 flex items-center justify-center shrink-0">
               <Sparkles className="size-4 text-accent-gold" />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="text-sm font-bold text-white">Ask about Agrim</p>
               <p className="font-mono text-[10px] text-white/50 uppercase tracking-wider">
                 AI assistant · grounded in his portfolio
               </p>
             </div>
+            <button
+              onClick={() => setOpen(false)}
+              aria-label="Close chat"
+              className="size-7 shrink-0 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors"
+            >
+              <X className="size-4 text-white/60" />
+            </button>
           </div>
 
           {/* Messages */}
-          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3 scrollbar-none">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3 chat-scroll">
             {messages.map((m, i) => (
               <div
                 key={i}
