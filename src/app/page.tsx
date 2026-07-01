@@ -9,6 +9,7 @@ import { HowIWork } from "@/components/how-i-work";
 import { Awards } from "@/components/awards";
 import { Contact } from "@/components/contact";
 import { FadeIn } from "@/components/fade-in";
+import { AskAgrim } from "@/components/ask-agrim";
 
 export default function Home() {
   return (
@@ -31,6 +32,7 @@ export default function Home() {
           <span className="font-mono text-xs tracking-wider">Built with Next.js · Deployed on Vercel</span>
         </div>
       </footer>
+      <AskAgrim />
     </>
   );
 }
