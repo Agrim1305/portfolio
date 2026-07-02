@@ -18,7 +18,7 @@ function renderMessageContent(content: string) {
 
       return (
         <span key={i}>
-          
+          <a
             href={cleanUrl}
             target="_blank"
             rel="noopener noreferrer"
