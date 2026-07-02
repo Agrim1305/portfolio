@@ -3,6 +3,37 @@
 import { useEffect, useRef, useState } from "react";
 import { X, Send, Sparkles } from "lucide-react";
 
+// Renders message text, turning any URLs into styled, clickable links.
+function renderMessageContent(content: string) {
+  const urlPattern = /(https?:\/\/[^\s]+)/g;
+  const parts = content.split(urlPattern);
+
+  return parts.map((part, i) => {
+    if (part.match(urlPattern)) {
+      // Trim trailing punctuation that isn't part of the URL itself.
+      const trailingPunctuation = part.match(/[).,;:!?]+$/)?.[0] ?? "";
+      const cleanUrl = trailingPunctuation
+        ? part.slice(0, -trailingPunctuation.length)
+        : part;
+
+      return (
+        <span key={i}>
+          
+            href={cleanUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent-gold underline decoration-accent-gold/30 underline-offset-2 hover:text-accent-gold hover:decoration-accent-gold transition-colors break-all"
+          >
+            {cleanUrl}
+          </a>
+          {trailingPunctuation}
+        </span>
+      );
+    }
+    return <span key={i}>{part}</span>;
+  });
+}
+
 type Message = {
   role: "user" | "assistant";
   content: string;
@@ -160,7 +191,7 @@ export function AskAgrim() {
                       : "bg-white/5 border border-white/10 text-white/85"
                   }`}
                 >
-                  {m.content}
+                  {renderMessageContent(m.content)}
                 </div>
               </div>
             ))}
