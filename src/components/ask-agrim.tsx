@@ -3,10 +3,23 @@
 import { useEffect, useRef, useState } from "react";
 import { X, Send, Sparkles } from "lucide-react";
 
-// Renders message text, turning any URLs into styled, clickable links.
-function renderMessageContent(content: string) {
+// Strips markdown emphasis syntax the model shouldn't be using but
+// sometimes does anyway (small models don't reliably obey "never use
+// bold" instructions). Keeps the inner text, drops the ** or __ wrapper,
+// so a prompt slip shows as plain text instead of literal asterisks.
+function stripStrayMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/__(.+?)__/g, "$1");
+}
+
+// Turns a single line of text into React nodes, converting any URLs
+// within it into styled, clickable links. Used by renderMessageContent
+// for each line/bullet after the message has been split into blocks.
+function renderLineWithLinks(line: string, keyPrefix: string) {
+  const cleanLine = stripStrayMarkdown(line);
   const urlPattern = /(https?:\/\/[^\s]+)/g;
-  const parts = content.split(urlPattern);
+  const parts = cleanLine.split(urlPattern);
 
   return parts.map((part, i) => {
     if (part.match(urlPattern)) {
@@ -17,7 +30,7 @@ function renderMessageContent(content: string) {
         : part;
 
       return (
-        <span key={i}>
+        <span key={`${keyPrefix}-${i}`}>
           <a
             href={cleanUrl}
             target="_blank"
@@ -30,7 +43,37 @@ function renderMessageContent(content: string) {
         </span>
       );
     }
-    return <span key={i}>{part}</span>;
+    return <span key={`${keyPrefix}-${i}`}>{part}</span>;
+  });
+}
+
+// Renders full message text: splits on blank lines into paragraphs,
+// treats consecutive "- " lines as a bullet list, and turns any URLs
+// within the text into styled, clickable links.
+function renderMessageContent(content: string) {
+  const blocks = content.trim().split(/\n\s*\n/); // split on blank lines
+
+  return blocks.map((block, blockIndex) => {
+    const lines = block.split("\n").filter((l) => l.trim().length > 0);
+    const isBulletBlock = lines.length > 0 && lines.every((l) => l.trim().startsWith("- "));
+
+    if (isBulletBlock) {
+      return (
+        <ul key={blockIndex} className="list-disc pl-4 space-y-1 my-1">
+          {lines.map((line, i) => (
+            <li key={i}>
+              {renderLineWithLinks(line.trim().replace(/^-\s+/, ""), `${blockIndex}-${i}`)}
+            </li>
+          ))}
+        </ul>
+      );
+    }
+
+    return (
+      <p key={blockIndex} className={blockIndex > 0 ? "mt-2" : ""}>
+        {renderLineWithLinks(lines.join(" "), `${blockIndex}`)}
+      </p>
+    );
   });
 }
 
@@ -185,7 +228,7 @@ export function AskAgrim() {
                 className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[85%] rounded-xl px-3.5 py-2.5 text-sm leading-relaxed ${
+                  className={`max-w-[85%] rounded-xl px-3.5 py-2.5 text-sm leading-relaxed break-words ${
                     m.role === "user"
                       ? "bg-accent-gold text-background font-medium"
                       : "bg-white/5 border border-white/10 text-white/85"
