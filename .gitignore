@@ -43,3 +43,4 @@ next-env.d.ts
 # AI tooling config (kept local, not published)
 AGENTS.md
 CLAUDE.md
+.claude/
