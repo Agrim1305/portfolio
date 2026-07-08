@@ -6,14 +6,28 @@ type SectionHeadingProps = {
 
 export function SectionHeading({ number, title, caption }: SectionHeadingProps) {
   return (
-    <div className="mb-14 space-y-4">
-      <div className="flex items-center gap-3">
-        <span className="font-mono text-xs text-accent-gold tracking-wider font-semibold">{number}</span>
-        <span className="h-px flex-1 bg-gradient-to-r from-accent-gold/40 via-white/10 to-transparent" />
+    <div className="mb-12 sm:mb-16">
+      <div className="flex items-center gap-4">
+        <span className="rise font-mono text-xs tracking-[0.2em] text-accent">
+          {number}
+        </span>
+        {/* The section's governing grid hairline. It fades out toward the edge
+            so it reads as a drafting guide, not a full-width divider rule. */}
+        <span className="draw-line h-px flex-1 bg-gradient-to-r from-hairline via-hairline/50 to-transparent" />
       </div>
-      <h2 className="text-4xl md:text-6xl font-bold tracking-tight text-white leading-[1.05]">{title}</h2>
+      <h2
+        className="rise mt-5 font-serif text-5xl sm:text-6xl font-medium tracking-tight text-ink"
+        style={{ "--rise-delay": "0.08s" } as React.CSSProperties}
+      >
+        {title}
+      </h2>
       {caption && (
-        <p className="text-base text-white/60 font-mono tracking-wide">{caption}</p>
+        <p
+          className="rise mt-4 text-base text-ink-faint"
+          style={{ "--rise-delay": "0.16s" } as React.CSSProperties}
+        >
+          {caption}
+        </p>
       )}
     </div>
   );

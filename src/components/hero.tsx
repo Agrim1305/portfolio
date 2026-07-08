@@ -1,114 +1,99 @@
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Mail, FileText, Send } from "lucide-react";
-import { FaGithub, FaLinkedin } from "react-icons/fa";
-import { Typewriter } from "@/components/typewriter";
+import { TickFrame } from "@/components/tick-frame";
 
 export function Hero() {
   return (
-    <section
-      id="hero"
-      className="min-h-[calc(100vh-80px)] flex items-center py-16"
-    >
-      <div className="grid lg:grid-cols-[1fr_auto] gap-16 items-center w-full">
-        <div className="space-y-10 order-2 lg:order-1">
-          <div className="hero-rise inline-flex items-center gap-2.5 px-4 py-2 rounded-full glass-panel">
-            <span className="relative flex size-2">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-accent-gold opacity-60 animate-ping" />
-              <span className="relative inline-flex size-2 rounded-full bg-accent-gold" />
+    <section id="top" className="overflow-x-clip pt-16 sm:pt-28 pb-24 sm:pb-36">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-10">
+        <div className="relative max-w-3xl">
+          {/* Registration marks: thin guides that converge on the name, then
+              dissolve into the ambient grid. Decorative; hidden on reduced
+              motion. */}
+          <span className="hero-guide-v" aria-hidden />
+          <span className="hero-guide-h" aria-hidden />
+
+          <div className="hero-rise sm:hidden mb-7" style={{ animationDelay: "0.55s" }}>
+            <TickFrame
+              src="/headshot.jpg"
+              alt="Agrim Sharma"
+              sizes="160px"
+              variant="titleblock"
+              caption="Agrim Sharma"
+              flicker
+              priority
+              className="w-40 aspect-[4/5]"
+            />
+          </div>
+
+          <p
+            className="hero-rise font-mono text-xs uppercase tracking-[0.2em] text-ink-faint"
+            style={{ animationDelay: "0.6s" }}
+          >
+            Software · Applied AI · Adelaide
+          </p>
+          <h1 className="hero-name mt-5 font-serif text-6xl sm:text-7xl lg:text-8xl font-medium tracking-tight text-ink">
+            Agrim Sharma
+          </h1>
+          <p
+            className="hero-rise mt-8 text-xl sm:text-2xl leading-relaxed text-ink-muted max-w-2xl"
+            style={{ animationDelay: "0.8s" }}
+          >
+            Final-year Computer Science student at Adelaide University, majoring
+            in Artificial Intelligence. I build{" "}
+            <span className="text-ink">full-stack products</span>, put AI to work
+            inside them, and{" "}
+            <span className="text-ink">ship them so real people can use them</span>
+            .
+          </p>
+          <p
+            className="hero-rise mt-6 flex items-start gap-2.5 font-mono text-[13px] leading-relaxed text-ink-muted"
+            style={{ animationDelay: "0.9s" }}
+          >
+            <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-accent" />
+            <span>
+              Available for internships now · graduate roles from December 2026
             </span>
-            <span className="font-mono text-xs text-white/85 tracking-wider uppercase">
-              Available for Graduate Roles · Can Start Immediately
-            </span>
-          </div>
+          </p>
 
-          <div className="space-y-6">
-            <p className="hero-rise font-mono text-sm text-accent-gold uppercase tracking-[0.25em] font-semibold">
-              Hi, my name is
-            </p>
-            <h1 className="hero-rise hero-rise-delay-1 text-5xl md:text-7xl xl:text-8xl font-bold tracking-tight leading-[0.95] text-white">
-              Agrim Sharma<span className="text-accent-gold">.</span>
-            </h1>
-            {/* Fixed height reserves space for the longest phrase so the
-                typing animation never reflows the layout below it. */}
-            <h2 className="hero-rise hero-rise-delay-2 text-2xl md:text-4xl font-bold tracking-tight leading-[1.15] text-white/55 max-w-2xl h-[5.4rem] md:h-[5.8rem]">
-              I build{" "}
-              <Typewriter
-                phrases={[
-                  "full-stack web apps.",
-                  "AI into real products.",
-                  "tools that turn data into decisions.",
-                  "software people actually use.",
-                ]}
-                className="text-white/80"
-              />
-            </h2>
-          </div>
-
-          <div className="hero-rise hero-rise-delay-3 flex flex-wrap gap-3 pt-6">
-            <Button
-              asChild
-              className="h-13 px-7 text-sm font-bold uppercase tracking-wider bg-accent-gold hover:bg-accent-gold/90 text-background shadow-lg shadow-accent-gold/20 hover:shadow-accent-gold/40 hover:scale-[1.02] transition-all"
+          <div
+            className="hero-rise mt-10 flex flex-wrap items-center gap-x-6 gap-y-3"
+            style={{ animationDelay: "1s" }}
+          >
+            <a
+              href="mailto:agrimsh22@gmail.com"
+              className="link-draw inline-flex min-h-11 items-center text-[15px] text-ink"
             >
-              <a href="/resume.pdf" target="_blank" rel="noopener noreferrer">
-                <FileText className="size-4" />
-                Download Resume
-              </a>
-            </Button>
-            <Button
-              asChild
-              className="h-13 px-7 text-sm font-bold uppercase tracking-wider border border-white/20 bg-white/5 text-white hover:border-accent-gold/60 hover:bg-accent-gold/5 hover:text-accent-gold transition-all"
-            >
-              <a href="#contact">
-                <Send className="size-4" />
-                Get in Touch
-              </a>
-            </Button>
-          </div>
-
-          <div className="hero-rise hero-rise-delay-3 flex items-center gap-4 pt-2">
+              agrimsh22@gmail.com
+            </a>
             <a
               href="https://github.com/Agrim1305"
               target="_blank"
               rel="noopener noreferrer"
-              className="size-11 rounded-lg bg-white/5 border border-white/10 hover:border-accent-gold/40 hover:bg-accent-gold/5 flex items-center justify-center text-white/70 hover:text-accent-gold transition-all"
-              aria-label="GitHub"
+              className="link-draw inline-flex min-h-11 items-center text-[15px] text-ink-muted hover:text-ink"
             >
-              <FaGithub className="size-5" />
+              GitHub
             </a>
             <a
               href="https://www.linkedin.com/in/agrim-sharma-821788302/"
               target="_blank"
               rel="noopener noreferrer"
-              className="size-11 rounded-lg bg-white/5 border border-white/10 hover:border-accent-gold/40 hover:bg-accent-gold/5 flex items-center justify-center text-white/70 hover:text-accent-gold transition-all"
-              aria-label="LinkedIn"
+              className="link-draw inline-flex min-h-11 items-center text-[15px] text-ink-muted hover:text-ink"
             >
-              <FaLinkedin className="size-5" />
-            </a>
-            <a
-              href="mailto:agrimsh22@gmail.com"
-              className="size-11 rounded-lg bg-white/5 border border-white/10 hover:border-accent-gold/40 hover:bg-accent-gold/5 flex items-center justify-center text-white/70 hover:text-accent-gold transition-all"
-              aria-label="Email"
-            >
-              <Mail className="size-5" />
+              LinkedIn
             </a>
           </div>
         </div>
 
-        <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
-          <div className="relative">
-            <div className="absolute -inset-2 rounded-full bg-gradient-to-tr from-accent-gold/30 via-accent-blue/20 to-transparent blur-2xl" />
-            <div className="relative size-48 md:size-64 rounded-full overflow-hidden border-2 border-white/15">
-              <Image
-                src="/headshot.jpg"
-                alt="Agrim Sharma"
-                fill
-                sizes="(max-width: 768px) 192px, 256px"
-                className="object-cover object-top"
-                priority
-              />
-            </div>
-          </div>
+        <div className="hidden sm:block shrink-0 pt-1">
+          <TickFrame
+            src="/headshot.jpg"
+            alt="Agrim Sharma"
+            sizes="(max-width: 1024px) 208px, 240px"
+            variant="titleblock"
+            caption="Agrim Sharma"
+            flicker
+            priority
+            className="w-52 lg:w-60 aspect-[4/5]"
+          />
         </div>
       </div>
     </section>

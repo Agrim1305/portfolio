@@ -1,59 +1,55 @@
-import { Button } from "@/components/ui/button";
-import { Send } from "lucide-react";
-import { FaGithub, FaLinkedin } from "react-icons/fa";
+import { SectionHeading } from "@/components/section-heading";
 
 export function Contact() {
   return (
-    <section id="contact" className="py-32">
-      <div className="text-center max-w-3xl mx-auto">
-        <p className="font-mono text-sm text-accent-gold uppercase tracking-[0.25em] mb-6">
-          Let&apos;s build something
-        </p>
-        <h2 className="text-5xl md:text-7xl font-bold tracking-tight text-white leading-[1.0]">
-          Get in Touch<span className="text-accent-gold">.</span>
-        </h2>
-        <p className="mt-8 text-lg md:text-xl text-white/75 leading-relaxed">
-          I&apos;m looking for graduate and internship roles in software
-          engineering, AI, data, and analytics. Email is the best way to reach
-          me. I&apos;m based in Adelaide and happy to
-          relocate within Australia.
-        </p>
-        <p className="mt-4 text-sm text-white/55 leading-relaxed font-mono">
-          Full working rights from 15 December 2026 · eligible for a Temporary
-          Graduate visa (subclass 485) with multi-year work rights.
+    <section id="contact" className="scroll-mt-24 pb-24 sm:pb-32">
+      <SectionHeading number="05" title="Contact" />
+      <div
+        className="rise max-w-3xl"
+        style={{ "--rise-delay": "0.24s" } as React.CSSProperties}
+      >
+        <p className="text-lg sm:text-xl leading-relaxed text-ink-muted">
+          I&apos;m looking for{" "}
+          <span className="text-ink">
+            graduate and internship roles in software engineering, AI, data, and
+            analytics
+          </span>
+          . Email is the best way to reach me. I&apos;m based in Adelaide and
+          happy to relocate within Australia.
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-10">
-          <Button
-            asChild
-            className="h-13 px-8 text-sm font-bold uppercase tracking-wider bg-accent-gold hover:bg-accent-gold/90 text-background shadow-lg shadow-accent-gold/20 hover:scale-[1.02] transition-all"
+        <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3">
+          <a
+            href="mailto:agrimsh22@gmail.com"
+            className="inline-flex min-h-12 items-center rounded-md bg-ink px-6 text-[15px] font-medium text-paper hover:bg-ink/90 transition-all hover:-translate-y-0.5"
           >
-            <a href="mailto:agrimsh22@gmail.com">
-              <Send className="size-4" />
-              Send Email
-            </a>
-          </Button>
-          <div className="flex items-center gap-3">
-            <a
-              href="https://github.com/Agrim1305"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="size-13 rounded-lg bg-white/5 border border-white/10 hover:border-accent-gold/40 hover:bg-accent-gold/5 flex items-center justify-center text-white/70 hover:text-accent-gold transition-all"
-              aria-label="GitHub"
-            >
-              <FaGithub className="size-5" />
-            </a>
-            <a
-              href="https://www.linkedin.com/in/agrim-sharma-821788302/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="size-13 rounded-lg bg-white/5 border border-white/10 hover:border-accent-gold/40 hover:bg-accent-gold/5 flex items-center justify-center text-white/70 hover:text-accent-gold transition-all"
-              aria-label="LinkedIn"
-            >
-              <FaLinkedin className="size-5" />
-            </a>
-          </div>
+            Email me
+          </a>
+          <a
+            href="https://github.com/Agrim1305"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link-draw inline-flex min-h-12 items-center text-[15px] text-ink-muted hover:text-ink"
+          >
+            GitHub
+          </a>
+          <a
+            href="https://www.linkedin.com/in/agrim-sharma-821788302/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link-draw inline-flex min-h-12 items-center text-[15px] text-ink-muted hover:text-ink"
+          >
+            LinkedIn
+          </a>
         </div>
+
+        <p className="mt-12 border-l-2 border-accent pl-5 text-[15px] leading-relaxed text-ink-muted">
+          Currently in Australia on a student visa with work rights for
+          internship and part-time roles. Full, unrestricted working rights
+          from 15 December 2026 (graduation), eligible for the subclass 485
+          Temporary Graduate visa. Available for graduate roles from December
+          2026, and for internships immediately.
+        </p>
       </div>
     </section>
   );

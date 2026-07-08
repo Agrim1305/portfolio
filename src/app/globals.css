@@ -1,51 +1,39 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
+/* Dark editorial theme. "Paper" is the page surface (near-black), "ink" is
+   what's printed on it (near-white). One gold accent, used sparingly.
+   Hierarchy comes from type scale, contrast, and space — not rules or glass. */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --radius: 0.625rem;
-}
+  --paper: hsl(60 3% 7%);
+  --ink: hsl(40 20% 96%);
+  --ink-muted: hsl(40 9% 78%);
+  --ink-faint: hsl(40 6% 63%);
+  --hairline: hsl(40 6% 17%);
+  --accent: hsl(38 70% 62%);
+  --accent-wash: hsl(38 70% 62% / 0.09);
+  --surface: hsl(45 4% 10%);
+  --grid-line: hsl(40 6% 12%);
+  --grid-line-lit: hsl(38 26% 20%);
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.269 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.371 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--paper);
+  --secondary: hsl(45 4% 13%);
+  --secondary-foreground: var(--ink);
+  --muted: hsl(45 4% 13%);
+  --muted-foreground: var(--ink-muted);
+  --accent-foreground: var(--paper);
+  --destructive: hsl(0 70% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: var(--hairline);
+  --input: var(--hairline);
+  --ring: var(--accent);
+  --radius: 0.5rem;
 }
 
 @theme inline {
@@ -68,12 +56,20 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-hairline: var(--hairline);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: ui-monospace, "SF Mono", Menlo, "Cascadia Mono", Consolas,
+    monospace;
+  --font-serif: var(--font-newsreader);
 }
 
 @layer base {
@@ -87,113 +83,22 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 5.5rem;
 }
 
 body {
-  background-color: hsl(220 25% 6%);
-  color: hsl(220 10% 92%);
-  position: relative;
   min-height: 100vh;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(at 20% 10%, hsl(220 60% 15% / 0.6) 0px, transparent 50%),
-    radial-gradient(at 85% 85%, hsl(40 60% 12% / 0.3) 0px, transparent 50%),
-    radial-gradient(at 50% 50%, hsl(220 50% 8% / 0.4) 0px, transparent 50%);
-  pointer-events: none;
-  z-index: -1;
-}
+.text-accent { color: var(--accent); }
+.bg-accent { background-color: var(--accent); }
+.bg-accent-wash { background-color: var(--accent-wash); }
+.border-accent { border-color: var(--accent); }
 
-:root {
-  --accent-gold: 42 75% 60%;
-  --accent-blue: 215 90% 70%;
-}
-
-.text-accent-gold { color: hsl(var(--accent-gold)); }
-.bg-accent-gold { background-color: hsl(var(--accent-gold)); }
-.border-accent-gold { border-color: hsl(var(--accent-gold)); }
-
-.text-accent-blue { color: hsl(var(--accent-blue)); }
-.bg-accent-blue { background-color: hsl(var(--accent-blue)); }
-.border-accent-blue { border-color: hsl(var(--accent-blue)); }
-
-.glass-panel {
-  background: hsl(220 25% 9% / 0.55);
-  backdrop-filter: blur(20px) saturate(170%);
-  -webkit-backdrop-filter: blur(20px) saturate(170%);
-  border: 1px solid hsl(0 0% 100% / 0.08);
-}
-
-.glass-nav {
-  background: hsl(220 25% 7% / 0.55);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-bottom: 1px solid hsl(0 0% 100% / 0.08);
-  box-shadow: 0 1px 0 hsl(0 0% 100% / 0.03), 0 8px 32px hsl(220 50% 3% / 0.4);
-}
-html {
-  scroll-padding-top: 6rem;
-}
-.scrollbar-none::-webkit-scrollbar { display: none; }
-.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
-
-@keyframes hero-rise {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.hero-rise {
-  opacity: 0;
-  animation: hero-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.hero-rise-delay-1 {
-  animation-delay: 0.1s;
-}
-.hero-rise-delay-2 {
-  animation-delay: 0.25s;
-}
-.hero-rise-delay-3 {
-  animation-delay: 0.4s;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-rise {
-    opacity: 1;
-    animation: none;
-  }
-}
-/* Hero entrance — staggered rise on page load */
-@keyframes hero-rise {
-  from { opacity: 0; transform: translateY(40px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.hero-rise {
-  opacity: 0;
-  animation: hero-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-.hero-rise-delay-1 { animation-delay: 0.12s; }
-.hero-rise-delay-2 { animation-delay: 0.26s; }
-.hero-rise-delay-3 { animation-delay: 0.42s; }
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-rise { opacity: 1; animation: none; }
-}
-
-/* Ask-Agrim chat scrollbar — thin, visible, matches the gold accent */
+/* Ask-Agrim chat scrollbar — thin, matches the accent */
 .chat-scroll {
   scrollbar-width: thin;
-  scrollbar-color: hsl(var(--accent-gold) / 0.4) transparent;
+  scrollbar-color: hsl(38 70% 62% / 0.35) transparent;
 }
 .chat-scroll::-webkit-scrollbar {
   width: 6px;
@@ -202,9 +107,224 @@ html {
   background: transparent;
 }
 .chat-scroll::-webkit-scrollbar-thumb {
-  background-color: hsl(var(--accent-gold) / 0.35);
+  background-color: hsl(38 70% 62% / 0.3);
   border-radius: 999px;
 }
 .chat-scroll::-webkit-scrollbar-thumb:hover {
-  background-color: hsl(var(--accent-gold) / 0.55);
+  background-color: hsl(38 70% 62% / 0.5);
+}
+
+/* ---- Drafting grid: fixed structural field + cursor reveal ---- */
+.draft-grid,
+.draft-grid-glow {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 80px 80px;
+  background-position: center top;
+}
+.draft-grid-glow {
+  background-image:
+    linear-gradient(to right, var(--grid-line-lit) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line-lit) 1px, transparent 1px);
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  -webkit-mask-image: radial-gradient(
+    circle 200px at var(--mx, -500px) var(--my, -500px),
+    #000 0%,
+    transparent 68%
+  );
+  mask-image: radial-gradient(
+    circle 200px at var(--mx, -500px) var(--my, -500px),
+    #000 0%,
+    transparent 68%
+  );
+}
+.draft-grid-glow.active {
+  opacity: 1;
+}
+
+/* ---- Hero registration-mark entrance ----
+   The guides draw in (scale) rather than translate, so they never extend past
+   the viewport edge during the animation. */
+@keyframes reg-v {
+  0% { opacity: 0; transform: scaleY(0); }
+  32% { opacity: 0.5; transform: scaleY(1); }
+  70% { opacity: 0.5; transform: scaleY(1); }
+  100% { opacity: 0; transform: scaleY(1); }
+}
+@keyframes reg-h {
+  0% { opacity: 0; transform: scaleX(0); }
+  32% { opacity: 0.5; transform: scaleX(1); }
+  70% { opacity: 0.5; transform: scaleX(1); }
+  100% { opacity: 0; transform: scaleX(1); }
+}
+@keyframes name-wipe {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+.hero-guide-v,
+.hero-guide-h {
+  position: absolute;
+  background: var(--accent);
+  pointer-events: none;
+}
+.hero-guide-v {
+  top: -1.5rem;
+  height: 9rem;
+  width: 1px;
+  left: 0;
+  transform-origin: top;
+  animation: reg-v 1.15s ease forwards;
+}
+.hero-guide-h {
+  left: 0;
+  right: 0;
+  height: 1px;
+  top: 4.75rem;
+  transform-origin: left;
+  animation: reg-h 1.15s ease forwards;
+}
+.hero-name {
+  animation: name-wipe 0.6s cubic-bezier(0.7, 0, 0.2, 1) 0.5s both;
+}
+.hero-rise {
+  opacity: 0;
+  animation: rise-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+
+/* ---- Section reveal: governing line draws, content settles ---- */
+.draw-line {
+  transition: transform 0.85s cubic-bezier(0.7, 0, 0.2, 1);
+}
+[data-reveal][data-armed] .draw-line {
+  transform: scaleX(0);
+  transform-origin: left;
+}
+[data-reveal][data-armed][data-visible] .draw-line {
+  transform: scaleX(1);
+}
+.rise {
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--rise-delay, 0s);
+}
+[data-reveal][data-armed] .rise {
+  opacity: 0;
+  transform: translateY(16px);
+}
+[data-reveal][data-armed][data-visible] .rise {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---- Project card: registration ticks + drafting fill ---- */
+.card-draft {
+  background-color: var(--surface);
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.reg-tick {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  z-index: 2;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+/* Image frames wear their registration ticks permanently (drafting-table
+   language), rather than revealing them on hover like the project cards. */
+.tick-frame .reg-tick {
+  opacity: 0.85;
+  transform: none;
+}
+.reg-tl { top: 10px; left: 10px; border-top: 1.5px solid; border-left: 1.5px solid; transform: translate(4px, 4px); }
+.reg-tr { top: 10px; right: 10px; border-top: 1.5px solid; border-right: 1.5px solid; transform: translate(-4px, 4px); }
+.reg-bl { bottom: 10px; left: 10px; border-bottom: 1.5px solid; border-left: 1.5px solid; transform: translate(4px, -4px); }
+.reg-br { bottom: 10px; right: 10px; border-bottom: 1.5px solid; border-right: 1.5px solid; transform: translate(-4px, -4px); }
+.group:hover .reg-tick { opacity: 0.9; transform: translate(0, 0); }
+
+/* ---- Hero photo: a restrained flicker on entrance, like a plate developing ---- */
+@keyframes photo-flicker {
+  0% { opacity: 0; }
+  8% { opacity: 0.5; }
+  13% { opacity: 0.18; }
+  22% { opacity: 0.85; }
+  28% { opacity: 0.35; }
+  42% { opacity: 1; }
+  48% { opacity: 0.72; }
+  58% { opacity: 1; }
+  100% { opacity: 1; }
+}
+.photo-flicker {
+  animation: photo-flicker 1.15s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* ---- Nav: corner brackets marking the active item ---- */
+.nav-bracket {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  color: var(--accent);
+  pointer-events: none;
+}
+.nav-bracket.tl { top: 0; left: 0; border-top: 1.5px solid; border-left: 1.5px solid; }
+.nav-bracket.tr { top: 0; right: 0; border-top: 1.5px solid; border-right: 1.5px solid; }
+.nav-bracket.bl { bottom: 0; left: 0; border-bottom: 1.5px solid; border-left: 1.5px solid; }
+.nav-bracket.br { bottom: 0; right: 0; border-bottom: 1.5px solid; border-right: 1.5px solid; }
+
+/* ---- Link underline draw ---- */
+.link-draw {
+  position: relative;
+}
+.link-draw::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s cubic-bezier(0.7, 0, 0.2, 1);
+}
+.link-draw:hover::after {
+  transform: scaleX(1);
+}
+
+/* Keyword emphasis: one consistent treatment for the phrases and numbers a
+   skimming reader should catch. A faint gold under-stripe, like a mark left on
+   a drawing. Used sparingly. */
+.hl {
+  color: var(--ink);
+  font-weight: 500;
+  background-image: linear-gradient(
+    to top,
+    hsl(38 70% 62% / 0.24) 0.34em,
+    transparent 0.34em
+  );
+  padding: 0 0.06em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .draft-grid-glow { display: none; }
+  .hero-guide-v,
+  .hero-guide-h { display: none; }
+  .hero-name { animation: none; clip-path: none; }
+  .hero-rise { opacity: 1; animation: none; }
+  .draw-line,
+  .rise { transition: none; }
+  .link-draw::after { transition: none; }
+  .photo-flicker { animation: none; opacity: 1; }
 }

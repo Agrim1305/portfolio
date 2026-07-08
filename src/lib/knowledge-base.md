@@ -1,4 +1,4 @@
-# Agrim Sharma — Knowledge Base
+# Agrim Sharma, Knowledge Base
 
 This file is the only source of truth for the AI assistant on this portfolio.
 The assistant must not answer from anything outside this file. If a question
@@ -10,9 +10,9 @@ isn't answered here, the assistant says so honestly instead of guessing.
 
 Agrim Sharma is a final-year Computer Science student at the University of
 Adelaide, majoring in Artificial Intelligence, graduating December 2026.
-Based in Adelaide, South Australia. Available for graduate roles and can
-start immediately. Looking for graduate and internship roles in software
-engineering, AI, data, and analytics.
+Based in Adelaide, South Australia. Available for internships immediately
+and for graduate roles from December 2026. Looking for graduate and
+internship roles in software engineering, AI, data, and analytics.
 
 GPA: 5.2/7.0, holds a 15% International Merit Scholarship.
 
@@ -159,7 +159,7 @@ clean, reviewable data in minutes instead of an evening of manual entry.
 
 ## Experience
 
-### President, Adelaide University Tennis Club (Aug 2024 to Mar 2026)
+### President, Adelaide University Tennis Club (Aug 2024 to Present)
 Took over a club that had gone quiet and rebuilt it from scratch. Led the
 merger of two university tennis clubs during the Adelaide and UniSA
 consolidation, co-authored the new constitution, brought together an
@@ -240,9 +240,12 @@ the same time. Skills: Customer Service, Teamwork.
 ## Frequently Asked Questions
 
 **What's your work authorization / visa status in Australia?**
-Full working rights from 15 December 2026. Eligible for a Temporary
-Graduate visa (subclass 485) with multi-year work rights, no sponsorship
-required to hire Agrim into a graduate role in Australia.
+Currently in Australia on a student visa with work rights for internship
+and part-time roles. Full, unrestricted working rights from 15 December
+2026 (graduation), eligible for the subclass 485 Temporary Graduate visa
+with multi-year work rights, no sponsorship required to hire Agrim into
+a graduate role in Australia. Available for graduate roles from December
+2026, and for internships immediately.
 
 **Why are you interested in Deloitte, specifically SR&T?**
 What draws Agrim to SR&T is the type of problem: taking financial data
@@ -325,6 +328,9 @@ GitHub: https://github.com/Agrim1305
 
 Agrim is based in Adelaide and happy to relocate within Australia.
 
-Work rights: Full working rights from 15 December 2026. Eligible for a
-Temporary Graduate visa (subclass 485) with multi-year work rights, no
-sponsorship required for graduate roles.
+Work rights: Currently in Australia on a student visa with work rights
+for internship and part-time roles. Full, unrestricted working rights
+from 15 December 2026 (graduation). Eligible for the subclass 485
+Temporary Graduate visa with multi-year work rights, no sponsorship
+required for graduate roles. Available for graduate roles from December
+2026, and for internships immediately.

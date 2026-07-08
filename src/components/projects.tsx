@@ -1,305 +1,271 @@
+import { ArrowUpRight } from "lucide-react";
 import { SectionHeading } from "@/components/section-heading";
-import { Card } from "@/components/ui/card";
-import { FadeIn } from "@/components/fade-in";
-import { FaGithub } from "react-icons/fa";
-import { ExternalLink } from "lucide-react";
-
-type Tier = "flagship" | "engineering" | "building";
+import { BrowserFrame } from "@/components/browser-frame";
 
 type Project = {
   title: string;
   status: string;
-  tier: Tier;
-  problem: string;   // What needed solving
-  approach: string;  // What I did about it
-  impact: string;    // What it does / achieved now
+  oneLiner: string;
+  emphasis: string; // phrase in the one-liner to lift to bright ink
+  impact: string;
   stack: string[];
   href?: string; // GitHub source
   live?: string; // deployed app
-  image?: string;
 };
 
+const flagship = {
+  title: "MetaPlay",
+  status: "Live · 2025",
+  problem:
+    "Gamers track what they play across scattered notes, spreadsheets, and memory. Our brief was a single place to discover games, build a collection, and review them, backed by real game data rather than a static seed list.",
+  approach:
+    "I worked in a five-person team and owned the front-end and back-end integration. I built the authentication layer, with email and password login plus Google sign-in across three roles (admin, user, and guest), and designed a normalised MySQL schema across eight tables. After the course ended I came back to it on my own, fixed the remaining issues end to end, wired it up to live RAWG game data, and deployed it to production.",
+  impact:
+    "It runs live today with personalised dashboards, collections, reviews, and an admin panel, pulling real-time data from the RAWG API. This is the deployed version of a team project that I took the rest of the way and shipped myself.",
+  stack: ["Vue.js", "Node.js", "Express", "MySQL", "Passport.js"],
+  href: "https://github.com/Agrim1305/Metaplay",
+  live: "https://metaplay-production.up.railway.app/",
+};
+
+// Adding a future project is one new entry here; the grid renders any count.
 const projects: Project[] = [
-  {
-    title: "MetaPlay",
-    status: "Live · 2025",
-    tier: "flagship",
-    problem:
-      "Gamers track what they play across scattered notes, spreadsheets, and memory. Our brief was a single place to discover games, build a collection, and review them, backed by real game data rather than a static seed list.",
-    approach:
-      "I worked in a five-person team and owned the front-end and back-end integration. I built the authentication layer, with email and password login plus Google sign-in across three roles (admin, user, and guest), and designed a normalised MySQL schema across eight tables. After the course ended I came back to it on my own, fixed the remaining issues end to end, wired it up to live RAWG game data, and deployed it to production.",
-    impact:
-      "It runs live today with personalised dashboards, collections, reviews, and an admin panel, pulling real-time data from the RAWG API. It is the deployed version of a team project that I took the rest of the way and shipped myself.",
-    stack: ["Vue.js", "Node.js", "Express", "MySQL", "Passport.js"],
-    href: "https://github.com/Agrim1305/Metaplay",
-    live: "https://metaplay-production.up.railway.app/",
-    image: "/metaplay.jpg",
-  },
-  {
-    title: "Virtual Restaurant Simulator",
-    status: "C++ · 2025",
-    tier: "engineering",
-    problem:
-      "The task was to model a working restaurant in C++, covering staff, menus, orders, and inventory. The tricky part was keeping it maintainable as new staff types and behaviours got added, instead of letting it collapse into one giant switch statement.",
-    approach:
-      "I designed an object-oriented hierarchy with a Person base class extended by Employee, Chef, and Head Chef, using inheritance and virtual methods so each role defines its own behaviour through a shared interface. State is persisted to and reloaded from files so a session can be saved and resumed.",
-    impact:
-      "A command-line simulation that runs a full restaurant cycle and stays easy to extend. Adding a new staff type just means adding a class, with no need to rewrite the existing logic. This is the project where I learned to think in terms of clean class boundaries and polymorphism.",
-    stack: ["C++", "OOP", "Makefile"],
-    href: "https://github.com/Agrim1305/Virtual_Restaurant_Simulator",
-  },
   {
     title: "Pathfinder AI Agent",
     status: "Python · 2026",
-    tier: "engineering",
-    problem:
-      "An agent is dropped into a grid it cannot fully see, with hidden hazards scattered around it. It has to reach the goal without dying by reasoning from limited clues rather than blindly trying every path, which means it needs to track what it knows and work out what is safe to do next.",
-    approach:
-      "I built a propositional knowledge base that records facts the agent senses, with inference rules that deduce which neighbouring cells are safe. On top of that I wrote a search strategy that picks the next move under uncertainty, preferring proven-safe cells and only taking a calculated risk when forced.",
+    oneLiner:
+      "A logic-based agent that reasons its way through hidden hazards. It scored ten out of ten on every hidden autograder map.",
+    emphasis: "ten out of ten",
     impact:
-      "The agent navigates hidden environments reliably and scored ten out of ten on the course autograder across every hidden test map. It is my clearest example of logic-based AI and reasoning under uncertainty, written and tested entirely in Python.",
+      "It builds a propositional knowledge base from what it senses and deduces which cells are safe, taking a calculated risk only when forced. My clearest example of logic-based AI and reasoning under uncertainty.",
     stack: ["Python", "Propositional Logic", "Search"],
   },
   {
     title: "GPS Tracker Dashboard",
     status: "Java · 2026",
-    tier: "engineering",
-    problem:
-      "A live tracking dashboard has to react to a continuous stream of location updates and raise alerts as they arrive, without the tangle of shared mutable state and manual event wiring that normally makes real-time UIs fragile.",
-    approach:
-      "I modelled location updates and alerts as composable event streams using functional reactive programming in Java, so data flows through transformations instead of being mutated in place. I designed the data model and event-handling logic with object-oriented principles and covered it with unit tests targeting the tricky edge cases.",
+    oneLiner:
+      "A real-time tracking dashboard built on functional reactive streams, verified by nineteen unit tests.",
+    emphasis: "nineteen unit tests",
     impact:
-      "A real-time dashboard that updates cleanly as new data arrives, with no shared mutable state and nineteen passing unit tests verifying its behaviour. It is where I learned to handle streaming data and event-driven design properly.",
+      "Location updates and alerts flow through composable event streams instead of shared mutable state, so the UI updates cleanly as data arrives. It is where I learned to handle streaming data and event-driven design properly.",
     stack: ["Java", "Sodium FRP", "JUnit"],
     href: "https://github.com/Agrim1305/gps-frp-tracker",
   },
   {
+    title: "Virtual Restaurant Simulator",
+    status: "C++ · 2025",
+    oneLiner:
+      "A restaurant simulation designed around clean class hierarchies, so new staff roles extend it without rewrites.",
+    emphasis: "without rewrites",
+    impact:
+      "A Person base class with inheritance and virtual methods lets each role define its own behaviour through a shared interface, and state persists to files between sessions. Adding a staff type means adding a class, not rewriting logic.",
+    stack: ["C++", "OOP", "Makefile"],
+    href: "https://github.com/Agrim1305/Virtual_Restaurant_Simulator",
+  },
+  {
     title: "Baseline",
     status: "In development",
-    tier: "building",
-    problem:
-      "I coach tennis, and logging each session by typing is the kind of friction nobody keeps up with. Coaches end up losing track of what they worked on and which clients are quietly drifting away. There is no lightweight tool built for how a solo coach actually works.",
-    approach:
-      "I am building a mobile-first tool where a coach talks instead of types: voice notes are transcribed and turned into structured session records. It flags clients who have not booked in a while so they can be followed up before they churn.",
+    oneLiner:
+      "A voice-first session log for tennis coaches, built from my own coaching practice.",
+    emphasis: "voice-first session log",
     impact:
-      "In active development, built directly from my own coaching practice as the first real user. The goal is a tool I rely on weekly, then put in front of other Adelaide coaches.",
+      "Voice notes are transcribed into structured session records, and clients who have not booked in a while get flagged before they churn. I am the first real user; other Adelaide coaches are next.",
     stack: ["Next.js", "TypeScript", "FastAPI", "Whisper", "PostgreSQL"],
   },
   {
     title: "Receipt Extractor",
     status: "In development",
-    tier: "building",
-    problem:
-      "Sole traders in Australia waste hours each quarter manually keying receipts and invoices to prepare their Business Activity Statement, and small errors in GST totals are easy to make and costly to fix.",
-    approach:
-      "I am building a scanner that reads a receipt or invoice and pulls out the vendor, line items, and GST automatically, structuring the data so it is ready to feed straight into a BAS workflow.",
+    oneLiner:
+      "A scanner that turns Australian receipts into structured, GST-ready data.",
+    emphasis: "GST-ready data",
     impact:
-      "Early development. The aim is to turn a pile of paper receipts into clean, reviewable data in minutes instead of an evening of manual entry.",
+      "It reads a receipt or invoice and pulls out the vendor, line items, and GST, structured to feed straight into a BAS workflow. An evening of manual entry becomes a few minutes of review.",
     stack: ["Next.js", "TypeScript", "FastAPI", "Vision LLM"],
   },
 ];
 
-function ActionButtons({ project }: { project: Project }) {
-  if (!project.live && !project.href) return null;
-  return (
-    <div className="flex flex-wrap items-center gap-3 mt-5">
-      {project.live && (
-        <a
-          href={project.live}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-lg bg-accent-gold px-4 py-2 text-sm font-bold text-background hover:bg-accent-gold/90 hover:scale-[1.02] transition-all"
-        >
-          <ExternalLink className="size-4" />
-          Launch live app
-        </a>
-      )}
-      {project.href && (
-        <a
-          href={project.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white/80 hover:border-accent-gold/40 hover:text-accent-gold transition-all"
-        >
-          <FaGithub className="size-4" />
-          View source
-        </a>
-      )}
-    </div>
-  );
-}
-
-function StarBlock({ label, text }: { label: string; text: string }) {
-  return (
-    <div className="mt-4 first:mt-4 pl-3 border-l-2 border-accent-gold/40">
-      <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-accent-gold bg-accent-gold/15 px-2.5 py-1 rounded mb-2">
-        {label}
-      </span>
-      <p className="text-[15px] leading-relaxed text-white/80">{text}</p>
-    </div>
-  );
-}
-
-function ProjectMeta({ project }: { project: Project }) {
+// Wraps the first occurrence of `phrase` in the keyword-highlight (gold) treatment.
+function highlight(text: string, phrase: string) {
+  const i = text.indexOf(phrase);
+  if (i === -1) return text;
   return (
     <>
-      <div className="flex items-start justify-between gap-4 mb-1">
-        <h3 className="text-lg font-bold text-white">{project.title}</h3>
-        <span className="font-mono text-[10px] text-white/50 uppercase tracking-wider shrink-0">
-          {project.status}
-        </span>
-      </div>
-      <StarBlock label="Problem" text={project.problem} />
-      <StarBlock label="Approach" text={project.approach} />
-      <StarBlock label="Impact" text={project.impact} />
-      <div className="flex flex-wrap gap-2 mt-4">
-        {project.stack.map((tech) => (
-          <span
-            key={tech}
-            className="px-3 py-1 rounded-full text-xs font-mono bg-accent-blue/10 text-accent-blue/90 border border-accent-blue/20"
-          >
-            {tech}
-          </span>
-        ))}
-      </div>
-      <ActionButtons project={project} />
+      {text.slice(0, i)}
+      <span className="hl">{phrase}</span>
+      {text.slice(i + phrase.length)}
     </>
   );
 }
 
-function FlagshipCard({ project }: { project: Project }) {
+// Lifts the key phrase of an otherwise muted line to bright ink, so the eye
+// lands on it without spending the gold accent.
+function emphasize(text: string, phrase: string) {
+  const i = text.indexOf(phrase);
+  if (i === -1) return text;
   return (
-    <Card className="glass-panel overflow-hidden hover:border-white/25 transition-all group">
-      <div className="grid md:grid-cols-2 items-stretch">
-        {/* Left column: logo panel + stack + actions, filling the height */}
-        <div className="p-4 md:pr-2 flex flex-col gap-4">
-          <a
-            href={project.live ?? project.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="relative flex items-center justify-center aspect-[16/10] overflow-hidden rounded-xl ring-1 ring-white/10 bg-gradient-to-br from-[#1a1320] via-card to-[#0d1420]"
-            aria-label={`Open ${project.title}`}
-          >
-            <div className="absolute -inset-10 bg-gradient-to-tr from-rose-500/10 via-transparent to-accent-blue/10 blur-2xl" />
-            <div className="relative text-center px-6">
-              <p className="text-3xl md:text-4xl font-bold tracking-tight text-rose-400 transition-transform duration-500 group-hover:scale-105">
-                MetaPlay
-              </p>
-              <p className="mt-2 font-mono text-[10px] text-white/50 uppercase tracking-[0.2em]">
-                Live games dashboard
-              </p>
-            </div>
-            {project.live && (
-              <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-background/80 backdrop-blur px-3 py-1.5 text-xs font-mono text-white border border-white/15">
-                <span className="relative flex size-2">
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" />
-                  <span className="relative inline-flex size-2 rounded-full bg-emerald-400" />
-                </span>
-                Live
-              </span>
-            )}
-          </a>
-
-          {/* Stack tags fill the space under the logo */}
-          <div className="flex flex-wrap gap-2">
-            {project.stack.map((tech) => (
-              <span
-                key={tech}
-                className="px-3 py-1 rounded-full text-xs font-mono bg-accent-blue/10 text-accent-blue/90 border border-accent-blue/20"
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
-
-          {/* Action buttons anchored to the bottom of the left column */}
-          <div className="mt-auto">
-            <ActionButtons project={project} />
-          </div>
-        </div>
-
-        {/* Right column: title + Problem / Approach / Impact */}
-        <div className="p-6 md:pl-4">
-          <div className="flex items-start justify-between gap-4 mb-1">
-            <h3 className="text-lg font-bold text-white">{project.title}</h3>
-            <span className="font-mono text-[10px] text-white/50 uppercase tracking-wider shrink-0">
-              {project.status}
-            </span>
-          </div>
-          <StarBlock label="Problem" text={project.problem} />
-          <StarBlock label="Approach" text={project.approach} />
-          <StarBlock label="Impact" text={project.impact} />
-        </div>
-      </div>
-    </Card>
+    <>
+      {text.slice(0, i)}
+      <span className="font-medium text-ink">{phrase}</span>
+      {text.slice(i + phrase.length)}
+    </>
   );
 }
 
-function TextCard({ project }: { project: Project }) {
+function StatusTag({ status }: { status: string }) {
   return (
-    <Card className="glass-panel overflow-hidden hover:border-white/25 transition-all group h-full">
-      <div className="p-6">
-        <ProjectMeta project={project} />
-      </div>
-    </Card>
+    <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-ink-faint">
+      <span className="size-1.5 rounded-full bg-accent" />
+      {status}
+    </span>
   );
 }
 
-function TierLabel({ children }: { children: React.ReactNode }) {
+function StackLine({ stack }: { stack: string[] }) {
   return (
-    <div className="flex items-center gap-3 mt-12 mb-4 first:mt-0">
-      <span className="font-mono text-xs text-accent-gold/80 uppercase tracking-[0.2em]">
+    <p className="font-mono text-xs text-ink-faint">{stack.join(" · ")}</p>
+  );
+}
+
+function ProjectLinks({ live, href }: { live?: string; href?: string }) {
+  if (!live && !href) return null;
+  return (
+    <p className="flex flex-wrap gap-x-6">
+      {live && (
+        <a
+          href={live}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="link-draw inline-flex min-h-11 items-center gap-1 text-[15px] text-accent"
+        >
+          Live demo
+          <ArrowUpRight className="size-4" aria-hidden />
+        </a>
+      )}
+      {href && (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="link-draw inline-flex min-h-11 items-center gap-1 text-[15px] text-ink"
+        >
+          Source
+          <ArrowUpRight className="size-4" aria-hidden />
+        </a>
+      )}
+    </p>
+  );
+}
+
+function DetailBlock({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-accent">
+        {label}
+      </p>
+      <p className="mt-2 text-[15px] leading-relaxed text-ink-muted">
         {children}
-      </span>
-      <span className="h-px flex-1 bg-white/10" />
+      </p>
     </div>
   );
 }
 
-export function Projects() {
-  const flagship = projects.filter((p) => p.tier === "flagship");
-  const engineering = projects.filter((p) => p.tier === "engineering");
-  const building = projects.filter((p) => p.tier === "building");
-
+// Flagship: full Problem / Approach / Impact depth, in the same card language
+// as the others. The depth difference is the signal that this one matters most.
+function FlagshipCard() {
   return (
-    <section id="projects" className="py-32">
+    <article className="group relative card-draft rounded-xl border border-hairline p-6 sm:p-8 transition-colors duration-300 hover:border-accent/60">
+      <span className="reg-tick reg-tl" aria-hidden />
+      <span className="reg-tick reg-tr" aria-hidden />
+      <span className="reg-tick reg-bl" aria-hidden />
+      <span className="reg-tick reg-br" aria-hidden />
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h3 className="font-serif text-2xl sm:text-3xl font-medium text-ink">
+          {flagship.title}
+        </h3>
+        <StatusTag status={flagship.status} />
+      </div>
+      <div className="mt-6 grid gap-x-8 gap-y-6 md:grid-cols-3">
+        <DetailBlock label="Problem">{flagship.problem}</DetailBlock>
+        <DetailBlock label="Approach">{flagship.approach}</DetailBlock>
+        <DetailBlock label="Impact">
+          {highlight(flagship.impact, "runs live today")}
+        </DetailBlock>
+      </div>
+      <div className="mt-7 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+        <ProjectLinks live={flagship.live} href={flagship.href} />
+        <StackLine stack={flagship.stack} />
+      </div>
+    </article>
+  );
+}
+
+function ProjectCard({ project }: { project: Project }) {
+  return (
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-xl border border-hairline card-draft p-7 transition-colors duration-300 hover:border-accent/60">
+      <span className="reg-tick reg-tl" aria-hidden />
+      <span className="reg-tick reg-tr" aria-hidden />
+      <span className="reg-tick reg-bl" aria-hidden />
+      <span className="reg-tick reg-br" aria-hidden />
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h3 className="text-xl font-semibold text-ink">{project.title}</h3>
+        <span className="font-mono text-[11px] uppercase tracking-wider text-ink-faint">
+          {project.status}
+        </span>
+      </div>
+      <p className="mt-4 text-[17px] leading-relaxed text-ink-muted">
+        {emphasize(project.oneLiner, project.emphasis)}
+      </p>
+      <p className="mt-3 text-[15px] leading-relaxed text-ink-faint">
+        {project.impact}
+      </p>
+      <div className="mt-auto pt-6 space-y-1">
+        <StackLine stack={project.stack} />
+        <ProjectLinks live={project.live} href={project.href} />
+      </div>
+    </article>
+  );
+}
+
+export function Projects() {
+  return (
+    <section id="projects" className="scroll-mt-24 pb-24 sm:pb-36">
       <SectionHeading
-        number="03"
+        number="01"
         title="Projects"
-        caption="Problem, approach, and impact"
+        caption="Problem, approach, and impact. The stack comes second."
       />
 
-      {flagship.map((project, i) => (
-        <FadeIn key={project.title} delay={i * 90}>
-          <FlagshipCard project={project} />
-        </FadeIn>
-      ))}
+      {/* Flagship: the screenshot is the anchor, the card carries the depth */}
+      <div
+        className="rise"
+        style={{ "--rise-delay": "0.24s" } as React.CSSProperties}
+      >
+        <BrowserFrame
+          src="/metaplay-landing.png"
+          alt="MetaPlay landing page: personalised gaming hub with account sign-up and Google sign-in"
+          url="metaplay-production.up.railway.app"
+          href={flagship.live}
+          priority
+        />
+        <div className="mt-6">
+          <FlagshipCard />
+        </div>
+      </div>
 
-      {engineering.length > 0 && (
-        <>
-          <TierLabel>Other engineering work</TierLabel>
-          <div className="grid md:grid-cols-2 gap-4 items-stretch">
-            {engineering.map((project, i) => (
-              <FadeIn key={project.title} delay={i * 90} className="h-full">
-                <TextCard project={project} />
-              </FadeIn>
-            ))}
-          </div>
-        </>
-      )}
-
-      {building.length > 0 && (
-        <>
-          <TierLabel>Currently building</TierLabel>
-          <div className="grid md:grid-cols-2 gap-4 items-stretch">
-            {building.map((project, i) => (
-              <FadeIn key={project.title} delay={i * 90} className="h-full">
-                <TextCard project={project} />
-              </FadeIn>
-            ))}
-          </div>
-        </>
-      )}
+      {/* The rest: tight one-liner-plus-supporting cards, two-up */}
+      <div
+        className="rise mt-16 grid gap-5 md:grid-cols-2"
+        style={{ "--rise-delay": "0.32s" } as React.CSSProperties}
+      >
+        {projects.map((project) => (
+          <ProjectCard key={project.title} project={project} />
+        ))}
+      </div>
     </section>
   );
 }

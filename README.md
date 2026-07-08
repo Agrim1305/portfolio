@@ -1,25 +1,28 @@
-# Personal Portfolio — agrimsharma.com
+# Personal Portfolio, agrimsharma.com
 
-My personal portfolio site. It introduces who I am, the projects I've built, my
+My personal portfolio. It introduces who I am, the projects I've built, my
 experience, and how to get in touch. Live at
 [agrimsharma.com](https://agrimsharma.com).
 
-I built it from scratch rather than using a template, so the layout, animations,
-and content are all my own.
+Built from scratch rather than from a template, so the layout, interactions, and
+content are my own.
 
 ## Built with
 
 - **Next.js** (App Router) and **React**
 - **TypeScript**
-- **Tailwind CSS** for styling
-- **shadcn/ui** for base components
-- Hand-written animation components (fade-in, typewriter, count-up) with
-  reduced-motion support
+- **Tailwind CSS v4**
+- A streaming **AI assistant** ("Ask about Agrim") backed by the Anthropic API,
+  grounded in a local knowledge base (`src/lib/knowledge-base.md`)
+- Hand-written interaction components (drafting-grid cursor field, scroll
+  reveals, registration-mark hero entrance) with `prefers-reduced-motion`
+  support
 - Deployed on **Vercel**
 
 ## Running it locally
 
-You'll need Node.js 18 or newer.
+Requires Node.js 20.9 or newer. Set `ANTHROPIC_API_KEY` in `.env.local` for the
+AI assistant.
 
 ```bash
 npm install
@@ -39,17 +42,16 @@ npm start
 
 ```
 src/
-  app/           Next.js app router pages and layout
-  components/    Each section of the site (hero, about, projects, etc.)
-  components/ui/ shadcn/ui base components
+  app/           App Router entry, layout, metadata, and the /api/chat route
+  components/    One component per section (hero, projects, leadership, …)
+  lib/           Knowledge base the AI assistant answers from
 public/          Images and the resume PDF
 ```
-
-Each section of the page is its own component in `src/components`, which keeps
-the content easy to find and edit.
 
 ## Notes
 
 - Security headers (CSP, HSTS, X-Frame-Options, and others) are configured in
   `next.config.ts`.
 - Images are optimised and served through the Next.js image pipeline.
+- `/api/chat` streams responses from Claude and answers only from the knowledge
+  base, with a small in-memory rate limit.

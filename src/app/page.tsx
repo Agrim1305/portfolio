@@ -1,35 +1,41 @@
 import { Nav } from "@/components/nav";
 import { Hero } from "@/components/hero";
-import { About } from "@/components/about";
-import { Currently } from "@/components/currently";
 import { Projects } from "@/components/projects";
+import { Leadership } from "@/components/leadership";
 import { Experience } from "@/components/experience";
-import { Certifications } from "@/components/certifications";
-import { HowIWork } from "@/components/how-i-work";
-import { Awards } from "@/components/awards";
+import { About } from "@/components/about";
 import { Contact } from "@/components/contact";
-import { FadeIn } from "@/components/fade-in";
 import { AskAgrim } from "@/components/ask-agrim";
+import { Reveal } from "@/components/reveal";
 
 export default function Home() {
   return (
     <>
       <Nav />
-      <main className="mx-auto max-w-6xl px-6 lg:px-8 pt-24 sm:pt-28">
+      <main className="mx-auto max-w-5xl px-5 sm:px-8">
         <Hero />
-        <FadeIn direction="up"><About /></FadeIn>
-        <FadeIn direction="up"><Currently /></FadeIn>
-        <Projects />
-        <FadeIn direction="up"><Experience /></FadeIn>
-        <FadeIn direction="up"><Certifications /></FadeIn>
-        <FadeIn direction="up"><HowIWork /></FadeIn>
-        <Awards />
-        <FadeIn direction="up"><Contact /></FadeIn>
+        <Reveal>
+          <Projects />
+        </Reveal>
+        <Reveal>
+          <Leadership />
+        </Reveal>
+        <Reveal>
+          <Experience />
+        </Reveal>
+        <Reveal>
+          <About />
+        </Reveal>
+        <Reveal>
+          <Contact />
+        </Reveal>
       </main>
-      <footer className="mx-auto max-w-6xl px-6 lg:px-8 border-t border-white/10 mt-12">
-        <div className="py-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-2 text-sm text-white/60">
+      <footer>
+        <div className="mx-auto max-w-5xl px-5 sm:px-8 pb-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-sm text-ink-faint">
           <span>© 2026 Agrim Sharma</span>
-          <span className="font-mono text-xs tracking-wider">Built with Next.js · Deployed on Vercel</span>
+          <span className="font-mono text-xs">
+            Built with Next.js · Deployed on Vercel
+          </span>
         </div>
       </footer>
       <AskAgrim />

@@ -35,7 +35,7 @@ function renderLineWithLinks(line: string, keyPrefix: string) {
             href={cleanUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-accent-gold underline decoration-accent-gold/30 underline-offset-2 hover:text-accent-gold hover:decoration-accent-gold transition-colors break-all"
+            className="text-accent underline decoration-1 underline-offset-2 hover:decoration-2 transition-colors break-all"
           >
             {cleanUrl}
           </a>
@@ -91,7 +91,7 @@ const SUGGESTED_QUESTIONS = [
 const INTRO_MESSAGE: Message = {
   role: "assistant",
   content:
-    "Hi — I'm an AI assistant trained only on Agrim's portfolio content. Ask me anything about his projects, experience, or background, and I'll answer from what's actually here rather than guessing.",
+    "Hi, I'm an AI assistant trained only on Agrim's portfolio content. Ask me anything about his projects, experience, or background, and I'll answer from what's actually here rather than guessing.",
 };
 
 export function AskAgrim() {
@@ -149,22 +149,65 @@ export function AskAgrim() {
         }),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data?.error ?? "Something went wrong.");
+      if (!res.ok || !res.body) {
+        // Error responses are JSON; success responses are a text stream.
+        let msg = "Something went wrong.";
+        try {
+          const data = await res.json();
+          msg = data?.error ?? msg;
+        } catch {
+          // response wasn't JSON — keep the default message
+        }
+        setError(msg);
         setMessages((prev) => prev.slice(0, -1)); // roll back the user msg on hard failure
         return;
       }
 
-      setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
+      // Append an empty assistant message and stream tokens into it.
+      setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let acc = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        acc += decoder.decode(value, { stream: true });
+        setMessages((prev) => {
+          const copy = prev.slice();
+          copy[copy.length - 1] = { role: "assistant", content: acc };
+          return copy;
+        });
+      }
+
+      if (!acc.trim()) {
+        setError("The assistant didn't return a response. Try again.");
+        setMessages((prev) => prev.slice(0, -2)); // drop empty assistant + user
+      }
     } catch {
-      setError("Couldn't reach the assistant — check your connection and try again.");
-      setMessages((prev) => prev.slice(0, -1));
+      setError("Couldn't reach the assistant. Check your connection and try again.");
+      // Remove a trailing empty assistant bubble, then the user message.
+      setMessages((prev) => {
+        const copy = prev.slice();
+        if (
+          copy.length &&
+          copy[copy.length - 1].role === "assistant" &&
+          copy[copy.length - 1].content === ""
+        ) {
+          copy.pop();
+        }
+        return copy.slice(0, -1);
+      });
     } finally {
       setLoading(false);
     }
   }
+
+  // While a request is in flight, show the typing dots until the streaming
+  // assistant bubble has received its first token.
+  const lastMessage = messages[messages.length - 1];
+  const waitingForFirstToken =
+    lastMessage?.role !== "assistant" || lastMessage.content === "";
 
   return (
     <>
@@ -172,22 +215,21 @@ export function AskAgrim() {
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Close AI assistant" : "Ask AI about Agrim"}
-        className="fixed bottom-5 right-5 z-50 flex items-center gap-2.5 pl-4 pr-5 py-3.5 rounded-full shadow-2xl shadow-black/50 border border-white/10 backdrop-blur-2xl hover:border-accent-gold/50 transition-all hover:scale-[1.03] active:scale-[0.98]"
-        style={{ background: "hsl(220 25% 8% / 0.92)" }}
+        className="fixed bottom-5 right-5 z-50 flex min-h-11 items-center gap-2.5 pl-4 pr-5 py-3 rounded-full bg-ink text-paper shadow-[0_12px_32px_-12px_hsl(230_15%_13%/0.5)] hover:bg-ink/90 transition-all active:scale-[0.98]"
+        
       >
         <span className="relative flex size-2">
-          <span className="absolute inline-flex h-full w-full rounded-full bg-accent-gold opacity-60 animate-ping" />
-          <span className="relative inline-flex size-2 rounded-full bg-accent-gold" />
+          <span className="relative inline-flex size-2 rounded-full bg-accent" />
         </span>
         {open ? (
-          <X className="size-4 text-white/90" />
+          <X className="size-4 text-paper" />
         ) : (
           <>
-            <Sparkles className="size-4 text-accent-gold" />
-            <span className="font-mono text-xs text-white/90 uppercase tracking-wider hidden sm:inline">
+            <Sparkles className="size-4 text-paper" />
+            <span className="font-mono text-xs text-paper uppercase tracking-wider hidden sm:inline">
               Ask AI about Agrim
             </span>
-            <span className="font-mono text-xs text-white/90 uppercase tracking-wider sm:hidden">
+            <span className="font-mono text-xs text-paper uppercase tracking-wider sm:hidden">
               Ask AI
             </span>
           </>
@@ -197,60 +239,65 @@ export function AskAgrim() {
       {/* Chat panel */}
       {open && (
         <div
-          className="fixed z-50 inset-x-3 bottom-3 top-16 sm:inset-x-auto sm:top-auto sm:bottom-24 sm:right-5 sm:left-auto sm:w-[400px] sm:h-[min(560px,70vh)] rounded-2xl shadow-2xl shadow-black/60 border border-white/10 backdrop-blur-2xl flex flex-col overflow-hidden"
-          style={{ background: "hsl(220 25% 8% / 0.97)" }}
+          className="fixed z-50 inset-x-3 bottom-3 top-16 sm:inset-x-auto sm:top-auto sm:bottom-24 sm:right-5 sm:left-auto sm:w-[400px] sm:h-[min(560px,70vh)] rounded-xl bg-surface shadow-[0_24px_64px_-24px_hsl(0_0%_0%/0.6)] border border-hairline flex flex-col overflow-hidden"
+          
         >
           {/* Header */}
-          <div className="px-5 py-4 border-b border-white/10 flex items-center gap-3">
-            <div className="size-9 rounded-xl bg-gradient-to-br from-accent-gold/20 to-accent-blue/10 border border-white/10 flex items-center justify-center shrink-0">
-              <Sparkles className="size-4 text-accent-gold" />
+          <div className="px-5 py-4 border-b border-hairline flex items-center gap-3">
+            <div className="size-9 rounded-lg bg-accent-wash border border-hairline flex items-center justify-center shrink-0">
+              <Sparkles className="size-4 text-accent" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold text-white">Ask about Agrim</p>
-              <p className="font-mono text-[10px] text-white/50 uppercase tracking-wider">
+              <p className="text-sm font-semibold text-ink">Ask about Agrim</p>
+              <p className="font-mono text-[10px] text-ink-faint uppercase tracking-wider">
                 AI assistant · grounded in his portfolio
               </p>
             </div>
             <button
               onClick={() => setOpen(false)}
               aria-label="Close chat"
-              className="size-7 shrink-0 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors"
+              className="size-7 shrink-0 rounded-lg hover:bg-secondary flex items-center justify-center transition-colors"
             >
-              <X className="size-4 text-white/60" />
+              <X className="size-4 text-ink-faint" />
             </button>
           </div>
 
           {/* Messages */}
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3 chat-scroll">
-            {messages.map((m, i) => (
-              <div
-                key={i}
-                className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
-              >
+            {messages.map((m, i) => {
+              // The streaming assistant bubble is empty until the first token
+              // arrives — the typing dots stand in for it until then.
+              if (m.role === "assistant" && m.content === "") return null;
+              return (
                 <div
-                  className={`max-w-[85%] rounded-xl px-3.5 py-2.5 text-sm leading-relaxed break-words ${
-                    m.role === "user"
-                      ? "bg-accent-gold text-background font-medium"
-                      : "bg-white/5 border border-white/10 text-white/85"
-                  }`}
+                  key={i}
+                  className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
                 >
-                  {renderMessageContent(m.content)}
+                  <div
+                    className={`max-w-[85%] rounded-xl px-3.5 py-2.5 text-sm leading-relaxed break-words ${
+                      m.role === "user"
+                        ? "bg-ink text-paper"
+                        : "bg-secondary text-ink"
+                    }`}
+                  >
+                    {renderMessageContent(m.content)}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
-            {loading && (
+            {loading && waitingForFirstToken && (
               <div className="flex justify-start">
-                <div className="bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 flex items-center gap-1.5">
-                  <span className="size-1.5 rounded-full bg-white/50 animate-bounce [animation-delay:-0.3s]" />
-                  <span className="size-1.5 rounded-full bg-white/50 animate-bounce [animation-delay:-0.15s]" />
-                  <span className="size-1.5 rounded-full bg-white/50 animate-bounce" />
+                <div className="bg-secondary rounded-xl px-3.5 py-2.5 flex items-center gap-1.5">
+                  <span className="size-1.5 rounded-full bg-ink-faint animate-bounce [animation-delay:-0.3s]" />
+                  <span className="size-1.5 rounded-full bg-ink-faint animate-bounce [animation-delay:-0.15s]" />
+                  <span className="size-1.5 rounded-full bg-ink-faint animate-bounce" />
                 </div>
               </div>
             )}
 
             {error && (
-              <p className="text-xs text-red-400/90 font-mono px-1">{error}</p>
+              <p className="text-xs text-destructive font-mono px-1">{error}</p>
             )}
 
             {/* Suggested questions — only before the conversation gets going */}
@@ -260,7 +307,7 @@ export function AskAgrim() {
                   <button
                     key={q}
                     onClick={() => sendMessage(q)}
-                    className="text-left text-xs font-mono px-3 py-2 rounded-lg border border-white/10 bg-white/[0.03] text-white/65 hover:border-accent-gold/40 hover:text-accent-gold transition-colors"
+                    className="text-left text-xs font-mono px-3 py-2.5 rounded-lg border border-hairline text-ink-muted hover:border-accent hover:text-accent transition-colors"
                   >
                     {q}
                   </button>
@@ -275,7 +322,7 @@ export function AskAgrim() {
               e.preventDefault();
               sendMessage(input);
             }}
-            className="p-3 border-t border-white/10 flex items-center gap-2"
+            className="p-3 border-t border-hairline flex items-center gap-2"
           >
             <input
               ref={inputRef}
@@ -284,15 +331,15 @@ export function AskAgrim() {
               placeholder="Ask a question..."
               maxLength={500}
               disabled={loading}
-              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-accent-gold/50 transition-colors disabled:opacity-50"
+              className="flex-1 bg-secondary border border-hairline rounded-lg px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-accent transition-colors disabled:opacity-50"
             />
             <button
               type="submit"
               disabled={loading || !input.trim()}
               aria-label="Send message"
-              className="size-10 shrink-0 rounded-lg bg-accent-gold hover:bg-accent-gold/90 disabled:opacity-30 disabled:hover:bg-accent-gold flex items-center justify-center transition-all"
+              className="size-11 shrink-0 rounded-lg bg-ink hover:bg-ink/85 disabled:opacity-30 disabled:hover:bg-ink flex items-center justify-center transition-all"
             >
-              <Send className="size-4 text-background" />
+              <Send className="size-4 text-paper" />
             </button>
           </form>
         </div>
