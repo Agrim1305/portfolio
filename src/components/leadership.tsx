@@ -30,7 +30,7 @@ export function Leadership() {
       <SectionHeading
         number="02"
         title="Leadership"
-        caption="Adelaide University Tennis Club · President, Aug 2024 to Present"
+        caption="Adelaide University Tennis Club · President, Aug 2024 to Mar 2026"
       />
 
       <div

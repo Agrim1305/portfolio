@@ -12,7 +12,7 @@ const roles: Role[] = [
   {
     role: "President",
     org: "Adelaide University Tennis Club",
-    dates: "Aug 2024 to Present",
+    dates: "Aug 2024 to Mar 2026 ",
     description:
       "Led the club revival covered above: merger, constitution, committee, grants, and the award.",
   },
