@@ -3,19 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import { X, Send, Sparkles } from "lucide-react";
 
-// Strips markdown emphasis syntax the model shouldn't be using but
-// sometimes does anyway (small models don't reliably obey "never use
-// bold" instructions). Keeps the inner text, drops the ** or __ wrapper,
-// so a prompt slip shows as plain text instead of literal asterisks.
+// Small models sometimes emit **bold** or __underline__ despite the prompt
+// forbidding it; strip the wrappers so a slip renders as plain text.
 function stripStrayMarkdown(text: string): string {
   return text
     .replace(/\*\*(.+?)\*\*/g, "$1")
     .replace(/__(.+?)__/g, "$1");
 }
 
-// Turns a single line of text into React nodes, converting any URLs
-// within it into styled, clickable links. Used by renderMessageContent
-// for each line/bullet after the message has been split into blocks.
+// Renders one line, turning any URLs in it into clickable links.
 function renderLineWithLinks(line: string, keyPrefix: string) {
   const cleanLine = stripStrayMarkdown(line);
   const urlPattern = /(https?:\/\/[^\s]+)/g;
@@ -47,11 +43,10 @@ function renderLineWithLinks(line: string, keyPrefix: string) {
   });
 }
 
-// Renders full message text: splits on blank lines into paragraphs,
-// treats consecutive "- " lines as a bullet list, and turns any URLs
-// within the text into styled, clickable links.
+// Splits message text into paragraphs, rendering any run of "- " lines
+// as a bullet list.
 function renderMessageContent(content: string) {
-  const blocks = content.trim().split(/\n\s*\n/); // split on blank lines
+  const blocks = content.trim().split(/\n\s*\n/);
 
   return blocks.map((block, blockIndex) => {
     const lines = block.split("\n").filter((l) => l.trim().length > 0);
@@ -167,20 +162,25 @@ export function AskAgrim() {
       setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
-      let acc = "";
+      let received = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        acc += decoder.decode(value, { stream: true });
+        const chunk = decoder.decode(value, { stream: true });
+        received += chunk;
         setMessages((prev) => {
           const copy = prev.slice();
-          copy[copy.length - 1] = { role: "assistant", content: acc };
+          const last = copy[copy.length - 1];
+          copy[copy.length - 1] = {
+            role: "assistant",
+            content: last.content + chunk,
+          };
           return copy;
         });
       }
 
-      if (!acc.trim()) {
+      if (!received.trim()) {
         setError("The assistant didn't return a response. Try again.");
         setMessages((prev) => prev.slice(0, -2)); // drop empty assistant + user
       }
@@ -216,7 +216,6 @@ export function AskAgrim() {
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Close AI assistant" : "Ask AI about Agrim"}
         className="fixed bottom-5 right-5 z-50 flex min-h-11 items-center gap-2.5 pl-4 pr-5 py-3 rounded-full bg-ink text-paper shadow-[0_12px_32px_-12px_hsl(230_15%_13%/0.5)] hover:bg-ink/90 transition-all active:scale-[0.98]"
-        
       >
         <span className="relative flex size-2">
           <span className="relative inline-flex size-2 rounded-full bg-accent" />
@@ -240,7 +239,6 @@ export function AskAgrim() {
       {open && (
         <div
           className="fixed z-50 inset-x-3 bottom-3 top-16 sm:inset-x-auto sm:top-auto sm:bottom-24 sm:right-5 sm:left-auto sm:w-[400px] sm:h-[min(560px,70vh)] rounded-xl bg-surface shadow-[0_24px_64px_-24px_hsl(0_0%_0%/0.6)] border border-hairline flex flex-col overflow-hidden"
-          
         >
           {/* Header */}
           <div className="px-5 py-4 border-b border-hairline flex items-center gap-3">

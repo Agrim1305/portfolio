@@ -254,29 +254,74 @@ body {
 .reg-br { bottom: 10px; right: 10px; border-bottom: 1.5px solid; border-right: 1.5px solid; transform: translate(-4px, -4px); }
 .group:hover .reg-tick { opacity: 0.9; transform: translate(0, 0); }
 
-/* ---- Hero photo: a restrained flicker on entrance, like a plate developing ---- */
-@keyframes photo-flicker {
-  0% { opacity: 0; }
-  8% { opacity: 0.5; }
-  13% { opacity: 0.18; }
-  22% { opacity: 0.85; }
-  28% { opacity: 0.35; }
-  42% { opacity: 1; }
-  48% { opacity: 0.72; }
-  58% { opacity: 1; }
-  100% { opacity: 1; }
+/* ---- Image entrance: the same drawing-then-resolving language as the hero
+   name above (.hero-guide-* draw, then .hero-name inks in). The gold corner
+   marks draw outward from a small square to the full frame first, then the
+   photo resolves from blurred to sharp within them — sequential, sharing the
+   name's easing and its 0.5s hand-off. ---- */
+@keyframes tf-marks-draw {
+  0% { opacity: 0; transform: scale(0.06); }
+  25% { opacity: 1; }
+  100% { opacity: 1; transform: scale(1); }
 }
-.photo-flicker {
-  animation: photo-flicker 1.15s cubic-bezier(0.4, 0, 0.2, 1) both;
+@keyframes tf-photo-resolve {
+  0% { opacity: 0; filter: blur(14px); }
+  100% { opacity: 1; filter: blur(0); }
+}
+.tf-marks {
+  transform-origin: center;
 }
 
-/* ---- Nav: corner brackets marking the active item ---- */
+/* Hero image: plays on load, in step with the name. */
+[data-tf="load"] .tf-marks {
+  animation: tf-marks-draw 0.5s cubic-bezier(0.7, 0, 0.2, 1) both;
+}
+[data-tf="load"] .tf-photo {
+  animation: tf-photo-resolve 0.6s cubic-bezier(0.7, 0, 0.2, 1) 0.5s both;
+}
+
+/* Images further down the page: the same entrance, held until their section
+   scrolls into view (armed by <Reveal>). */
+[data-reveal][data-armed] [data-tf="reveal"] .tf-marks {
+  opacity: 0;
+  transform: scale(0.06);
+}
+[data-reveal][data-armed] [data-tf="reveal"] .tf-photo {
+  opacity: 0;
+}
+[data-reveal][data-armed][data-visible] [data-tf="reveal"] .tf-marks {
+  animation: tf-marks-draw 0.5s cubic-bezier(0.7, 0, 0.2, 1) both;
+}
+[data-reveal][data-armed][data-visible] [data-tf="reveal"] .tf-photo {
+  animation: tf-photo-resolve 0.6s cubic-bezier(0.7, 0, 0.2, 1) 0.5s both;
+}
+
+.frame-mark {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  color: var(--accent);
+  opacity: 0.7;
+  pointer-events: none;
+}
+.frame-mark.tl { top: 8px; left: 8px; border-top: 1.5px solid; border-left: 1.5px solid; }
+.frame-mark.tr { top: 8px; right: 8px; border-top: 1.5px solid; border-right: 1.5px solid; }
+.frame-mark.bl { bottom: 8px; left: 8px; border-bottom: 1.5px solid; border-left: 1.5px solid; }
+.frame-mark.br { bottom: 8px; right: 8px; border-bottom: 1.5px solid; border-right: 1.5px solid; }
+
+/* ---- Nav: corner brackets marking the active item, and drawn on hover ---- */
 .nav-bracket {
   position: absolute;
   width: 9px;
   height: 9px;
   color: var(--accent);
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.nav-link:hover .nav-bracket,
+.nav-link[aria-current="true"] .nav-bracket {
+  opacity: 1;
 }
 .nav-bracket.tl { top: 0; left: 0; border-top: 1.5px solid; border-left: 1.5px solid; }
 .nav-bracket.tr { top: 0; right: 0; border-top: 1.5px solid; border-right: 1.5px solid; }
@@ -326,5 +371,12 @@ body {
   .draw-line,
   .rise { transition: none; }
   .link-draw::after { transition: none; }
-  .photo-flicker { animation: none; opacity: 1; }
+  [data-tf] .tf-marks,
+  [data-tf] .tf-photo {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  .nav-bracket { transition: none; }
 }

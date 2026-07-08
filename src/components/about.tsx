@@ -75,6 +75,7 @@ export function About() {
           sizes="(max-width: 1024px) 100vw, 360px"
           caption="Match play · Adelaide"
           objectPosition="center"
+          entrance="reveal"
           className="aspect-[4/3] lg:aspect-[4/5]"
         />
       </div>

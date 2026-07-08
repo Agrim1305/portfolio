@@ -1,4 +1,6 @@
+import { Mail } from "lucide-react";
 import { SectionHeading } from "@/components/section-heading";
+import { SocialLinks } from "@/components/social-links";
 
 export function Contact() {
   return (
@@ -21,26 +23,14 @@ export function Contact() {
         <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3">
           <a
             href="mailto:agrimsh22@gmail.com"
-            className="inline-flex min-h-12 items-center rounded-md bg-ink px-6 text-[15px] font-medium text-paper hover:bg-ink/90 transition-all hover:-translate-y-0.5"
+            className="inline-flex min-h-12 items-center gap-2 rounded-md bg-ink px-6 text-[15px] font-medium text-paper hover:bg-ink/90 transition-all hover:-translate-y-0.5"
           >
+            <Mail className="size-4" aria-hidden />
             Email me
           </a>
-          <a
-            href="https://github.com/Agrim1305"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="link-draw inline-flex min-h-12 items-center text-[15px] text-ink-muted hover:text-ink"
-          >
-            GitHub
-          </a>
-          <a
-            href="https://www.linkedin.com/in/agrim-sharma-821788302/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="link-draw inline-flex min-h-12 items-center text-[15px] text-ink-muted hover:text-ink"
-          >
-            LinkedIn
-          </a>
+          <div className="flex items-center gap-3">
+            <SocialLinks />
+          </div>
         </div>
 
         <p className="mt-12 border-l-2 border-accent pl-5 text-[15px] leading-relaxed text-ink-muted">

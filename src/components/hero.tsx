@@ -1,4 +1,5 @@
 import { TickFrame } from "@/components/tick-frame";
+import { SocialLinks } from "@/components/social-links";
 
 export function Hero() {
   return (
@@ -11,14 +12,15 @@ export function Hero() {
           <span className="hero-guide-v" aria-hidden />
           <span className="hero-guide-h" aria-hidden />
 
-          <div className="hero-rise sm:hidden mb-7" style={{ animationDelay: "0.55s" }}>
+          <div className="sm:hidden mb-7">
             <TickFrame
               src="/headshot.jpg"
               alt="Agrim Sharma"
               sizes="160px"
               variant="titleblock"
               caption="Agrim Sharma"
-              flicker
+              marks
+              entrance="load"
               priority
               className="w-40 aspect-[4/5]"
             />
@@ -64,22 +66,9 @@ export function Hero() {
             >
               agrimsh22@gmail.com
             </a>
-            <a
-              href="https://github.com/Agrim1305"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="link-draw inline-flex min-h-11 items-center text-[15px] text-ink-muted hover:text-ink"
-            >
-              GitHub
-            </a>
-            <a
-              href="https://www.linkedin.com/in/agrim-sharma-821788302/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="link-draw inline-flex min-h-11 items-center text-[15px] text-ink-muted hover:text-ink"
-            >
-              LinkedIn
-            </a>
+            <div className="flex items-center gap-3">
+              <SocialLinks />
+            </div>
           </div>
         </div>
 
@@ -90,7 +79,8 @@ export function Hero() {
             sizes="(max-width: 1024px) 208px, 240px"
             variant="titleblock"
             caption="Agrim Sharma"
-            flicker
+            marks
+            entrance="load"
             priority
             className="w-52 lg:w-60 aspect-[4/5]"
           />

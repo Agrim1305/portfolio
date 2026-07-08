@@ -22,6 +22,46 @@ function Brackets() {
   );
 }
 
+/* The site mark, mirroring app/icon.svg (the favicon) so the logo is identical
+   in the tab and on the page. */
+function Logo() {
+  return (
+    <svg viewBox="0 0 64 64" className="size-10" aria-hidden>
+      <defs>
+        <linearGradient id="as-logo-grad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#1a1320" />
+          <stop offset="100%" stopColor="#0d1420" />
+        </linearGradient>
+      </defs>
+      <rect width="64" height="64" rx="14" fill="url(#as-logo-grad)" />
+      <rect
+        x="1.5"
+        y="1.5"
+        width="61"
+        height="61"
+        rx="12.5"
+        fill="none"
+        stroke="#e0b65c"
+        strokeOpacity="0.25"
+        strokeWidth="1.5"
+      />
+      <text
+        x="32"
+        y="33"
+        fontFamily="Arial, Helvetica, sans-serif"
+        fontSize="34"
+        fontWeight="700"
+        fill="#e8bd5e"
+        textAnchor="middle"
+        dominantBaseline="central"
+        letterSpacing="-1"
+      >
+        AS
+      </text>
+    </svg>
+  );
+}
+
 export function Nav() {
   const [active, setActive] = useState("");
   const [open, setOpen] = useState(false);
@@ -63,10 +103,10 @@ export function Nav() {
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
         <a
           href="#top"
-          aria-label="AS, back to top"
-          className="inline-flex size-10 items-center justify-center rounded-md border border-hairline bg-surface font-serif text-[15px] tracking-tight text-ink transition-colors hover:border-accent/60"
+          aria-label="Agrim Sharma, back to top"
+          className="inline-flex size-10 items-center justify-center rounded-[11px] transition-opacity hover:opacity-80"
         >
-          AS
+          <Logo />
         </a>
 
         {/* Desktop: numbered links with a bracket selection marker, Resume CTA */}
@@ -79,11 +119,11 @@ export function Nav() {
                   key={id}
                   href={`#${id}`}
                   aria-current={isActive ? "true" : undefined}
-                  className={`relative px-3.5 py-2 text-sm transition-colors ${
+                  className={`nav-link relative px-3.5 py-2 text-sm transition-colors ${
                     isActive ? "text-accent" : "text-ink-muted hover:text-ink"
                   }`}
                 >
-                  {isActive && <Brackets />}
+                  <Brackets />
                   <span className="inline-flex items-baseline gap-1.5">
                     <span
                       className={`font-mono text-[11px] ${

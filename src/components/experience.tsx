@@ -44,19 +44,22 @@ const certifications: Certification[] = [
     name: "Technology Job Simulation",
     issuer: "Deloitte Australia",
     year: "2026",
-    credentialUrl: "https://www.theforage.com/",
+    credentialUrl:
+      "https://www.linkedin.com/in/agrim-sharma-821788302/details/certifications/",
   },
   {
     name: "Data Analytics Job Simulation",
     issuer: "Deloitte Australia",
     year: "2026",
-    credentialUrl: "https://www.theforage.com/",
+    credentialUrl:
+      "https://www.linkedin.com/in/agrim-sharma-821788302/details/certifications/",
   },
   {
     name: "Partnering with AI in the Workplace",
     issuer: "Datacom",
     year: "2026",
-    credentialUrl: "https://www.theforage.com/",
+    credentialUrl:
+      "https://www.linkedin.com/in/agrim-sharma-821788302/details/certifications/",
   },
   {
     name: "Career Access Mentoring Program",
