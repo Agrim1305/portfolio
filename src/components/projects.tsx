@@ -38,6 +38,7 @@ const projects: Project[] = [
     impact:
       "It builds a propositional knowledge base from what it senses and deduces which cells are safe, taking a calculated risk only when forced. My clearest example of logic-based AI and reasoning under uncertainty.",
     stack: ["Python", "Propositional Logic", "Search"],
+    href: "https://github.com/Agrim1305/Pathfinder",
   },
   {
     title: "GPS Tracker Dashboard",
