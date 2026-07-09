@@ -1,5 +1,6 @@
 import { ArrowUpRight } from "lucide-react";
 import { SectionHeading } from "@/components/section-heading";
+import { TickFrame } from "@/components/tick-frame";
 
 type Role = {
   role: string;
@@ -61,14 +62,10 @@ const certifications: Certification[] = [
     credentialUrl:
       "https://www.linkedin.com/in/agrim-sharma-821788302/details/certifications/",
   },
-  {
-    name: "Career Access Mentoring Program",
-    issuer: "Adelaide University",
-    year: "2025",
-    credentialUrl:
-      "https://www.linkedin.com/feed/update/urn:li:activity:7376092779933835264/",
-  },
 ];
+
+const MENTORSHIP_CREDENTIAL_URL =
+  "https://www.linkedin.com/feed/update/urn:li:activity:7376092779933835264/";
 
 export function Experience() {
   return (
@@ -83,10 +80,12 @@ export function Experience() {
         className="rise max-w-3xl text-base leading-relaxed text-ink-muted"
         style={{ "--rise-delay": "0.16s" } as React.CSSProperties}
       >
-        I&apos;m an international student, and my coaching and retail roles are{" "}
-        <span className="hl">customer-facing experience in Australian workplaces</span>
-        . I already know how work here runs, so I can start contributing from day
-        one.
+        Across leading a committee, coaching more than fifty clients of every
+        age and background, and working a busy retail floor, the common thread
+        is <span className="hl">working with people</span>. It&apos;s made me
+        good at reading and communicating with people from all walks of life,
+        and comfortable fitting into any environment, including the Australian
+        workplace I want to build my career in.
       </p>
 
       {/* Roles on a quiet timeline rail */}
@@ -115,10 +114,61 @@ export function Experience() {
         ))}
       </div>
 
-      {/* Certifications, boxed, each verifiable */}
+      {/* Mentorship: kept separate from the roles and given more weight than
+          the certifications, since it is the more significant of the two. */}
       <div
         className="rise mt-14 rounded-xl border border-hairline card-draft p-6 sm:p-7"
         style={{ "--rise-delay": "0.32s" } as React.CSSProperties}
+      >
+        <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-accent">
+          Mentorship
+        </p>
+        <div className="mt-4 flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+              <h3 className="text-[15px] text-ink">
+                Career Access Mentoring Program
+                <span className="text-ink-faint"> · Adelaide University</span>
+              </h3>
+              <a
+                href={MENTORSHIP_CREDENTIAL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link-draw inline-flex items-center gap-1 text-[13px] text-accent"
+              >
+                Credential
+                <ArrowUpRight className="size-3.5" aria-hidden />
+              </a>
+            </div>
+            <p className="mt-3 text-[15px] leading-relaxed text-ink-muted">
+              A structured 14-hour mentorship through Adelaide University, spread
+              across meetings over four to six months, mentored one-on-one by an{" "}
+              <span className="hl">APT Analyst at Google Threat Intelligence</span>
+              . We have stayed in touch for more than a year since. He ran me
+              through a full mock Google interview loop, from the online
+              assessment to the technical, behavioural and HR rounds, and was
+              direct about exactly where I was weak and what to work on. He showed
+              me how each round actually works, how to structure an answer, and
+              which of my own experiences to draw on for it. We also covered how
+              engineers at that level approach software craft and problem-solving,
+              and where my strengths fit best. He still reviews my thinking
+              whenever I am making a decision about my career.
+            </p>
+          </div>
+          <TickFrame
+            src="/mentorship.jpeg"
+            alt="University of Adelaide Certificate of Completion for the Career Access Mentoring Program"
+            sizes="(max-width: 640px) 160px, 176px"
+            entrance="reveal"
+            className="w-40 sm:w-44 shrink-0 aspect-[800/1132]"
+          />
+        </div>
+      </div>
+
+      {/* Certifications, boxed, each verifiable */}
+      <div
+        className="rise mt-6 rounded-xl border border-hairline card-draft p-6 sm:p-7"
+        style={{ "--rise-delay": "0.4s" } as React.CSSProperties}
       >
         <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-accent">
           Certifications

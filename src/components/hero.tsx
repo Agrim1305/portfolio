@@ -41,9 +41,9 @@ export function Hero() {
           >
             Final-year Computer Science student at Adelaide University, majoring
             in Artificial Intelligence. I build{" "}
-            <span className="text-ink">full-stack products</span>, put AI to work
+            <span className="text-ink">software that solves problems</span>, put AI to work
             inside them, and{" "}
-            <span className="text-ink">ship them so real people can use them</span>
+            <span className="text-ink">ship it so real people actually use it</span>
             .
           </p>
           <p
