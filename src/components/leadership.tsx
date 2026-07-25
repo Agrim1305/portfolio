@@ -84,7 +84,7 @@ export function Leadership() {
 
       {/* The 'tell me about a conflict' story, collapsed by default */}
       <details
-        className="rise group relative mt-6 overflow-hidden rounded-xl border border-hairline card-draft"
+        className="story rise group relative mt-6 rounded-xl border border-hairline card-draft transition-colors duration-300 hover:border-accent/60"
         style={{ "--rise-delay": "0.4s" } as React.CSSProperties}
       >
         <span className="reg-tick reg-tl" aria-hidden />
@@ -100,12 +100,20 @@ export function Leadership() {
               Running our side of a two-university club merger
             </span>
           </span>
-          <ChevronDown
-            className="size-5 shrink-0 text-ink-faint transition-transform duration-300 group-open:rotate-180"
-            aria-hidden
-          />
+          <span className="flex shrink-0 items-center gap-3">
+            <span className="hidden font-mono text-[11px] uppercase tracking-[0.15em] text-ink-faint transition-colors group-hover:text-accent sm:inline">
+              <span className="group-open:hidden">Read it</span>
+              <span className="hidden group-open:inline">Close</span>
+            </span>
+            <span className="inline-flex size-9 items-center justify-center rounded-md border border-hairline bg-surface text-ink-faint transition-colors group-hover:border-accent/60 group-hover:text-accent">
+              <ChevronDown
+                className="size-4 transition-transform duration-300 group-open:rotate-180"
+                aria-hidden
+              />
+            </span>
+          </span>
         </summary>
-        <div className="space-y-4 px-6 pb-6 sm:px-7 sm:pb-7">
+        <div className="story-body space-y-4 px-6 pb-6 sm:px-7 sm:pb-7">
           {story.map((beat) => (
             <div key={beat.label}>
               <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-accent">

@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
-// ---- Config -----------------------------------------------------------
-
 const MODEL = "claude-haiku-4-5-20251001";
 const MAX_TOKENS = 600;
 const MAX_MESSAGE_LENGTH = 500;
@@ -25,8 +23,6 @@ function isRateLimited(ip: string): boolean {
   requestLog.set(ip, timestamps);
   return timestamps.length > RATE_LIMIT_MAX_REQUESTS;
 }
-
-// ---- Knowledge base loading --------------------------------------------
 
 let cachedKnowledgeBase: string | null = null;
 
@@ -55,11 +51,7 @@ KNOWLEDGE BASE:
 ${knowledgeBase}`;
 }
 
-// ---- Types --------------------------------------------------------------
-
 type ChatMessage = { role: "user" | "assistant"; content: string };
-
-// ---- Handler --------------------------------------------------------------
 
 export async function POST(req: NextRequest) {
   const apiKey = process.env.ANTHROPIC_API_KEY;

@@ -67,6 +67,13 @@ export function About() {
             <span className="hl">follow-through</span>, and to still caring once
             the interesting part is over.
           </p>
+          <p>
+            When a humanitarian AI hackathon came up in Sydney, I{" "}
+            <span className="hl">backed myself</span>, booked the trip interstate
+            on my own, and built for 44 hours with people I met that weekend. We
+            finished in the top 12. Unfamiliar rooms on short deadlines turn out
+            to be where I do some of my best work.
+          </p>
         </div>
 
         <TickFrame
@@ -113,9 +120,8 @@ export function About() {
         <p className="mt-8 text-lg leading-relaxed text-ink-muted">
           Right now I am building two tools I want in my own hands, a voice log
           for tennis coaches and a receipt scanner for Australian GST, studying
-          for the Azure AZ-900, and heading to a humanitarian AI hackathon in
-          Sydney to build alongside people who understand those problems better
-          than I do.
+          for the Azure AZ-900, and getting ready for the hackathon Grand Final
+          in August.
         </p>
       </div>
 

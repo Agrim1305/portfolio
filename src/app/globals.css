@@ -86,6 +86,13 @@ html {
   scroll-padding-top: 5.5rem;
 }
 
+/* Lenis animates the scroll position itself, so the native smooth behaviour has
+   to step aside while it runs. It stays in place for reduced motion and for the
+   no-JS case, where Lenis never starts and this class is never added. */
+html.smooth-scroll {
+  scroll-behavior: auto;
+}
+
 body {
   min-height: 100vh;
 }
@@ -225,6 +232,50 @@ body {
   transform: none;
 }
 
+/* ---- Chat panel: grows out of the launcher rather than appearing ----
+   It stays mounted so the close animates too. `visibility` flips instantly on
+   open and waits for the fade on close, which also keeps the closed panel out
+   of the tab order and the accessibility tree. */
+.chat-panel {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px) scale(0.98);
+  transform-origin: bottom right;
+  transition: opacity 0.32s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.32s cubic-bezier(0.2, 0.7, 0.2, 1),
+    visibility 0s linear 0.32s;
+}
+.chat-panel[data-open="true"] {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 0.32s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.32s cubic-bezier(0.2, 0.7, 0.2, 1),
+    visibility 0s linear 0s;
+}
+
+/* ---- Mobile menu: slides down on open. It sits in the header's flow, so it
+   is unmounted when closed and only the opening is animated. ---- */
+@keyframes menu-open {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+.menu-panel {
+  animation: menu-open 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* ---- Expandable story: the body eases open instead of snapping ----
+   Animating ::details-content would also ease the close, but partial support
+   for it clipped the story to zero height in some browsers, so this animates
+   the body on open and lets the close snap the way <details> normally does. */
+@keyframes story-open {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+.story[open] .story-body {
+  animation: story-open 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
 /* ---- Project card: registration ticks + drafting fill ---- */
 .card-draft {
   background-color: var(--surface);
@@ -317,7 +368,7 @@ body {
   color: var(--accent);
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.3s ease;
 }
 .nav-link:hover .nav-bracket,
 .nav-link[aria-current="true"] .nav-bracket {
@@ -379,4 +430,8 @@ body {
     filter: none;
   }
   .nav-bracket { transition: none; }
+  .story[open] .story-body { animation: none; }
+  .chat-panel,
+  .chat-panel[data-open="true"] { transition: none; }
+  .menu-panel { animation: none; }
 }

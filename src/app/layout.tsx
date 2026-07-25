@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Newsreader } from "next/font/google";
 import "./globals.css";
 import { DraftGrid } from "@/components/draft-grid";
+import { SmoothScroll } from "@/components/smooth-scroll";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,6 +47,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${newsreader.variable} font-sans antialiased`}
       >
+        <SmoothScroll />
         <DraftGrid />
         {children}
       </body>

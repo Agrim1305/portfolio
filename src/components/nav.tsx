@@ -109,7 +109,6 @@ export function Nav() {
           <Logo />
         </a>
 
-        {/* Desktop: numbered links with a bracket selection marker, Resume CTA */}
         <div className="hidden items-center gap-5 sm:flex">
           <nav className="flex items-center gap-1">
             {sections.map(({ id, number, label }) => {
@@ -148,7 +147,6 @@ export function Nav() {
           </a>
         </div>
 
-        {/* Mobile: hamburger */}
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
@@ -160,9 +158,8 @@ export function Nav() {
         </button>
       </div>
 
-      {/* Mobile menu panel */}
       {open && (
-        <nav className="border-t border-hairline bg-paper px-5 pb-5 sm:hidden">
+        <nav className="menu-panel border-t border-hairline bg-paper px-5 pb-5 sm:hidden">
           {sections.map(({ id, number, label }) => {
             const isActive = active === id;
             return (

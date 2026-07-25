@@ -13,7 +13,7 @@ const roles: Role[] = [
   {
     role: "President",
     org: "Adelaide University Tennis Club",
-    dates: "Aug 2024 to Mar 2026 ",
+    dates: "Aug 2024 to Mar 2026",
     description:
       "Led the club revival covered above: merger, constitution, committee, grants, and the award.",
   },
@@ -88,7 +88,6 @@ export function Experience() {
         workplace I want to build my career in.
       </p>
 
-      {/* Roles on a quiet timeline rail */}
       <div
         className="rise mt-10"
         style={{ "--rise-delay": "0.24s" } as React.CSSProperties}
@@ -151,8 +150,10 @@ export function Experience() {
               me how each round actually works, how to structure an answer, and
               which of my own experiences to draw on for it. We also covered how
               engineers at that level approach software craft and problem-solving,
-              and where my strengths fit best. He still reviews my thinking
-              whenever I am making a decision about my career.
+              and where my strengths fit best. We met in person for the first
+              time at Google&apos;s Sydney office, where he gave me a tour, and he
+              still reviews my thinking whenever I am making a decision about my
+              career.
             </p>
           </div>
           <TickFrame
@@ -163,9 +164,29 @@ export function Experience() {
             className="w-40 sm:w-44 shrink-0 aspect-[800/1132]"
           />
         </div>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <TickFrame
+            src="/google-sydney-1.jpg"
+            alt="Agrim Sharma beside the Google logo sculpture in the Google Sydney office"
+            sizes="(max-width: 640px) 100vw, 340px"
+            caption="Visiting my mentor at Google Sydney"
+            objectPosition="center"
+            entrance="reveal"
+            className="aspect-[16/9]"
+          />
+          <TickFrame
+            src="/google-sydney-2.jpg"
+            alt="Agrim Sharma beside the neon Google sign in the Google Sydney office"
+            sizes="(max-width: 640px) 100vw, 340px"
+            caption="Google Sydney office"
+            objectPosition="center"
+            entrance="reveal"
+            className="aspect-[16/9]"
+          />
+        </div>
       </div>
 
-      {/* Certifications, boxed, each verifiable */}
       <div
         className="rise mt-6 rounded-xl border border-hairline card-draft p-6 sm:p-7"
         style={{ "--rise-delay": "0.4s" } as React.CSSProperties}
