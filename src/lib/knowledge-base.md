@@ -41,8 +41,9 @@ Tree Gully Tennis Club in Adelaide.
 ## Projects
 
 ### MetaPlay (Flagship, Live)
+
 Status: Live, 2025. Stack: Vue.js, Node.js, Express, MySQL, Passport.js.
-Live: https://metaplay-production.up.railway.app/
+Live: https://metaplay-g2q7.onrender.com
 Source: https://github.com/Agrim1305/Metaplay
 
 Problem: Gamers track what they play across scattered notes, spreadsheets,
@@ -63,6 +64,7 @@ It's the deployed version of a team project he took the rest of the way
 and shipped himself.
 
 ### Virtual Restaurant Simulator (Engineering)
+
 Status: C++, 2025. Stack: C++, OOP, Makefile.
 Source: https://github.com/Agrim1305/Virtual_Restaurant_Simulator
 
@@ -82,6 +84,7 @@ This is the project where Agrim learned to think in clean class
 boundaries and polymorphism.
 
 ### Pathfinder AI Agent (Engineering)
+
 Status: Python, 2026. Stack: Python, Propositional Logic, Search.
 
 Problem: An agent is dropped into a grid it cannot fully see, with hidden
@@ -106,6 +109,7 @@ that can't be published publicly, so it isn't linked from the portfolio.
 The Pathfinder repo contains only Agrim's own original code.
 
 ### GPS Tracker Dashboard (Engineering)
+
 Status: Java, 2026. Stack: Java, Sodium FRP, JUnit.
 Source: https://github.com/Agrim1305/gps-frp-tracker
 
@@ -125,6 +129,7 @@ with no shared mutable state and 19 passing unit tests. Where Agrim
 learned to handle streaming data and event-driven design properly.
 
 ### Baseline (In Development)
+
 Stack: Next.js, TypeScript, FastAPI, Whisper, PostgreSQL.
 
 Problem: Agrim coaches tennis, and logging each session by typing is the
@@ -142,6 +147,7 @@ practice as the first real user. Goal is a tool he relies on weekly, then
 puts in front of other Adelaide coaches.
 
 ### Receipt Extractor (In Development)
+
 Stack: Next.js, TypeScript, FastAPI, Vision LLM.
 
 Problem: Sole traders in Australia waste hours each quarter manually
@@ -159,7 +165,8 @@ clean, reviewable data in minutes instead of an evening of manual entry.
 
 ## Experience
 
-### President, Adelaide University Tennis Club (Aug 2024 to Present)
+### President, Adelaide University Tennis Club (Aug 2024 to Mar 2026)
+
 Took over a club that had gone quiet and rebuilt it from scratch. Led the
 merger of two university tennis clubs during the Adelaide and UniSA
 consolidation, co-authored the new constitution, brought together an
@@ -172,7 +179,8 @@ grants, merged two clubs into one, won Club of the Year 2025 (Jessop
 Shield). Skills: Leadership, Governance, Operations, Stakeholder
 Management.
 
-### Tennis Coach, Tea Tree Gully Tennis Club (Mar 2024 to Jun 2026)
+### Tennis Coach, Tea Tree Gully Tennis Club (Mar 2024 to Present)
+
 Coaches juniors and adults at all skill levels, one-on-one and in groups.
 Plans each session, adjusts feedback to the player, tracks progress over
 time. Built skill at explaining the same idea multiple ways until it
@@ -180,6 +188,7 @@ clicks, and at keeping people motivated when things are hard.
 Skills: Communication, Mentoring, Planning.
 
 ### Retail Assistant, IGA Supermarkets (Feb 2024 to Sep 2024)
+
 Part-time customer service across two stores while studying full-time.
 Busy retail floor, steady standards, practice juggling work and uni at
 the same time. Skills: Customer Service, Teamwork.
@@ -267,8 +276,7 @@ students stop: a five-person team project that ended when the course
 did, which he then came back to alone, fixed end-to-end, connected to
 live external data (the RAWG API), and deployed to production. It's the
 clearest evidence of the difference between building for a grade and
-shipping because he wanted it to exist. Full auth with Google sign-in,
-a normalised 8-table MySQL schema, and an admin panel, all live today.
+shipping because he wanted it to exist. Full auth with Google sign-in, a normalised 9-table MySQL schema, and an admin panel, all live today (originally deployed on Railway, migrated to Render + Aiven when the trial expired — good real-world experience across two deployment stacks).
 
 **Why should we hire you over someone with more experience?**
 Agrim doesn't have years of industry experience yet, but he has a track
