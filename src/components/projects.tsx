@@ -72,7 +72,7 @@ const metaplay: CaseStudy = {
   links: [
     {
       label: "Live demo",
-      url: "https://metaplay-production.up.railway.app/",
+      url: "https://metaplay-g2q7.onrender.com/",
       accent: true,
     },
     { label: "Source", url: "https://github.com/Agrim1305/Metaplay" },
@@ -141,7 +141,7 @@ function mark(text: string, phrases: string[], className: string) {
     nodes.push(
       <span key={i} className={className}>
         {phrase}
-      </span>
+      </span>,
     );
     cursor = at + phrase.length;
   });
