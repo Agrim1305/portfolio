@@ -72,6 +72,8 @@ export function Nav() {
     // down the viewport. A plain scroll listener, since the browser pauses rAF
     // in background tabs.
     const update = () => {
+      // Case study pages share this nav but have none of the home sections.
+      if (!document.getElementById("projects")) return;
       const atBottom =
         window.scrollY + window.innerHeight >=
         document.documentElement.scrollHeight - 2;

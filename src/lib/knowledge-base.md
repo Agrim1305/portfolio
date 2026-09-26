@@ -184,7 +184,7 @@ did, which he then came back to alone, fixed end-to-end, connected to
 live external data (the RAWG API), and deployed to production. It's the
 clearest evidence of the difference between building for a grade and
 shipping because he wanted it to exist. Full auth with Google sign-in, a
-normalised 8-table relational schema, and an admin panel, all live today.
+normalised 9-table relational schema, and an admin panel, all live today.
 It was originally deployed on Railway, then moved to Render when the trial
 expired, with the database migrated from MySQL to PostgreSQL along the way,
 which gave him real experience across two deployment stacks.

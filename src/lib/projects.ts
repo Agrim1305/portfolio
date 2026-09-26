@@ -132,8 +132,8 @@ export const projects: Project[] = [
   {
     slug: "metaplay",
     title: "MetaPlay",
-    status: "Live · 2025, relaunched 2026",
-    period: "Mar 2025 to Jun 2025, brought back to production in 2026",
+    status: "Live · Built 2025, deployed 2026",
+    period: "Mar 2025 to Jun 2025, deployed to production Jun 2026",
     role: "Front-end to back-end integration, auth and schema in a team of five",
     lead: true,
     oneLiner:
@@ -378,7 +378,7 @@ export function projectsAsKnowledge(): string {
         `Status: ${p.status}. Period: ${p.period}. Role: ${p.role}.`,
         `Stack: ${p.stack.join(", ")}.`,
         ...p.links.map((l) => `${l.label}: ${l.url}`),
-        p.privateNote ? `Source: ${p.privateNote}.` : "",
+        ...(p.privateNote ? [`Source: ${p.privateNote}.`] : []),
         `Case study page: https://agrimsharma.com/projects/${p.slug}`,
         "",
         `Summary: ${p.oneLiner}`,
@@ -390,7 +390,7 @@ export function projectsAsKnowledge(): string {
         `Impact: ${p.impact}`,
       ];
       if (p.learned) lines.push("", `What he learned: ${p.learned}`);
-      return lines.filter((l, i, a) => !(l === "" && a[i - 1] === "")).join("\n");
+      return lines.join("\n");
     })
     .join("\n\n");
 }

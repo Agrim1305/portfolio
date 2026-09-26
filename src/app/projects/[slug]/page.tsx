@@ -129,13 +129,13 @@ export default async function ProjectPage({
           {project.metrics && (
             <dl className="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-xl border border-hairline bg-hairline">
               {project.metrics.map((m) => (
-                <div key={m.label} className="bg-surface p-4 sm:p-6">
-                  <dd className="font-serif text-2xl sm:text-3xl font-medium text-ink tabular-nums whitespace-nowrap">
-                    {m.value}
-                  </dd>
+                <div key={m.label} className="flex flex-col bg-surface p-4 sm:p-6">
                   <dt className="mt-2 font-mono text-[11px] uppercase tracking-[0.15em] text-ink-faint">
                     {m.label}
                   </dt>
+                  <dd className="order-first font-serif text-2xl sm:text-3xl font-medium text-ink tabular-nums whitespace-nowrap">
+                    {m.value}
+                  </dd>
                 </div>
               ))}
             </dl>
