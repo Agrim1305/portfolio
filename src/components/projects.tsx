@@ -1,133 +1,18 @@
-import { ArrowUpRight } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, ArrowRight } from "lucide-react";
 import { SectionHeading } from "@/components/section-heading";
-import { BrowserFrame } from "@/components/browser-frame";
-import { TickFrame } from "@/components/tick-frame";
-
-type Link = { label: string; url: string; accent?: boolean };
-
-type Project = {
-  title: string;
-  status: string;
-  oneLiner: string;
-  emphasis: string; // phrase in the one-liner to lift to bright ink
-  impact: string;
-  stack: string[];
-  links: Link[];
-};
-
-type CaseStudy = {
-  title: string;
-  status: string;
-  problem: string;
-  approach: string[]; // one entry per paragraph
-  impact: string;
-  impactHighlights?: string[]; // phrases in the impact to lift to gold
-  stack: string[];
-  links: Link[];
-};
-
-const pacificVillage: CaseStudy = {
-  title: "Pacific Village Explorer",
-  status: "Top 12 finalist · 2026 Humanitarian Innovation Hackathon",
-  problem:
-    "A village council deciding where to rebuild after a flood, where to move a school, or how to farm ground turning saline has no way to see its own coastline in twenty years. The digital twin platforms that answer that cost over $10,000 per site and need technical staff villages do not have.",
-  approach: [
-    "Built in 44 hours with a three-university team at the University of Sydney. A coordinator picks their village, drags a timeline from 2026 to 2075, and watches houses, wells, farms and sacred sites change status as the water rises, with adaptation options for every asset at risk.",
-    "I led the AI recommendation engine. The prompt carries each village's real context, its population, cultural constraints, budget and community capacity, into the Claude API, with guardrails that keep every recommendation tied to that village instead of generic climate advice, plus an offline fallback so the tool still works with no API at all.",
-    "The call I am proudest of was 2D over a 3D digital twin. 86% of the Pacific has mobile coverage but only 27% use mobile internet, so the real constraint is usability, not connectivity. Appropriate technology beats impressive technology.",
-  ],
-  impact:
-    "Top 12 of 75 submissions from 110 teams, and the only finalist representing Adelaide University. Judged by a panel including Sir Peter Cosgrove, Canva, Commonwealth Bank's AI Scientist and the Pacific Region Infrastructure Facility. Under $500 per village against $10,000+ for the alternatives, on any phone from the last five years, built on IPCC AR6, SPREP and NASA sea level data. The Grand Final is on 19 August.",
-  impactHighlights: [
-    "Top 12 of 75 submissions",
-    "the only finalist representing Adelaide University",
-  ],
-  stack: ["React", "Vite", "Tailwind", "Leaflet", "Claude API", "Vercel"],
-  links: [
-    {
-      label: "Source",
-      url: "https://github.com/reeyansh404/Pacific-Village-Explorer",
-    },
-    {
-      label: "Finalist announcement",
-      url: "https://hack-eng.sydney.edu.au/",
-      accent: true,
-    },
-  ],
-};
-
-const metaplay: CaseStudy = {
-  title: "MetaPlay",
-  status: "Live · 2025",
-  problem:
-    "Gamers track what they play across scattered notes, spreadsheets, and memory. Our brief was a single place to discover games, build a collection, and review them, backed by real game data rather than a static seed list.",
-  approach: [
-    "I worked in a five-person team and owned the front-end and back-end integration. I built the authentication layer, with email and password login plus Google sign-in across three roles (admin, user, and guest), and designed a normalised MySQL schema across eight tables.",
-    "After the course ended I came back to it on my own, fixed the remaining issues end to end, wired it up to live RAWG game data, and deployed it to production.",
-  ],
-  impact:
-    "It runs live today with personalised dashboards, collections, reviews, and an admin panel, pulling real-time data from the RAWG API. This is the deployed version of a team project that I took the rest of the way and shipped myself.",
-  impactHighlights: ["runs live today"],
-  stack: ["Vue.js", "Node.js", "Express", "MySQL", "Passport.js"],
-  links: [
-    {
-      label: "Live demo",
-      url: "https://metaplay-g2q7.onrender.com/",
-      accent: true,
-    },
-    { label: "Source", url: "https://github.com/Agrim1305/Metaplay" },
-  ],
-};
-
-const projects: Project[] = [
-  {
-    title: "Pathfinder AI Agent",
-    status: "Python · 2026",
-    oneLiner:
-      "A logic-based agent that reasons its way through hidden hazards. It scored ten out of ten on every hidden autograder map.",
-    emphasis: "ten out of ten",
-    impact:
-      "It builds a propositional knowledge base from what it senses and deduces which cells are safe, taking a calculated risk only when forced. My clearest example of logic-based AI and reasoning under uncertainty.",
-    stack: ["Python", "Propositional Logic", "Search"],
-    links: [
-      { label: "Source", url: "https://github.com/Agrim1305/Pathfinder" },
-    ],
-  },
-  {
-    title: "GPS Tracker Dashboard",
-    status: "Java · 2026",
-    oneLiner:
-      "A real-time tracking dashboard built on functional reactive streams, verified by nineteen unit tests.",
-    emphasis: "nineteen unit tests",
-    impact:
-      "Location updates and alerts flow through composable event streams instead of shared mutable state, so the UI updates cleanly as data arrives. It is where I learned to handle streaming data and event-driven design properly.",
-    stack: ["Java", "Sodium FRP", "JUnit"],
-    links: [
-      { label: "Source", url: "https://github.com/Agrim1305/gps-frp-tracker" },
-    ],
-  },
-  {
-    title: "Virtual Restaurant Simulator",
-    status: "C++ · 2025",
-    oneLiner:
-      "A restaurant simulation designed around clean class hierarchies, so new staff roles extend it without rewrites.",
-    emphasis: "without rewrites",
-    impact:
-      "A Person base class with inheritance and virtual methods lets each role define its own behaviour through a shared interface, and state persists to files between sessions. Adding a staff type means adding a class, not rewriting logic.",
-    stack: ["C++", "OOP", "Makefile"],
-    links: [
-      {
-        label: "Source",
-        url: "https://github.com/Agrim1305/Virtual_Restaurant_Simulator",
-      },
-    ],
-  },
-];
+import { ProjectMediaView } from "@/components/project-media";
+import {
+  leadProjects,
+  otherProjects,
+  type Project,
+  type ProjectLink,
+} from "@/lib/projects";
 
 // Wraps the first occurrence of each phrase in `className` so a skimming reader
 // lands on the numbers that matter. Gold (`hl`) is reserved for the strongest
 // claims; bright ink carries the rest without spending the accent.
-function mark(text: string, phrases: string[], className: string) {
+export function mark(text: string, phrases: string[], className: string) {
   const hits = phrases
     .map((phrase) => ({ phrase, at: text.indexOf(phrase) }))
     .filter(({ at }) => at !== -1)
@@ -158,7 +43,7 @@ function StatusTag({ status }: { status: string }) {
   );
 }
 
-function StackLine({
+export function StackLine({
   stack,
   className = "text-xs",
 }: {
@@ -172,7 +57,7 @@ function StackLine({
   );
 }
 
-function LinkRow({ links }: { links: Link[] }) {
+export function LinkRow({ links }: { links: ProjectLink[] }) {
   return (
     <p className="flex flex-wrap gap-x-6">
       {links.map(({ label, url, accent }) => (
@@ -218,11 +103,24 @@ function DetailBlock({
 // language as the others. The depth is the signal that these two matter most.
 // The title and status sit above `media` so a screenshot is never the first
 // thing a reader meets with no idea what they are looking at.
+function CaseStudyLink({ slug, title }: { slug: string; title: string }) {
+  return (
+    <Link
+      href={`/projects/${slug}`}
+      className="link-draw inline-flex min-h-11 items-center gap-1.5 text-[15px] text-accent"
+    >
+      Read the case study
+      <span className="sr-only"> for {title}</span>
+      <ArrowRight className="size-4" aria-hidden />
+    </Link>
+  );
+}
+
 function CaseStudyCard({
   study,
   media,
 }: {
-  study: CaseStudy;
+  study: Project;
   media?: React.ReactNode;
 }) {
   return (
@@ -249,7 +147,7 @@ function CaseStudyCard({
           label="Approach"
           className="lg:col-start-2 lg:row-start-1 lg:row-span-2"
         >
-          {study.approach.map((para, i) => (
+          {study.approach.slice(0, 2).map((para, i) => (
             <p key={i}>{para}</p>
           ))}
         </DetailBlock>
@@ -258,7 +156,10 @@ function CaseStudyCard({
         </DetailBlock>
       </div>
       <div className="mt-7 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-        <LinkRow links={study.links} />
+        <div className="flex flex-wrap gap-x-6">
+          <CaseStudyLink slug={study.slug} title={study.title} />
+          <LinkRow links={study.links} />
+        </div>
         <StackLine stack={study.stack} />
       </div>
     </article>
@@ -292,14 +193,20 @@ function ProjectCard({
         {mark(project.oneLiner, [project.emphasis], "font-medium text-ink")}
       </p>
       <p className="mt-3 text-[15px] leading-relaxed text-ink-faint">
-        {project.impact}
+        {project.summary}
       </p>
       {/* Metadata band, pinned to the bottom so it lines up across the row. The
           stack matches the 11px status line above, which also keeps it on one
           line so the rule sits at the same height on every card. */}
       <div className="mt-auto space-y-2 border-t border-hairline pt-5">
         <StackLine stack={project.stack} className="text-[11px]" />
-        <LinkRow links={project.links} />
+        <div className="flex flex-wrap gap-x-6">
+          <CaseStudyLink slug={project.slug} title={project.title} />
+          <LinkRow links={project.links} />
+        </div>
+        {project.privateNote && (
+          <p className="text-[12px] text-ink-faint">{project.privateNote}</p>
+        )}
       </div>
     </article>
   );
@@ -314,90 +221,42 @@ export function Projects() {
         caption="Problem, approach, and impact. The stack comes second."
       />
 
-      {/* Lead: the card carries the depth, and the hackathon photos sit
-          underneath as evidence of how it was built. */}
-      <div
-        className="rise"
-        style={{ "--rise-delay": "0.24s" } as React.CSSProperties}
-      >
-        <CaseStudyCard
-          study={pacificVillage}
-          media={
-            <TickFrame
-              src="/pacific-app.jpg"
-              alt="Pacific Village Explorer: flooding vulnerability on Christmas Island, Kiribati at 2055, with the sea level timeline and climate planning layers"
-              sizes="(max-width: 1024px) 100vw, 900px"
-              caption="Christmas Island, Kiribati at 2055"
-              objectPosition="top"
-              entrance="reveal"
-              priority
-              className="aspect-[1920/1035]"
-            />
-          }
-        />
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
-          <TickFrame
-            src="/pacific-team.jpg"
-            alt="Agrim Sharma with his two teammates at the Humanitarian Innovation Hackathon"
-            sizes="(max-width: 640px) 100vw, 320px"
-            caption="The team"
-            objectPosition="center"
-            entrance="reveal"
-            className="aspect-[3/2]"
+      {leadProjects.map((study, i) => (
+        <div
+          key={study.slug}
+          className={`rise ${i > 0 ? "mt-16" : ""}`}
+          style={{ "--rise-delay": `${0.24 + i * 0.06}s` } as React.CSSProperties}
+        >
+          <CaseStudyCard
+            study={study}
+            media={
+              study.media && (
+                <ProjectMediaView media={study.media} priority={i === 0} />
+              )
+            }
           />
-          <TickFrame
-            src="/pacific-build.jpg"
-            alt="Whiteboarding the app architecture during the hackathon"
-            sizes="(max-width: 640px) 100vw, 320px"
-            caption="Whiteboarding the build"
-            objectPosition="center"
-            entrance="reveal"
-            className="aspect-[3/2]"
-          />
-          <TickFrame
-            src="/pacific-work.jpg"
-            alt="The three-university team building during the 44-hour hackathon"
-            sizes="(max-width: 640px) 100vw, 320px"
-            caption="44 hours in"
-            objectPosition="center"
-            entrance="reveal"
-            className="aspect-[3/2]"
-          />
+          {study.gallery && (
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+              {study.gallery.map((g) => (
+                <ProjectMediaView key={g.src} media={g} small />
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+      ))}
 
-      {/* Second: MetaPlay, the deployed product. */}
-      <div
-        className="rise mt-16"
-        style={{ "--rise-delay": "0.3s" } as React.CSSProperties}
-      >
-        <CaseStudyCard
-          study={metaplay}
-          media={
-            <BrowserFrame
-              src="/metaplay-landing.png"
-              alt="MetaPlay landing page: personalised gaming hub with account sign-up and Google sign-in"
-              url="metaplay-production.up.railway.app"
-              href="https://metaplay-production.up.railway.app/"
-              sizes="(max-width: 1024px) 100vw, 900px"
-            />
-          }
-        />
-      </div>
-
-      {/* The rest: tight one-liner-plus-supporting cards. Three-up once there is
-          room; at the two-column width an odd last card takes the full row so it
-          never sits alone in a half-empty one. */}
+      {/* The rest: tight one-liner-plus-supporting cards, each with its own
+          case study page for anyone who wants the depth. */}
       <div
         className="rise mt-16 grid gap-5 md:grid-cols-2 lg:grid-cols-3"
         style={{ "--rise-delay": "0.36s" } as React.CSSProperties}
       >
-        {projects.map((project, i) => {
+        {otherProjects.map((project, i) => {
           const isOddLast =
-            i === projects.length - 1 && projects.length % 2 === 1;
+            i === otherProjects.length - 1 && otherProjects.length % 2 === 1;
           return (
             <ProjectCard
-              key={project.title}
+              key={project.slug}
               project={project}
               className={isOddLast ? "md:col-span-2 lg:col-span-1" : ""}
             />

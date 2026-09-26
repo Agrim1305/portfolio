@@ -52,7 +52,7 @@ export function Hero() {
           >
             <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-accent" />
             <span>
-              Available for internships now · graduate roles from December 2026
+              Interning on voice AI at Aurivox · open to graduate roles from December 2026
             </span>
           </p>
 

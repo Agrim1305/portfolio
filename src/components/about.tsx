@@ -118,10 +118,9 @@ export function About() {
           ))}
         </div>
         <p className="mt-8 text-lg leading-relaxed text-ink-muted">
-          Right now I am building two tools I want in my own hands, a voice log
-          for tennis coaches and a receipt scanner for Australian GST, studying
-          for the Azure AZ-900, and getting ready for the hackathon Grand Final
-          in August.
+          Right now I am in my final semester, interning on a voice AI
+          prototype at Aurivox, and finishing the website for the tennis
+          academy I coach at. I graduate in December.
         </p>
       </div>
 

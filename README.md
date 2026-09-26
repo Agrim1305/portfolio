@@ -17,6 +17,8 @@ content are my own.
 - Hand-written interaction components (drafting-grid cursor field, scroll
   reveals, registration-mark hero entrance) with `prefers-reduced-motion`
   support
+- Case study pages for every project (`/projects/[slug]`), generated from a
+  single data file (`src/lib/projects.ts`) that also feeds the AI assistant
 - Deployed on **Vercel**
 
 ## Running it locally

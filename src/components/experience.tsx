@@ -11,23 +11,30 @@ type Role = {
 
 const roles: Role[] = [
   {
+    role: "Software Engineering Intern, Voice AI",
+    org: "Aurivox · Viemo Capital & Consulting",
+    dates: "Aug 2026 to Nov 2026",
+    description:
+      "Chosen as one of four interns from eleven shortlisted students for a 50-day placement with a startup building a voice AI product. I work across the speech-to-text, language model and text-to-speech stack of a voice-first meeting assistant, reporting to the founder and taking an open brief through to a working prototype. It is the first time I have shipped AI features against a founder's brief rather than a marking rubric.",
+  },
+  {
     role: "President",
     org: "Adelaide University Tennis Club",
-    dates: "Aug 2024 to Mar 2026",
+    dates: "Jul 2024 to Mar 2026",
     description:
       "Led the club revival covered above: merger, constitution, committee, grants, and the award.",
   },
   {
-    role: "Tennis Coach",
-    org: "Tea Tree Gully Tennis Club",
+    role: "Assistant Head Coach",
+    org: "Adelaide Rising Stars Tennis Academy",
     dates: "Mar 2024 to Present",
     description:
-      "I coach juniors and adults at all skill levels, both one-on-one and in groups. I plan each session, adjust my feedback to the player, and track their progress over time. It has made me good at explaining the same idea a few different ways until it clicks, and at keeping people motivated when they are finding it hard.",
+      "I coach 10+ sessions a week at Tea Tree Gully Tennis Club for more than fifty clients, from juniors to adults, one-on-one and in groups. I run junior and performance squads of up to thirty players in a two-hour block, setting the drill plan and directing assistant coaches across four courts. It has made me good at explaining the same idea a few different ways until it clicks, and at keeping a big group moving on one plan.",
   },
   {
     role: "Retail Assistant",
     org: "IGA Supermarkets",
-    dates: "Feb 2024 to Sep 2024",
+    dates: "Feb 2024 to Oct 2024",
     description:
       "Part-time customer service across two stores while studying full-time. Busy retail floor, steady standards, and a lot of practice juggling work and study at the same time.",
   },
@@ -41,6 +48,13 @@ type Certification = {
 };
 
 const certifications: Certification[] = [
+  {
+    name: "Azure Fundamentals (AZ-900)",
+    issuer: "Microsoft",
+    year: "2026",
+    credentialUrl:
+      "https://www.linkedin.com/in/agrim-sharma-821788302/details/certifications/",
+  },
   {
     name: "Technology Job Simulation",
     issuer: "Deloitte Australia",

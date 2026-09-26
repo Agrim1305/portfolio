@@ -7,6 +7,7 @@ import { About } from "@/components/about";
 import { Contact } from "@/components/contact";
 import { AskAgrim } from "@/components/ask-agrim";
 import { Reveal } from "@/components/reveal";
+import { Footer } from "@/components/footer";
 
 export default function Home() {
   return (
@@ -30,14 +31,7 @@ export default function Home() {
           <Contact />
         </Reveal>
       </main>
-      <footer>
-        <div className="mx-auto max-w-5xl px-5 sm:px-8 pb-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-sm text-ink-faint">
-          <span>© 2026 Agrim Sharma</span>
-          <span className="font-mono text-xs">
-            Built with Next.js · Deployed on Vercel
-          </span>
-        </div>
-      </footer>
+      <Footer />
       <AskAgrim />
     </>
   );

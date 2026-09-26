@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Menu, X } from "lucide-react";
 
 const sections = [
@@ -101,22 +102,22 @@ export function Nav() {
   return (
     <header className="sticky top-0 z-40 bg-paper">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-        <a
-          href="#top"
+        <Link
+          href="/#top"
           aria-label="Agrim Sharma, back to top"
           className="inline-flex size-10 items-center justify-center rounded-[11px] transition-opacity hover:opacity-80"
         >
           <Logo />
-        </a>
+        </Link>
 
         <div className="hidden items-center gap-5 sm:flex">
           <nav className="flex items-center gap-1">
             {sections.map(({ id, number, label }) => {
               const isActive = active === id;
               return (
-                <a
+                <Link
                   key={id}
-                  href={`#${id}`}
+                  href={`/#${id}`}
                   aria-current={isActive ? "true" : undefined}
                   className={`nav-link relative px-3.5 py-2 text-sm transition-colors ${
                     isActive ? "text-accent" : "text-ink-muted hover:text-ink"
@@ -133,7 +134,7 @@ export function Nav() {
                     </span>
                     {label}
                   </span>
-                </a>
+                </Link>
               );
             })}
           </nav>
@@ -163,9 +164,9 @@ export function Nav() {
           {sections.map(({ id, number, label }) => {
             const isActive = active === id;
             return (
-              <a
+              <Link
                 key={id}
-                href={`#${id}`}
+                href={`/#${id}`}
                 onClick={() => setOpen(false)}
                 aria-current={isActive ? "true" : undefined}
                 className={`flex items-baseline gap-2.5 border-b border-hairline py-3.5 text-base ${
@@ -180,7 +181,7 @@ export function Nav() {
                   {number}
                 </span>
                 {label}
-              </a>
+              </Link>
             );
           })}
           <a
