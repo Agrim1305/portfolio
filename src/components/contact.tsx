@@ -13,8 +13,7 @@ export function Contact() {
         <p className="text-lg sm:text-xl leading-relaxed text-ink-muted">
           I&apos;m looking for{" "}
           <span className="text-ink">
-            graduate and internship roles in software engineering, AI, data, and
-            analytics
+            graduate roles in software engineering, AI, data, and analytics
           </span>
           . Email is the best way to reach me. I&apos;m based in Adelaide and
           happy to relocate within Australia.
@@ -38,7 +37,7 @@ export function Contact() {
           internship and part-time roles. Full, unrestricted working rights
           from 15 December 2026 (graduation), eligible for the subclass 485
           Temporary Graduate visa. Available for graduate roles from December
-          2026, and for internships immediately.
+          2026.
         </p>
       </div>
     </section>
