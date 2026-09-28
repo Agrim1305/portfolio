@@ -89,8 +89,21 @@ const INTRO_MESSAGE: Message = {
     "Hi, I'm an AI assistant trained only on Agrim's portfolio content. Ask me anything about his projects, experience, or background, and I'll answer from what's actually here rather than guessing.",
 };
 
+const OPEN_EVENT = "ask:open";
+
+/* Opens the assistant from anywhere on the page (hero bar, menu, launcher). */
+export function openAsk() {
+  window.dispatchEvent(new Event(OPEN_EVENT));
+}
+
 export function AskAgrim() {
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const onOpen = () => setOpen(true);
+    window.addEventListener(OPEN_EVENT, onOpen);
+    return () => window.removeEventListener(OPEN_EVENT, onOpen);
+  }, []);
   const [messages, setMessages] = useState<Message[]>([INTRO_MESSAGE]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);

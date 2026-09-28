@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { Geist, Newsreader } from "next/font/google";
+import { Bricolage_Grotesque, Geist, Newsreader } from "next/font/google";
 import "./globals.css";
-import { DraftGrid } from "@/components/draft-grid";
 import { SmoothScroll } from "@/components/smooth-scroll";
 
 const geistSans = Geist({
@@ -10,9 +9,17 @@ const geistSans = Geist({
   display: "optional",
 });
 
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
+  subsets: ["latin"],
+});
+
+// Only ever used for italic accent words, so the upright cut is never loaded.
 const newsreader = Newsreader({
   variable: "--font-newsreader",
   subsets: ["latin"],
+  style: "italic",
+  weight: "500",
 });
 
 const description =
@@ -45,10 +52,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${newsreader.variable} font-sans antialiased`}
+        className={`${geistSans.variable} ${bricolage.variable} ${newsreader.variable} font-sans antialiased`}
       >
         <SmoothScroll />
-        <DraftGrid />
         {children}
       </body>
     </html>
