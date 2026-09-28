@@ -97,6 +97,8 @@ export function AskAgrim() {
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const launcherRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -124,9 +126,40 @@ export function AskAgrim() {
     }
   }, [open]);
 
+  function close() {
+    setOpen(false);
+    launcherRef.current?.focus();
+  }
+
+  // The panel is modal: Escape closes it, and Tab wraps inside it so keyboard
+  // focus can't reach the scroll-locked page behind.
+  function handlePanelKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Escape") {
+      close();
+      return;
+    }
+    if (e.key !== "Tab") return;
+    const focusable = panelRef.current?.querySelectorAll<HTMLElement>(
+      "a[href], button:not(:disabled), input",
+    );
+    if (!focusable?.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
   async function sendMessage(text: string) {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
+    // A suggested question unmounts and the send button disables once this
+    // runs, so move focus to the input rather than letting it drop to <body>.
+    inputRef.current?.focus();
 
     const nextMessages: Message[] = [...messages, { role: "user", content: trimmed }];
     setMessages(nextMessages);
@@ -213,8 +246,11 @@ export function AskAgrim() {
   return (
     <>
       <button
+        ref={launcherRef}
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Close AI assistant" : "Ask AI about Agrim"}
+        aria-expanded={open}
+        aria-controls="ask-agrim-panel"
         className="fixed bottom-5 right-5 z-50 flex min-h-11 items-center gap-2.5 pl-4 pr-5 py-3 rounded-full bg-ink text-paper shadow-[0_12px_32px_-12px_hsl(230_15%_13%/0.5)] hover:bg-ink/90 transition-all active:scale-[0.98]"
       >
         <span className="relative flex size-2">
@@ -236,6 +272,12 @@ export function AskAgrim() {
       </button>
 
       <div
+        ref={panelRef}
+        id="ask-agrim-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ask-agrim-title"
+        onKeyDown={handlePanelKeyDown}
         data-open={open}
         className="chat-panel fixed z-50 inset-x-3 bottom-3 top-16 sm:inset-x-auto sm:top-auto sm:bottom-24 sm:right-5 sm:left-auto sm:w-[400px] sm:h-[min(560px,70vh)] rounded-xl bg-surface shadow-[0_24px_64px_-24px_hsl(0_0%_0%/0.6)] border border-hairline flex flex-col overflow-hidden"
       >
@@ -244,13 +286,15 @@ export function AskAgrim() {
             <Sparkles className="size-4 text-accent" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-ink">Ask about Agrim</p>
+            <p id="ask-agrim-title" className="text-sm font-semibold text-ink">
+              Ask about Agrim
+            </p>
             <p className="font-mono text-[10px] text-ink-faint uppercase tracking-wider">
               AI assistant · grounded in his portfolio
             </p>
           </div>
           <button
-            onClick={() => setOpen(false)}
+            onClick={close}
             aria-label="Close chat"
             className="size-7 shrink-0 rounded-lg hover:bg-secondary flex items-center justify-center transition-colors"
           >
@@ -263,6 +307,9 @@ export function AskAgrim() {
         <div
           ref={scrollRef}
           data-lenis-prevent
+          role="log"
+          aria-live="polite"
+          aria-busy={loading}
           className="flex-1 overflow-y-auto px-4 py-4 space-y-3 chat-scroll"
         >
           {messages.map((m, i) => {
@@ -289,7 +336,10 @@ export function AskAgrim() {
 
           {loading && waitingForFirstToken && (
             <div className="flex justify-start">
-              <div className="bg-secondary rounded-xl px-3.5 py-2.5 flex items-center gap-1.5">
+              <div
+                className="bg-secondary rounded-xl px-3.5 py-2.5 flex items-center gap-1.5"
+                aria-hidden
+              >
                 <span className="size-1.5 rounded-full bg-ink-faint animate-bounce [animation-delay:-0.3s]" />
                 <span className="size-1.5 rounded-full bg-ink-faint animate-bounce [animation-delay:-0.15s]" />
                 <span className="size-1.5 rounded-full bg-ink-faint animate-bounce" />
@@ -298,7 +348,9 @@ export function AskAgrim() {
           )}
 
           {error && (
-            <p className="text-xs text-destructive font-mono px-1">{error}</p>
+            <p role="alert" className="text-xs text-destructive font-mono px-1">
+              {error}
+            </p>
           )}
 
           {/* Suggested questions — only before the conversation gets going */}
@@ -329,9 +381,12 @@ export function AskAgrim() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask a question..."
+            aria-label="Ask a question"
             maxLength={500}
-            disabled={loading}
-            className="flex-1 bg-secondary border border-hairline rounded-lg px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-accent transition-colors disabled:opacity-50"
+            // readOnly rather than disabled: a disabled input drops keyboard
+            // focus to <body> mid-conversation.
+            readOnly={loading}
+            className="flex-1 bg-secondary border border-hairline rounded-lg px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-accent transition-colors read-only:opacity-50"
           />
           <button
             type="submit"
