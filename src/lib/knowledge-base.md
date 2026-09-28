@@ -8,8 +8,8 @@ isn't answered here, the assistant says so honestly instead of guessing.
 
 ## Identity & Status
 
-Agrim Sharma is a final-year Computer Science student at the University of
-Adelaide, majoring in Artificial Intelligence, graduating December 2026.
+Agrim Sharma is a final-year Computer Science student at Adelaide
+University, majoring in Artificial Intelligence, graduating December 2026.
 Based in Adelaide, South Australia. Currently completing an AI engineering
 internship at Aurivox (Viemo Capital & Consulting) as part of his final
 semester. Available for graduate roles from December 2026. Looking for graduate
@@ -93,8 +93,8 @@ Based at Tea Tree Gully Tennis Club. Coaches 10+ sessions a week for a
 client base of 50+, juniors and adults, one-on-one and in groups. Runs
 junior squads of up to 30 players in a two-hour block and directs the
 assistant coaches. Plans each session, adjusts feedback to the player,
-tracks progress over time. Directs assistant coaches across four courts. Built skill at explaining the same idea multiple ways until it
-clicks, and at keeping people motivated when things are hard.
+tracks progress over time. Built skill at explaining the same idea multiple
+ways until it clicks, and at keeping people motivated when things are hard.
 Skills: Communication, Mentoring, Planning.
 
 ### Retail Assistant, IGA Supermarkets (Feb 2024 to Oct 2024)

@@ -75,7 +75,7 @@ export const projects: Project[] = [
       "the only Adelaide University student to reach the Grand Final",
     ],
     metrics: [
-      { value: "Top 12", label: "of 110 teams" },
+      { value: "Top 12", label: "of 75 submissions" },
       { value: "44 hrs", label: "idea to demo" },
       { value: "<$500", label: "per village" },
       { value: "2026→2075", label: "timeline modelled" },
