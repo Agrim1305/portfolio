@@ -96,8 +96,9 @@ html {
 }
 
 /* Lenis animates the scroll position itself, so the native smooth behaviour has
-   to step aside while it runs. It stays in place for reduced motion and for the
-   no-JS case, where Lenis never starts and this class is never added. */
+   to step aside while it runs. It stays in place for the no-JS case, where
+   Lenis never starts and this class is never added. Reduced motion turns it
+   off below. */
 html.smooth-scroll {
   scroll-behavior: auto;
 }
@@ -423,6 +424,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
   .draft-grid-glow { display: none; }
   .hero-guide-v,
   .hero-guide-h { display: none; }

@@ -13,6 +13,7 @@ export function TickFrame({
   caption,
   plate = "Portrait · 01",
   priority = false,
+  fetchPriority,
   objectPosition = "top",
   variant = "ticks",
   marks = false,
@@ -25,6 +26,7 @@ export function TickFrame({
   caption?: string;
   plate?: string;
   priority?: boolean;
+  fetchPriority?: "high";
   objectPosition?: "top" | "center";
   variant?: "ticks" | "titleblock";
   marks?: boolean;
@@ -43,6 +45,7 @@ export function TickFrame({
       fill
       sizes={sizes}
       priority={priority}
+      fetchPriority={fetchPriority}
       className={objectClass}
     />
   );

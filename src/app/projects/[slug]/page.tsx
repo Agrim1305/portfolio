@@ -133,7 +133,7 @@ export default async function ProjectPage({
                   <dt className="mt-2 font-mono text-[11px] uppercase tracking-[0.15em] text-ink-faint">
                     {m.label}
                   </dt>
-                  <dd className="order-first font-serif text-2xl sm:text-3xl font-medium text-ink tabular-nums whitespace-nowrap">
+                  <dd className="order-first font-serif text-lg sm:text-3xl font-medium text-ink tabular-nums whitespace-nowrap">
                     {m.value}
                   </dd>
                 </div>

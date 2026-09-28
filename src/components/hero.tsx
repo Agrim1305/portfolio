@@ -15,13 +15,13 @@ export function Hero() {
           <div className="sm:hidden mb-7">
             <TickFrame
               src="/headshot.jpg"
-              alt="Agrim Sharma"
+              alt=""
               sizes="160px"
               variant="titleblock"
               caption="Agrim Sharma"
               marks
               entrance="load"
-              priority
+              fetchPriority="high"
               className="w-40 aspect-[4/5]"
             />
           </div>
@@ -75,13 +75,13 @@ export function Hero() {
         <div className="hidden sm:block shrink-0 pt-1">
           <TickFrame
             src="/headshot.jpg"
-            alt="Agrim Sharma"
+            alt=""
             sizes="(max-width: 1024px) 208px, 240px"
             variant="titleblock"
             caption="Agrim Sharma"
             marks
             entrance="load"
-            priority
+            fetchPriority="high"
             className="w-52 lg:w-60 aspect-[4/5]"
           />
         </div>

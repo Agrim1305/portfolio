@@ -340,9 +340,9 @@ export function AskAgrim() {
                 className="bg-secondary rounded-xl px-3.5 py-2.5 flex items-center gap-1.5"
                 aria-hidden
               >
-                <span className="size-1.5 rounded-full bg-ink-faint animate-bounce [animation-delay:-0.3s]" />
-                <span className="size-1.5 rounded-full bg-ink-faint animate-bounce [animation-delay:-0.15s]" />
-                <span className="size-1.5 rounded-full bg-ink-faint animate-bounce" />
+                <span className="size-1.5 rounded-full bg-ink-faint animate-bounce motion-reduce:animate-none [animation-delay:-0.3s]" />
+                <span className="size-1.5 rounded-full bg-ink-faint animate-bounce motion-reduce:animate-none [animation-delay:-0.15s]" />
+                <span className="size-1.5 rounded-full bg-ink-faint animate-bounce motion-reduce:animate-none" />
               </div>
             </div>
           )}

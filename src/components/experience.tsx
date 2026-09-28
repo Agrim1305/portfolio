@@ -147,7 +147,7 @@ export function Experience() {
                 href={MENTORSHIP_CREDENTIAL_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="link-draw inline-flex items-center gap-1 text-[13px] text-accent"
+                className="link-draw inline-flex min-h-11 items-center gap-1 text-[13px] text-accent"
               >
                 Credential
                 <ArrowUpRight className="size-3.5" aria-hidden />
@@ -223,7 +223,7 @@ export function Experience() {
                   href={c.credentialUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="link-draw inline-flex items-center gap-1 text-[13px] text-accent"
+                  className="link-draw inline-flex min-h-11 items-center gap-1 text-[13px] text-accent"
                 >
                   Credential
                   <ArrowUpRight className="size-3.5" aria-hidden />
