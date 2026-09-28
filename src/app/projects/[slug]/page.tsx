@@ -5,9 +5,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
 import { AskAgrim } from "@/components/ask-agrim";
-import { Reveal } from "@/components/reveal";
-import { ProjectMediaView } from "@/components/project-media";
-import { LinkRow, mark } from "@/components/projects";
+import { CaseStudy } from "@/components/case-study";
 import { adjacentProjects, getProject, projects } from "@/lib/projects";
 
 export const dynamicParams = false;
@@ -41,25 +39,6 @@ export async function generateMetadata({
   };
 }
 
-function Block({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="grid gap-x-10 gap-y-3 border-t border-hairline py-10 sm:grid-cols-[160px_1fr]">
-      <h2 className="font-mono text-[11px] uppercase tracking-[0.15em] text-accent sm:pt-1.5">
-        {label}
-      </h2>
-      <div className="max-w-2xl space-y-4 text-[17px] leading-relaxed text-ink-muted">
-        {children}
-      </div>
-    </section>
-  );
-}
-
 export default async function ProjectPage({
   params,
 }: {
@@ -73,139 +52,54 @@ export default async function ProjectPage({
   return (
     <>
       <Nav />
-      <main className="mx-auto max-w-5xl px-5 sm:px-8">
-        <article className="pt-12 sm:pt-20 pb-24 sm:pb-32">
-          <Link
-            href="/#projects"
-            className="link-draw inline-flex min-h-11 items-center gap-2 text-sm text-ink-muted hover:text-ink"
-          >
-            <ArrowLeft className="size-4" aria-hidden />
-            All projects
-          </Link>
+      <main className="wrap pb-24 pt-6 lg:pb-32 lg:pt-8">
+        <Link
+          href="/#projects"
+          className="inline-flex min-h-11 items-center gap-2 text-sm text-ink-muted transition-colors hover:text-ink"
+        >
+          <ArrowLeft className="size-4" aria-hidden />
+          All projects
+        </Link>
 
-          <header className="mt-8">
-            <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-ink-faint">
-              <span className="size-1.5 rounded-full bg-accent" aria-hidden />
-              {project.status}
-            </p>
-            <h1 className="mt-4 font-serif text-5xl sm:text-6xl lg:text-7xl font-medium tracking-tight text-ink">
-              {project.title}
-            </h1>
-            <p className="mt-6 max-w-3xl text-xl sm:text-2xl leading-relaxed text-ink-muted">
-              {project.oneLiner}
-            </p>
-
-            <dl className="mt-10 grid gap-px overflow-hidden rounded-xl border border-hairline bg-hairline sm:grid-cols-3">
-              {[
-                { label: "When", value: project.period },
-                { label: "My role", value: project.role },
-                { label: "Stack", value: project.stack.join(" · ") },
-              ].map(({ label, value }) => (
-                <div key={label} className="bg-surface p-5">
-                  <dt className="font-mono text-[11px] uppercase tracking-[0.15em] text-ink-faint">
-                    {label}
-                  </dt>
-                  <dd className="mt-2 text-[15px] leading-relaxed text-ink">
-                    {value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-
-            <div className="mt-6">
-              {project.links.length > 0 && <LinkRow links={project.links} />}
-              {project.privateNote && (
-                <p className="text-sm text-ink-faint">{project.privateNote}</p>
-              )}
-            </div>
-          </header>
-
-          {project.media && (
-            <Reveal className="mt-12">
-              <ProjectMediaView media={project.media} priority />
-            </Reveal>
-          )}
-
-          {project.metrics && (
-            <dl className="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-xl border border-hairline bg-hairline">
-              {project.metrics.map((m) => (
-                <div key={m.label} className="flex flex-col bg-surface p-4 sm:p-6">
-                  <dt className="mt-2 font-mono text-[11px] uppercase tracking-[0.15em] text-ink-faint">
-                    {m.label}
-                  </dt>
-                  <dd className="order-first font-serif text-lg sm:text-3xl font-medium text-ink tabular-nums whitespace-nowrap">
-                    {m.value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          )}
-
-          <div className="mt-16">
-            <Block label="Problem">
-              <p>{project.problem}</p>
-            </Block>
-            <Block label="Approach">
-              {project.approach.map((para, i) => (
-                <p key={i}>{para}</p>
-              ))}
-            </Block>
-            <Block label="Impact">
-              <p>{mark(project.impact, project.impactHighlights ?? [], "hl")}</p>
-            </Block>
-            {project.learned && (
-              <Block label="What I took from it">
-                <p className="font-serif text-2xl leading-snug text-ink">
-                  {project.learned}
-                </p>
-              </Block>
-            )}
-          </div>
-
-          {project.gallery && (
-            <Reveal className="mt-4 grid gap-4 sm:grid-cols-3">
-              {project.gallery.map((g) => (
-                <ProjectMediaView key={g.src} media={g} small />
-              ))}
-            </Reveal>
-          )}
-
-          <nav
-            aria-label="More projects"
-            className="mt-20 grid gap-4 border-t border-hairline pt-10 sm:grid-cols-2"
-          >
-            {prev ? (
-              <Link
-                href={`/projects/${prev.slug}`}
-                className="group relative rounded-xl border border-hairline card-draft p-6 transition-colors hover:border-accent/60"
-              >
-                <span className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.15em] text-ink-faint">
-                  <ArrowLeft className="size-3.5" aria-hidden />
-                  Previous
-                </span>
-                <span className="mt-2 block text-lg font-medium text-ink">
-                  {prev.title}
-                </span>
-              </Link>
-            ) : (
-              <span className="hidden sm:block" />
-            )}
-            {next && (
-              <Link
-                href={`/projects/${next.slug}`}
-                className="group relative rounded-xl border border-hairline card-draft p-6 text-right transition-colors hover:border-accent/60"
-              >
-                <span className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.15em] text-ink-faint">
-                  Next
-                  <ArrowRight className="size-3.5" aria-hidden />
-                </span>
-                <span className="mt-2 block text-lg font-medium text-ink">
-                  {next.title}
-                </span>
-              </Link>
-            )}
-          </nav>
+        <article className="mx-auto mt-8 max-w-[1020px] lg:mt-12">
+          <CaseStudy project={project} />
         </article>
+
+        <nav
+          aria-label="More projects"
+          className="mx-auto mt-20 grid max-w-[1020px] gap-4 border-t border-hairline pt-10 sm:grid-cols-2"
+        >
+          {prev ? (
+            <Link
+              href={`/projects/${prev.slug}`}
+              className="lift rounded-3xl border border-hairline bg-surface p-6 transition-colors hover:border-accent/60"
+            >
+              <span className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.15em] text-ink-muted">
+                <ArrowLeft className="size-3.5" aria-hidden />
+                Previous
+              </span>
+              <span className="mt-2 block font-display text-xl font-bold text-ink">
+                {prev.title}
+              </span>
+            </Link>
+          ) : (
+            <span className="hidden sm:block" />
+          )}
+          {next && (
+            <Link
+              href={`/projects/${next.slug}`}
+              className="lift rounded-3xl border border-hairline bg-surface p-6 text-right transition-colors hover:border-accent/60"
+            >
+              <span className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.15em] text-ink-muted">
+                Next
+                <ArrowRight className="size-3.5" aria-hidden />
+              </span>
+              <span className="mt-2 block font-display text-xl font-bold text-ink">
+                {next.title}
+              </span>
+            </Link>
+          )}
+        </nav>
       </main>
       <Footer />
       <AskAgrim />

@@ -221,6 +221,40 @@ html:has(dialog[open]) {
   }
 }
 
+/* ---- Case study morph ----
+   On wide screens a card grows into its case study through a view transition
+   (see projects.tsx). The sheet's own entrance steps aside there so the two
+   don't stack; closing still eases out. */
+@media (width >= 64rem) {
+  .sheet.morph[open] {
+    transition: none;
+  }
+}
+::view-transition-group(case-study) {
+  animation-duration: 0.62s;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+/* The card fades early and the case study arrives a beat later, so the growing
+   shape reads first and the two layers never fight. */
+::view-transition-old(case-study),
+::view-transition-new(case-study) {
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+::view-transition-old(case-study) {
+  animation: vt-out 0.3s ease both;
+}
+::view-transition-new(case-study) {
+  animation: vt-in 0.4s ease 0.18s both;
+}
+@keyframes vt-out {
+  to { opacity: 0; }
+}
+@keyframes vt-in {
+  from { opacity: 0; }
+}
+
 /* ---- Avatar ----
    Pointer position arrives as --nx/--ny in [-1, 1]. Offsets are percentages of
    the layer itself, so the effect scales with the avatar. */
@@ -287,11 +321,13 @@ html:has(dialog[open]) {
   animation: topo-drift 40s ease-in-out infinite;
 }
 
-/* ---- Chat ---- */
-.chat-scroll {
+/* Thin accent scrollbar for scrolling panels inside sheets. */
+.thin-scroll {
   scrollbar-width: thin;
   scrollbar-color: rgb(255 91 46 / 0.35) transparent;
 }
+
+/* ---- Chat ---- */
 /* The input's bar shows focus with its border, so the ring would double it. */
 .chat-input:focus-visible {
   outline: none;

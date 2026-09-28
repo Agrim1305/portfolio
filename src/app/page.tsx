@@ -17,10 +17,8 @@ export default function Home() {
       <main>
         <Hero />
         <TechStrip />
-        <div className="mx-auto max-w-5xl px-5 pt-24 sm:px-8">
-          <Reveal>
-            <Projects />
-          </Reveal>
+        <Projects />
+        <div className="mx-auto max-w-5xl px-5 sm:px-8">
           <Reveal>
             <Leadership />
           </Reveal>

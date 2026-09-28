@@ -162,3 +162,70 @@ test.describe("ask Agrim", () => {
     await expect(launcher).toBeVisible();
   });
 });
+
+test.describe("selected work", () => {
+  test("next and previous move the carousel", async ({ page, isMobile }) => {
+    test.skip(isMobile, "the arrows are desktop controls; mobile swipes");
+    await page.goto("/");
+    const prev = page.getByRole("button", { name: "Previous project" });
+    const next = page.getByRole("button", { name: "Next project" });
+    await expect(prev).toBeDisabled();
+    await next.click();
+    await expect(page.getByText("2 / 8")).toBeVisible();
+    await expect(prev).toBeEnabled();
+  });
+
+  test("the track scrolls sideways and the current card follows", async ({ page }) => {
+    await page.goto("/");
+    const track = page.getByRole("region", { name: "Selected work" });
+    await track.scrollIntoViewIfNeeded();
+    await track.evaluate((el) => el.scrollTo({ left: el.scrollWidth, behavior: "instant" }));
+    await expect(page.getByRole("group", { name: "8 of 8" })).toBeInViewport({ ratio: 0.6 });
+  });
+
+  test("the mouse wheel over the cards still scrolls the page", async ({ page, isMobile }) => {
+    test.skip(isMobile, "no wheel on touch");
+    await page.goto("/");
+    const track = page.getByRole("region", { name: "Selected work" });
+    await track.scrollIntoViewIfNeeded();
+    const before = await page.evaluate(() => window.scrollY);
+    await track.hover();
+    await page.mouse.wheel(0, 500);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(before + 200);
+  });
+
+  test("a card opens its case study in place, with the page's own URL", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("link", { name: "Read the case study for MetaPlay" }).click();
+    const sheet = page.getByRole("dialog", { name: "MetaPlay" });
+    await expect(sheet).toBeVisible();
+    await expect(page).toHaveURL(/\/projects\/metaplay$/);
+    await expect(sheet).toContainText("Gamers track what they play across scattered notes");
+
+    await sheet.getByRole("button", { name: "Close case study" }).click();
+    await expect(sheet).toBeHidden();
+    await expect(page).toHaveURL(/\/$/);
+  });
+
+  test("keyboard: Enter opens, Escape closes and focus returns to the card", async ({ page }) => {
+    await page.goto("/");
+    const link = page.getByRole("link", { name: "Read the case study for Pacific Village Explorer" });
+    await link.focus();
+    await page.keyboard.press("Enter");
+    const sheet = page.getByRole("dialog", { name: "Pacific Village Explorer" });
+    await expect(sheet).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(sheet).toBeHidden();
+    await expect(link).toBeFocused();
+    await expect(page).toHaveURL(/\/$/);
+  });
+
+  test("Back closes an open case study", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("link", { name: "Read the case study for Pathfinder" }).click();
+    await expect(page.getByRole("dialog", { name: "Pathfinder" })).toBeVisible();
+    await page.goBack();
+    await expect(page.getByRole("dialog", { name: "Pathfinder" })).toBeHidden();
+    await expect(page.locator("#top")).toBeAttached();
+  });
+});

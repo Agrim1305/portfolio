@@ -25,12 +25,13 @@ export type Project = {
   status: string;
   period: string;
   role: string;
-  /** Lead projects get the full card on the home page; the rest get compact cards. */
+  /** Marks the two flagship projects. Every card shares one treatment in the
+      current design, so nothing reads this at the moment. */
   lead?: boolean;
   oneLiner: string;
-  /** Phrase inside oneLiner lifted to bright ink on compact cards. */
+  /** Phrase inside oneLiner lifted to bright ink. */
   emphasis: string;
-  /** Two or three sentences for the compact home card. */
+  /** Two or three sentences for the home page card. */
   summary: string;
   problem: string;
   approach: string[];
@@ -352,9 +353,6 @@ export const projects: Project[] = [
     ],
   },
 ];
-
-export const leadProjects = projects.filter((p) => p.lead);
-export const otherProjects = projects.filter((p) => !p.lead);
 
 export function getProject(slug: string) {
   return projects.find((p) => p.slug === slug);

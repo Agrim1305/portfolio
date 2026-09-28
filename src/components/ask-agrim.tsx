@@ -358,7 +358,7 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
             role="log"
             aria-live="polite"
             aria-busy={loading}
-            className="chat-scroll flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-5 lg:gap-3.5 lg:p-6"
+            className="thin-scroll flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-5 lg:gap-3.5 lg:p-6"
           >
             {messages.map((m, i) => {
               // The streaming assistant bubble is empty until the first token

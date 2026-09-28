@@ -1,268 +1,343 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, ArrowRight } from "lucide-react";
-import { SectionHeading } from "@/components/section-heading";
-import { ProjectMediaView } from "@/components/project-media";
-import {
-  leadProjects,
-  otherProjects,
-  type Project,
-  type ProjectLink,
-} from "@/lib/projects";
+import { ArrowLeft, ArrowRight, Plus, X } from "lucide-react";
+import { CaseStudy, COVER } from "@/components/case-study";
+import { Sheet } from "@/components/sheet";
+import { projects, type Project } from "@/lib/projects";
 
-// Wraps the first occurrence of each phrase in `className` so a skimming reader
-// lands on the numbers that matter. Gold (`hl`) is reserved for the strongest
-// claims; bright ink carries the rest without spending the accent.
-export function mark(text: string, phrases: string[], className: string) {
-  const hits = phrases
-    .map((phrase) => ({ phrase, at: text.indexOf(phrase) }))
-    .filter(({ at }) => at !== -1)
-    .sort((a, b) => a.at - b.at);
+const slugFromPath = () => window.location.pathname.match(/^\/projects\/([^/]+)/)?.[1];
+const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const nodes: React.ReactNode[] = [];
-  let cursor = 0;
-  hits.forEach(({ phrase, at }, i) => {
-    if (at < cursor) return; // phrase overlaps an earlier one
-    nodes.push(text.slice(cursor, at));
-    nodes.push(
-      <span key={i} className={className}>
-        {phrase}
-      </span>,
-    );
-    cursor = at + phrase.length;
+/* On wide screens the card grows into the case study (View Transitions API).
+   Anywhere that can't, or under reduced motion, the sheet simply opens. */
+function morphFrom(card: HTMLElement | null, update: () => void) {
+  const canMorph =
+    card &&
+    "startViewTransition" in document &&
+    !prefersReducedMotion() &&
+    window.matchMedia("(min-width: 64rem)").matches;
+  if (!canMorph) return update();
+  card.style.viewTransitionName = "case-study";
+  document.startViewTransition(() => {
+    card.style.viewTransitionName = "";
+    update();
   });
-  nodes.push(text.slice(cursor));
-  return <>{nodes}</>;
 }
 
-function StatusTag({ status }: { status: string }) {
-  return (
-    <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-ink-faint">
-      <span className="size-1.5 rounded-full bg-accent" />
-      {status}
-    </span>
-  );
-}
-
-export function StackLine({
-  stack,
-  className = "text-xs",
-}: {
-  stack: string[];
-  className?: string;
-}) {
-  return (
-    <p className={`font-mono text-ink-faint ${className}`}>
-      {stack.join(" · ")}
-    </p>
-  );
-}
-
-export function LinkRow({ links }: { links: ProjectLink[] }) {
-  return (
-    <p className="flex flex-wrap gap-x-6">
-      {links.map(({ label, url, accent }) => (
-        <a
-          key={label}
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`link-draw inline-flex min-h-11 items-center gap-1 text-[15px] ${
-            accent ? "text-accent" : "text-ink"
-          }`}
-        >
-          {label}
-          <ArrowUpRight className="size-4" aria-hidden />
-        </a>
-      ))}
-    </p>
-  );
-}
-
-function DetailBlock({
-  label,
-  className = "",
-  children,
-}: {
-  label: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className={className}>
-      <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-accent">
-        {label}
-      </p>
-      <div className="mt-2 space-y-3 text-[15px] leading-relaxed text-ink-muted">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-// The lead treatment: full Problem / Approach / Impact depth, in the same card
-// language as the others. The depth is the signal that these two matter most.
-// The title and status sit above `media` so a screenshot is never the first
-// thing a reader meets with no idea what they are looking at.
-function CaseStudyLink({ slug, title }: { slug: string; title: string }) {
-  return (
-    <Link
-      href={`/projects/${slug}`}
-      className="link-draw inline-flex min-h-11 items-center gap-1.5 text-[15px] text-accent"
-    >
-      Read the case study
-      <span className="sr-only"> for {title}</span>
-      <ArrowRight className="size-4" aria-hidden />
-    </Link>
-  );
-}
-
-function CaseStudyCard({
-  study,
-  media,
-}: {
-  study: Project;
-  media?: React.ReactNode;
-}) {
-  return (
-    <article className="group relative card-draft rounded-xl border border-hairline p-6 sm:p-8 transition-colors duration-300 hover:border-accent/60">
-      <span className="reg-tick reg-tl" aria-hidden />
-      <span className="reg-tick reg-tr" aria-hidden />
-      <span className="reg-tick reg-bl" aria-hidden />
-      <span className="reg-tick reg-br" aria-hidden />
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h3 className="font-serif text-2xl sm:text-3xl font-medium text-ink">
-          {study.title}
-        </h3>
-        <StatusTag status={study.status} />
-      </div>
-      {media && <div className="mt-5">{media}</div>}
-      {/* Approach is the long column, so it sits alongside Problem and Impact
-          rather than beside them in three rigid columns. Reading order stays
-          Problem, Approach, Impact, and stacks that way on small screens. */}
-      <div className="mt-6 grid gap-x-10 gap-y-6 lg:grid-cols-2">
-        <DetailBlock label="Problem" className="lg:col-start-1 lg:row-start-1">
-          <p>{study.problem}</p>
-        </DetailBlock>
-        <DetailBlock
-          label="Approach"
-          className="lg:col-start-2 lg:row-start-1 lg:row-span-2"
-        >
-          {study.approach.slice(0, 2).map((para, i) => (
-            <p key={i}>{para}</p>
-          ))}
-        </DetailBlock>
-        <DetailBlock label="Impact" className="lg:col-start-1 lg:row-start-2">
-          <p>{mark(study.impact, study.impactHighlights ?? [], "hl")}</p>
-        </DetailBlock>
-      </div>
-      <div className="mt-7 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-        <div className="flex flex-wrap gap-x-6">
-          <CaseStudyLink slug={study.slug} title={study.title} />
-          <LinkRow links={study.links} />
-        </div>
-        <StackLine stack={study.stack} />
-      </div>
-    </article>
-  );
-}
-
-function ProjectCard({
+function Card({
   project,
-  className = "",
+  index,
+  total,
+  onOpen,
 }: {
   project: Project;
-  className?: string;
+  index: number;
+  total: number;
+  onOpen: (card: HTMLElement) => void;
 }) {
+  const cover = COVER[project.slug];
+  const stat = project.metrics?.[0];
+  const media = project.media;
+
   return (
     <article
-      className={`group relative flex h-full flex-col rounded-xl border border-hairline card-draft p-7 transition duration-300 hover:-translate-y-0.5 hover:border-accent/60 ${className}`}
+      data-index={index}
+      role="group"
+      aria-roledescription="slide"
+      aria-label={`${index + 1} of ${total}`}
+      // The whole card opens the case study for a pointer; the link inside is
+      // the keyboard and screen reader route to the same place.
+      onClick={(e) => {
+        if (!(e.target as Element).closest("a")) onOpen(e.currentTarget);
+      }}
+      className="group relative flex min-h-[460px] w-[calc(100vw-4.625rem)] max-w-[520px] shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-3xl lg:aspect-[1110/650] lg:min-h-0 lg:w-[calc(min(1200px,100vw-4rem)-90px)] lg:max-w-none lg:justify-end lg:rounded-[28px]"
+      style={{ background: cover.bg }}
     >
-      <span className="reg-tick reg-tl" aria-hidden />
-      <span className="reg-tick reg-tr" aria-hidden />
-      <span className="reg-tick reg-bl" aria-hidden />
-      <span className="reg-tick reg-br" aria-hidden />
-      {/* Status sits on its own line so the title never has to share a row
-          with it, which kept wrapping differently card to card. */}
-      <p className="font-mono text-[11px] uppercase tracking-wider text-ink-faint">
-        {project.status}
-      </p>
-      <h3 className="mt-1.5 text-xl font-semibold leading-snug text-ink">
-        {project.title}
-      </h3>
-      <p className="mt-4 text-[17px] leading-relaxed text-ink-muted">
-        {mark(project.oneLiner, [project.emphasis], "font-medium text-ink")}
-      </p>
-      <p className="mt-3 text-[15px] leading-relaxed text-ink-faint">
-        {project.summary}
-      </p>
-      {/* Metadata band, pinned to the bottom so it lines up across the row. The
-          stack matches the 11px status line above, which also keeps it on one
-          line so the rule sits at the same height on every card. */}
-      <div className="mt-auto space-y-2 border-t border-hairline pt-5">
-        <StackLine stack={project.stack} className="text-[11px]" />
-        <div className="flex flex-wrap gap-x-6">
-          <CaseStudyLink slug={project.slug} title={project.title} />
-          <LinkRow links={project.links} />
+      {media ? (
+        // In the card's flow on small screens, so a long summary pushes the card
+        // taller instead of running over the screenshot.
+        <div className="relative mx-5 mt-6 aspect-[276/200] shrink-0 overflow-hidden rounded-xl border border-white/14 shadow-[0_24px_48px_rgb(0_0_0/0.5)] lg:absolute lg:left-[6.3%] lg:top-[9.2%] lg:mx-0 lg:mt-0 lg:aspect-auto lg:h-[64.6%] lg:w-[87.4%] lg:rounded-2xl lg:shadow-[0_40px_80px_rgb(0_0_0/0.5)]">
+          <Image
+            src={media.src}
+            alt={media.alt}
+            fill
+            sizes="(min-width: 1024px) 970px, 90vw"
+            className="object-cover object-left-top transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03] motion-reduce:transition-none"
+          />
         </div>
-        {project.privateNote && (
-          <p className="text-[12px] text-ink-faint">{project.privateNote}</p>
-        )}
+      ) : (
+        <span
+          aria-hidden
+          className="absolute left-5 top-4 font-display text-[7.5rem] font-extrabold leading-none tracking-[-0.04em] transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03] motion-reduce:transition-none lg:left-[60px] lg:top-10 lg:text-[min(18.75rem,19vw)]"
+          style={{ color: cover.ink }}
+        >
+          {project.stack[0]}
+        </span>
+      )}
+
+      <div className="relative mt-auto flex flex-col gap-2 bg-[linear-gradient(180deg,rgb(15_15_17/0),rgb(15_15_17/0.92)_35%)] p-[22px] pt-10 lg:flex-row lg:items-end lg:justify-between lg:gap-6 lg:px-9 lg:py-8 lg:pt-16">
+        <div className="flex max-w-[720px] flex-col gap-2">
+          <p className="font-mono text-[11px] text-accent-soft lg:text-xs">{project.status}</p>
+          <h3 className="font-display text-[28px] font-extrabold leading-[1.05] tracking-[-0.015em] text-ink lg:text-4xl lg:leading-none">
+            {project.title}
+          </h3>
+          <p className="text-[15px] leading-[1.45] text-ink-soft lg:text-base lg:leading-normal">
+            {project.summary}
+          </p>
+        </div>
+        <div className="flex min-h-10 items-center justify-between gap-4 pr-12 lg:block lg:shrink-0 lg:pr-0 lg:text-right">
+          {stat && (
+            <p className="flex items-baseline gap-2 lg:flex-col lg:items-end lg:gap-1">
+              <span className="font-display text-2xl font-extrabold leading-none text-ink lg:text-3xl">
+                {stat.value}
+              </span>
+              <span className="text-xs text-ink-muted lg:text-[13px]">{stat.label}</span>
+            </p>
+          )}
+        </div>
       </div>
+
+      <Link
+        href={`/projects/${project.slug}`}
+        data-expand
+        onClick={(e) => {
+          // Let new-tab and new-window clicks through to the real page.
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+          e.preventDefault();
+          onOpen(e.currentTarget.closest("article")!);
+        }}
+        className="absolute bottom-5 right-5 flex size-11 items-center justify-center gap-2 rounded-full bg-accent text-paper lg:glass lg:bottom-auto lg:top-3 lg:right-5 lg:h-[38px] lg:w-auto lg:pl-4 lg:pr-3.5 lg:text-sm lg:font-medium lg:text-ink"
+      >
+        <span className="max-lg:sr-only">Read the case study</span>
+        <span className="sr-only"> for {project.title}</span>
+        <Plus className="size-4 lg:size-[18px] lg:text-accent" aria-hidden />
+      </Link>
     </article>
   );
 }
 
 export function Projects() {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(0);
+  const [open, setOpen] = useState<number | null>(null);
+  // Whether the open case study added a history entry that Back should undo.
+  const pushed = useRef(false);
+
+  // The card most in view is the current one.
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) setActive(Number((e.target as HTMLElement).dataset.index));
+        }
+      },
+      { root: track, threshold: 0.6 },
+    );
+    track.querySelectorAll("[data-index]").forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+
+  // Back and Forward move between the home page and an open case study.
+  useEffect(() => {
+    const onPop = () => {
+      const i = projects.findIndex((p) => p.slug === slugFromPath());
+      pushed.current = i >= 0;
+      setOpen(i >= 0 ? i : null);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  function goTo(i: number) {
+    const card = trackRef.current?.querySelector(`[data-index="${i}"]`);
+    card?.scrollIntoView({
+      inline: "start",
+      block: "nearest",
+      behavior: prefersReducedMotion() ? "auto" : "smooth",
+    });
+  }
+
+  // The address bar shows the case study's own URL while it is open, so it can
+  // be shared, and a reload lands on the full page.
+  function openCase(i: number, card: HTMLElement) {
+    window.history.pushState(null, "", `/projects/${projects[i].slug}`);
+    pushed.current = true;
+    morphFrom(card, () => flushSync(() => setOpen(i)));
+  }
+
+  function switchCase(i: number) {
+    window.history.replaceState(null, "", `/projects/${projects[i].slug}`);
+    setOpen(i);
+    bodyRef.current?.scrollTo({ top: 0 });
+  }
+
+  function closeCase() {
+    if (pushed.current) {
+      pushed.current = false;
+      window.history.back(); // the popstate handler closes the sheet
+    } else {
+      setOpen(null);
+    }
+  }
+
+  const total = projects.length;
+  const current = open === null ? null : projects[open];
+  const prev = open !== null && open > 0 ? open - 1 : null;
+  const next = open !== null && open < total - 1 ? open + 1 : null;
+
   return (
-    <section id="projects" className="scroll-mt-24 pb-24 sm:pb-36">
-      <SectionHeading
-        number="01"
-        title="Projects"
-        caption="Problem, approach, and impact. The stack comes second."
-      />
-
-      {leadProjects.map((study, i) => (
-        <div
-          key={study.slug}
-          className={`rise ${i > 0 ? "mt-16" : ""}`}
-          style={{ "--rise-delay": `${0.24 + i * 0.06}s` } as React.CSSProperties}
-        >
-          <CaseStudyCard
-            study={study}
-            media={
-              study.media && (
-                <ProjectMediaView media={study.media} priority={i === 0} />
-              )
-            }
-          />
-          {study.gallery && (
-            <div className="mt-4 grid gap-4 sm:grid-cols-3">
-              {study.gallery.map((g) => (
-                <ProjectMediaView key={g.src} media={g} small />
-              ))}
-            </div>
-          )}
+    <section id="projects" className="py-20 lg:py-28">
+      <div className="wrap flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h2 className="font-display text-[clamp(3.75rem,2rem+5.5vw,6.5rem)] font-extrabold uppercase leading-[0.9] tracking-[-0.03em] text-ink">
+            <span className="block">Selected</span>{" "}
+            {/* The reference ghosts this word almost into the page; this is the
+                faintest grey that still clears 3:1 for large text. */}
+            <span className="block text-[#636167]">work</span>
+          </h2>
+          <p className="mt-4 text-[15px] text-ink-muted lg:text-base">
+            Problem, approach, and impact. The stack comes second.
+          </p>
         </div>
-      ))}
-
-      {/* The rest: tight one-liner-plus-supporting cards, each with its own
-          case study page for anyone who wants the depth. */}
-      <div
-        className="rise mt-16 grid gap-5 md:grid-cols-2 lg:grid-cols-3"
-        style={{ "--rise-delay": "0.36s" } as React.CSSProperties}
-      >
-        {otherProjects.map((project, i) => {
-          const isOddLast =
-            i === otherProjects.length - 1 && otherProjects.length % 2 === 1;
-          return (
-            <ProjectCard
-              key={project.slug}
-              project={project}
-              className={isOddLast ? "md:col-span-2 lg:col-span-1" : ""}
+        <div className="hidden items-center gap-5 pb-1.5 lg:flex">
+          <div aria-hidden className="h-[3px] w-[220px] overflow-hidden rounded-full bg-ink/12">
+            <div
+              className="h-full rounded-full bg-accent transition-[width] duration-500 motion-reduce:transition-none"
+              style={{ width: `${((active + 1) / total) * 100}%` }}
             />
-          );
-        })}
+          </div>
+          <span aria-hidden className="min-w-14 font-mono text-sm text-ink-faint">
+            {active + 1} / {total}
+          </span>
+          {[
+            { label: "Previous project", to: active - 1, Icon: ArrowLeft },
+            { label: "Next project", to: active + 1, Icon: ArrowRight },
+          ].map(({ label, to, Icon }) => (
+            <button
+              key={label}
+              type="button"
+              aria-label={label}
+              disabled={to < 0 || to >= total}
+              onClick={() => goTo(to)}
+              className="flex size-14 items-center justify-center rounded-full border border-ink/25 text-ink transition-colors duration-300 hover:border-accent hover:bg-accent hover:text-paper disabled:pointer-events-none disabled:opacity-30"
+            >
+              <Icon className="size-5" aria-hidden />
+            </button>
+          ))}
+        </div>
       </div>
+
+      <div
+        ref={trackRef}
+        role="region"
+        aria-roledescription="carousel"
+        aria-label="Selected work"
+        tabIndex={0}
+        className="mt-10 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-5 [scroll-padding-inline:1.25rem] [scrollbar-width:none] motion-reduce:scroll-auto sm:px-8 sm:[scroll-padding-inline:2rem] lg:mt-16 lg:gap-6 lg:px-[max(2rem,calc(50vw-600px))] lg:[scroll-padding-inline:max(2rem,calc(50vw-600px))] [&::-webkit-scrollbar]:hidden"
+      >
+        {projects.map((project, i) => (
+          <Card
+            key={project.slug}
+            project={project}
+            index={i}
+            total={total}
+            onOpen={(card) => openCase(i, card)}
+          />
+        ))}
+      </div>
+
+      <div aria-hidden className="wrap mt-5 flex gap-1.5 lg:hidden">
+        {projects.map((p, i) => (
+          <span
+            key={p.slug}
+            className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${
+              i === active ? "w-[22px] bg-accent" : "w-1.5 bg-ink/25"
+            }`}
+          />
+        ))}
+      </div>
+
+      <Sheet
+        open={current !== null}
+        onClose={closeCase}
+        labelledBy="case-study-title"
+        className="morph inset-x-0 bottom-0 top-auto h-[calc(100dvh-3rem)] w-full overflow-hidden rounded-t-[26px] border-t border-white/12 bg-sheet [view-transition-name:case-study] lg:inset-x-[max(2rem,calc(50vw-600px))] lg:top-6 lg:bottom-6 lg:h-auto lg:w-auto lg:rounded-[28px] lg:border"
+      >
+        {current && (
+          <div ref={bodyRef} className="thin-scroll h-full overflow-y-auto">
+            <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-hairline bg-sheet/90 py-2.5 pl-5 pr-3 backdrop-blur-md lg:h-[72px] lg:py-0 lg:pl-[90px] lg:pr-6">
+              <span aria-hidden className="absolute left-1/2 top-2 h-[5px] w-10 -translate-x-1/2 rounded-full bg-ink/25 lg:hidden" />
+              <span className="flex-1" />
+              {[
+                { i: prev, text: "Previous", Icon: ArrowLeft },
+                { i: next, text: "Next", Icon: ArrowRight },
+              ].map(({ i, text, Icon }) =>
+                i === null ? null : (
+                  <button
+                    key={text}
+                    type="button"
+                    onClick={() => switchCase(i)}
+                    className="hidden h-10 items-center gap-2 rounded-full border border-ink/20 px-4 text-sm text-ink-soft transition-colors hover:text-ink lg:flex"
+                  >
+                    {text === "Previous" && <Icon className="size-4" aria-hidden />}
+                    <span className="sr-only">{text}: </span>
+                    {projects[i].title}
+                    {text === "Next" && <Icon className="size-4" aria-hidden />}
+                  </button>
+                ),
+              )}
+              <button
+                type="button"
+                onClick={closeCase}
+                aria-label="Close case study"
+                className="mt-2 flex size-11 shrink-0 items-center justify-center rounded-full border border-ink/20 bg-surface-raised text-ink lg:mt-0"
+              >
+                <X className="size-5" aria-hidden />
+              </button>
+            </div>
+
+            <article className="px-5 pb-12 pt-6 lg:px-[90px] lg:pb-20 lg:pt-14">
+              <CaseStudy project={current} titleAs="h2" titleId="case-study-title" />
+
+              <nav
+                aria-label="More projects"
+                className="mt-16 flex flex-col gap-3 border-t border-hairline pt-7 sm:flex-row sm:justify-between"
+              >
+                {prev !== null ? (
+                  <button
+                    type="button"
+                    onClick={() => switchCase(prev)}
+                    className="glass lift flex min-h-14 items-center gap-2 rounded-full px-6 text-[15px] text-[#E4E1DB]"
+                  >
+                    <ArrowLeft className="size-4" aria-hidden />
+                    <span className="sr-only">Previous: </span>
+                    {projects[prev].title}
+                  </button>
+                ) : (
+                  <span />
+                )}
+                {next !== null && (
+                  <button
+                    type="button"
+                    onClick={() => switchCase(next)}
+                    className="lift flex min-h-14 items-center justify-center gap-2 rounded-full bg-accent px-6 text-[15px] font-semibold text-paper hover:bg-accent-soft"
+                  >
+                    Next: {projects[next].title}
+                    <ArrowRight className="size-4" aria-hidden />
+                  </button>
+                )}
+              </nav>
+            </article>
+          </div>
+        )}
+      </Sheet>
     </section>
   );
 }
