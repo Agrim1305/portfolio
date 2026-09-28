@@ -1,8 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { ArrowUp, X, Send, Sparkles } from "lucide-react";
-import { setPageScrollLocked } from "@/lib/scroll-lock";
+import { ArrowUp, Sparkles, Volume2, VolumeX, X } from "lucide-react";
+import { AvatarHead } from "@/components/avatar";
+import { Sheet } from "@/components/sheet";
+import {
+  setMuted,
+  speak,
+  stop,
+  takeSentences,
+  unlock,
+  useCanSpeak,
+  useSpeech,
+} from "@/lib/speech";
 
 // Small models sometimes emit **bold** or __underline__ despite the prompt
 // forbidding it; strip the wrappers so a slip renders as plain text.
@@ -129,22 +139,44 @@ export function AskBar({ className = "" }: { className?: string }) {
   );
 }
 
-export function AskAgrim() {
+/* `heroId` names the element holding the hero's ask bar. The floating launcher
+   waits for it to scroll away; without one, the launcher shows from the start. */
+export function AskAgrim({ heroId }: { heroId?: string }) {
   const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    const onOpen = () => setOpen(true);
-    window.addEventListener(OPEN_EVENT, onOpen);
-    return () => window.removeEventListener(OPEN_EVENT, onOpen);
-  }, []);
   const [messages, setMessages] = useState<Message[]>([INTRO_MESSAGE]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [launcherShown, setLauncherShown] = useState(!heroId);
+  const { muted } = useSpeech();
+  const canSpeak = useCanSpeak();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const launcherRef = useRef<HTMLButtonElement>(null);
+
+  // Opened by the hero bar, the menu, the launcher, or Cmd/Ctrl+K.
+  useEffect(() => {
+    const onOpen = () => setOpen(true);
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setOpen(true);
+      }
+    };
+    window.addEventListener(OPEN_EVENT, onOpen);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener(OPEN_EVENT, onOpen);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, []);
+
+  useEffect(() => {
+    const hero = heroId && document.getElementById(heroId);
+    if (!hero) return;
+    const io = new IntersectionObserver(([entry]) => setLauncherShown(!entry.isIntersecting));
+    io.observe(hero);
+    return () => io.disconnect();
+  }, [heroId]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -157,47 +189,9 @@ export function AskAgrim() {
     if (open) inputRef.current?.focus();
   }, [open]);
 
-  // Lock background scroll while the panel is open on mobile, so the
-  // widget feels like a contained sheet rather than the page shifting
-  // underneath it.
-  useEffect(() => {
-    if (open) {
-      const prevOverflow = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      setPageScrollLocked(true);
-      return () => {
-        document.body.style.overflow = prevOverflow;
-        setPageScrollLocked(false);
-      };
-    }
-  }, [open]);
-
   function close() {
     setOpen(false);
-    launcherRef.current?.focus();
-  }
-
-  // The panel is modal: Escape closes it, and Tab wraps inside it so keyboard
-  // focus can't reach the scroll-locked page behind.
-  function handlePanelKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "Escape") {
-      close();
-      return;
-    }
-    if (e.key !== "Tab") return;
-    const focusable = panelRef.current?.querySelectorAll<HTMLElement>(
-      "a[href], button:not(:disabled), input",
-    );
-    if (!focusable?.length) return;
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
-      e.preventDefault();
-      first.focus();
-    }
+    stop();
   }
 
   async function sendMessage(text: string) {
@@ -206,6 +200,10 @@ export function AskAgrim() {
     // A suggested question unmounts and the send button disables once this
     // runs, so move focus to the input rather than letting it drop to <body>.
     inputRef.current?.focus();
+    // A new question cuts off the previous answer. This runs inside the tap,
+    // which iOS needs before it will speak the reply later on.
+    stop();
+    unlock();
 
     const nextMessages: Message[] = [...messages, { role: "user", content: trimmed }];
     setMessages(nextMessages);
@@ -232,7 +230,7 @@ export function AskAgrim() {
           const data = await res.json();
           msg = data?.error ?? msg;
         } catch {
-          // response wasn't JSON — keep the default message
+          // response wasn't JSON, keep the default message
         }
         setError(msg);
         setMessages((prev) => prev.slice(0, -1)); // roll back the user msg on hard failure
@@ -243,12 +241,18 @@ export function AskAgrim() {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let received = "";
+      // Speech follows the stream a sentence at a time, so it starts before
+      // the answer has finished arriving.
+      let unspoken = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
         received += chunk;
+        const [sentences, rest] = takeSentences(unspoken + chunk);
+        unspoken = rest;
+        sentences.forEach(speak);
         setMessages((prev) => {
           const copy = prev.slice();
           const last = copy[copy.length - 1];
@@ -259,12 +263,14 @@ export function AskAgrim() {
           return copy;
         });
       }
+      speak(unspoken);
 
       if (!received.trim()) {
         setError("The assistant didn't return a response. Try again.");
         setMessages((prev) => prev.slice(0, -2)); // drop empty assistant + user
       }
     } catch {
+      stop();
       setError("Couldn't reach the assistant. Check your connection and try again.");
       // Remove a trailing empty assistant bubble, then the user message.
       setMessages((prev) => {
@@ -292,158 +298,150 @@ export function AskAgrim() {
   return (
     <>
       <button
-        ref={launcherRef}
-        onClick={() => setOpen((v) => !v)}
-        aria-label={open ? "Close AI assistant" : "Ask AI about Agrim"}
-        aria-expanded={open}
-        aria-controls="ask-agrim-panel"
-        className="fixed bottom-5 right-5 z-50 flex min-h-11 items-center gap-2.5 pl-4 pr-5 py-3 rounded-full bg-ink text-paper shadow-[0_12px_32px_-12px_hsl(230_15%_13%/0.5)] hover:bg-ink/90 transition-all active:scale-[0.98]"
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label="Ask AI about Agrim"
+        aria-keyshortcuts="Meta+K Control+K"
+        className={`glass fixed bottom-5 right-5 z-30 flex h-12 items-center gap-2.5 rounded-full pl-4 pr-5 transition-[opacity,translate,visibility] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
+          launcherShown && !open ? "visible opacity-100" : "invisible translate-y-3 opacity-0"
+        }`}
       >
-        <span className="relative flex size-2">
-          <span className="relative inline-flex size-2 rounded-full bg-accent" />
-        </span>
-        {open ? (
-          <X className="size-4 text-paper" />
-        ) : (
-          <>
-            <Sparkles className="size-4 text-paper" />
-            <span className="font-mono text-xs text-paper uppercase tracking-wider hidden sm:inline">
-              Ask AI about Agrim
-            </span>
-            <span className="font-mono text-xs text-paper uppercase tracking-wider sm:hidden">
-              Ask AI
-            </span>
-          </>
-        )}
+        <Sparkles className="size-4 text-accent" aria-hidden />
+        <span className="hidden text-[15px] font-medium text-ink sm:inline">Ask AI about Agrim</span>
+        <span className="text-[15px] font-medium text-ink sm:hidden">Ask AI</span>
       </button>
 
-      <div
-        ref={panelRef}
-        id="ask-agrim-panel"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="ask-agrim-title"
-        onKeyDown={handlePanelKeyDown}
-        data-open={open}
-        className="chat-panel fixed z-50 inset-x-3 bottom-3 top-16 sm:inset-x-auto sm:top-auto sm:bottom-24 sm:right-5 sm:left-auto sm:w-[400px] sm:h-[min(560px,70vh)] rounded-xl bg-surface shadow-[0_24px_64px_-24px_hsl(0_0%_0%/0.6)] border border-hairline flex flex-col overflow-hidden"
+      <Sheet
+        open={open}
+        onClose={close}
+        labelledBy="ask-agrim-title"
+        className="inset-x-0 bottom-0 top-auto h-[calc(100dvh-6.5rem)] w-full rounded-t-[26px] border-t border-white/12 bg-sheet lg:bottom-auto lg:left-[max(2rem,calc(50vw-600px))] lg:right-auto lg:top-28 lg:h-[min(760px,calc(100dvh-9rem))] lg:w-[660px] lg:rounded-[26px] lg:border"
       >
-        <div className="px-5 py-4 border-b border-hairline flex items-center gap-3">
-          <div className="size-9 rounded-lg bg-accent-wash border border-hairline flex items-center justify-center shrink-0">
-            <Sparkles className="size-4 text-accent" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p id="ask-agrim-title" className="text-sm font-semibold text-ink">
-              Ask about Agrim
-            </p>
-            <p className="font-mono text-[10px] text-ink-faint uppercase tracking-wider">
-              AI assistant · grounded in his portfolio
-            </p>
-          </div>
-          <button
-            onClick={close}
-            aria-label="Close chat"
-            className="size-7 shrink-0 rounded-lg hover:bg-secondary flex items-center justify-center transition-colors"
-          >
-            <X className="size-4 text-ink-faint" />
-          </button>
-        </div>
-
-        {/* data-lenis-prevent keeps a wheel inside the transcript scrolling the
-            transcript rather than the page behind it. */}
-        <div
-          ref={scrollRef}
-          data-lenis-prevent
-          role="log"
-          aria-live="polite"
-          aria-busy={loading}
-          className="flex-1 overflow-y-auto px-4 py-4 space-y-3 chat-scroll"
-        >
-          {messages.map((m, i) => {
-            // The streaming assistant bubble is empty until the first token
-            // arrives — the typing dots stand in for it until then.
-            if (m.role === "assistant" && m.content === "") return null;
-            return (
-              <div
-                key={i}
-                className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+        <div className="flex h-full flex-col">
+          <span aria-hidden className="mx-auto mt-2.5 h-[5px] w-10 rounded-full bg-ink/25 lg:hidden" />
+          <div className="flex items-center gap-3 border-b border-hairline py-3.5 pl-5 pr-4 lg:gap-3.5 lg:py-5 lg:pl-6 lg:pr-5">
+            <AvatarHead className="size-[52px] shrink-0 lg:size-11" />
+            <div className="min-w-0 flex-1">
+              <p id="ask-agrim-title" className="font-display text-[19px] font-extrabold lg:text-[21px]">
+                Ask about Agrim
+              </p>
+              <p className="font-mono text-[11px] uppercase tracking-wider text-ink-muted">
+                AI assistant · grounded in his portfolio
+              </p>
+            </div>
+            {canSpeak && (
+              <button
+                type="button"
+                onClick={() => setMuted(!muted)}
+                aria-pressed={!muted}
+                aria-label="Read answers aloud"
+                title={muted ? "Voice off" : "Voice on"}
+                className={`flex size-11 shrink-0 items-center justify-center rounded-full border transition-colors ${
+                  muted ? "border-ink/20 text-ink-muted hover:text-ink" : "border-accent text-accent-soft"
+                }`}
               >
+                {muted ? <VolumeX className="size-4" aria-hidden /> : <Volume2 className="size-4" aria-hidden />}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={close}
+              aria-label="Close chat"
+              className="flex size-11 shrink-0 items-center justify-center rounded-full border border-ink/20 text-ink-soft transition-colors hover:text-ink"
+            >
+              <X className="size-5" aria-hidden />
+            </button>
+          </div>
+
+          <div
+            ref={scrollRef}
+            role="log"
+            aria-live="polite"
+            aria-busy={loading}
+            className="chat-scroll flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-5 lg:gap-3.5 lg:p-6"
+          >
+            {messages.map((m, i) => {
+              // The streaming assistant bubble is empty until the first token
+              // arrives; the typing dots stand in for it until then.
+              if (m.role === "assistant" && m.content === "") return null;
+              return (
                 <div
-                  className={`max-w-[85%] rounded-xl px-3.5 py-2.5 text-sm leading-relaxed break-words ${
+                  key={i}
+                  className={`max-w-[85%] break-words px-4 py-3 text-[15px] leading-relaxed lg:px-[18px] lg:py-3.5 lg:text-base ${
                     m.role === "user"
-                      ? "bg-ink text-paper"
-                      : "bg-secondary text-ink"
+                      ? "self-end rounded-[18px_18px_6px_18px] bg-accent font-medium text-paper"
+                      : "self-start rounded-[18px_18px_18px_6px] bg-surface-raised text-[#E4E1DB]"
                   }`}
                 >
                   {renderMessageContent(m.content)}
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
 
-          {loading && waitingForFirstToken && (
-            <div className="flex justify-start">
+            {loading && waitingForFirstToken && (
               <div
-                className="bg-secondary rounded-xl px-3.5 py-2.5 flex items-center gap-1.5"
+                className="flex items-center gap-1.5 self-start rounded-[18px_18px_18px_6px] bg-surface-raised px-4 py-3.5"
                 aria-hidden
               >
                 <span className="size-1.5 rounded-full bg-ink-faint animate-bounce motion-reduce:animate-none [animation-delay:-0.3s]" />
                 <span className="size-1.5 rounded-full bg-ink-faint animate-bounce motion-reduce:animate-none [animation-delay:-0.15s]" />
                 <span className="size-1.5 rounded-full bg-ink-faint animate-bounce motion-reduce:animate-none" />
               </div>
-            </div>
-          )}
+            )}
 
-          {error && (
-            <p role="alert" className="text-xs text-destructive font-mono px-1">
-              {error}
-            </p>
-          )}
+            {error && (
+              <p role="alert" className="px-1 font-mono text-xs text-destructive">
+                {error}
+              </p>
+            )}
+          </div>
 
-          {/* Suggested questions — only before the conversation gets going */}
+          {/* Suggested questions, only before the conversation gets going */}
           {messages.length === 1 && !loading && (
-            <div className="flex flex-col gap-2 pt-2">
+            <div className="flex gap-2 overflow-x-auto px-4 pb-3 lg:flex-wrap lg:px-6">
               {SUGGESTED_QUESTIONS.map((q) => (
                 <button
                   key={q}
+                  type="button"
                   onClick={() => sendMessage(q)}
-                  className="text-left text-xs font-mono px-3 py-2.5 rounded-lg border border-hairline text-ink-muted hover:border-accent hover:text-accent transition-colors"
+                  className="h-11 shrink-0 whitespace-nowrap rounded-full border border-ink/20 px-3.5 text-sm text-ink-soft transition-colors hover:border-accent hover:text-ink"
                 >
                   {q}
                 </button>
               ))}
             </div>
           )}
-        </div>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            sendMessage(input);
-          }}
-          className="p-3 border-t border-hairline flex items-center gap-2"
-        >
-          <input
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask a question..."
-            aria-label="Ask a question"
-            maxLength={500}
-            // readOnly rather than disabled: a disabled input drops keyboard
-            // focus to <body> mid-conversation.
-            readOnly={loading}
-            className="flex-1 bg-secondary border border-hairline rounded-lg px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-accent transition-colors read-only:opacity-50"
-          />
-          <button
-            type="submit"
-            disabled={loading || !input.trim()}
-            aria-label="Send message"
-            className="size-11 shrink-0 rounded-lg bg-ink hover:bg-ink/85 disabled:opacity-30 disabled:hover:bg-ink flex items-center justify-center transition-all"
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              sendMessage(input);
+            }}
+            className="mx-4 mb-6 flex h-14 items-center gap-2.5 rounded-2xl border border-ink/15 bg-paper pl-4 pr-1.5 transition-colors focus-within:border-accent lg:mx-5 lg:mb-5 lg:h-[58px] lg:pl-[18px] lg:pr-2"
           >
-            <Send className="size-4 text-paper" />
-          </button>
-        </form>
-      </div>
+            <input
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask a question..."
+              aria-label="Ask a question"
+              maxLength={500}
+              // readOnly rather than disabled: a disabled input drops keyboard
+              // focus to <body> mid-conversation.
+              readOnly={loading}
+              className="chat-input min-w-0 flex-1 bg-transparent text-base text-ink placeholder:text-ink-faint read-only:opacity-50"
+            />
+            <button
+              type="submit"
+              disabled={loading || !input.trim()}
+              aria-label="Send message"
+              className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent text-paper transition-opacity disabled:opacity-40"
+            >
+              <ArrowUp className="size-5" aria-hidden />
+            </button>
+          </form>
+        </div>
+      </Sheet>
     </>
   );
 }

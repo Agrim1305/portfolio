@@ -40,3 +40,10 @@ test("every sheet passes axe while open", async ({ page }) => {
     await page.keyboard.press("Escape");
   }
 });
+
+test("chat passes axe while open", async ({ page }) => {
+  await page.goto("/");
+  await page.keyboard.press("ControlOrMeta+k");
+  await expect(page.getByRole("dialog", { name: "Ask about Agrim" })).toBeVisible();
+  expect(await violations(page)).toEqual([]);
+});

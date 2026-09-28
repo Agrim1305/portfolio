@@ -89,3 +89,76 @@ test("the stack strip can be paused", async ({ page }) => {
   const state = await page.locator(".marquee").evaluate((el) => getComputedStyle(el).animationPlayState);
   expect(state).toBe("paused");
 });
+
+test.describe("ask Agrim", () => {
+  const ANSWER = "I built MetaPlay. It runs live on Render today.";
+
+  // The real route calls the model; tests stream a fixed answer instead.
+  test.beforeEach(async ({ page }) => {
+    await page.route("/api/chat", (route) =>
+      route.fulfill({ status: 200, contentType: "text/plain; charset=utf-8", body: ANSWER }),
+    );
+    await page.addInitScript(() => {
+      const w = window as unknown as { __spoken: string[] };
+      w.__spoken = [];
+      window.speechSynthesis.cancel = () => {};
+      window.speechSynthesis.speak = (u) => {
+        w.__spoken.push(u.text);
+        setTimeout(() => u.onend?.(new Event("end") as SpeechSynthesisEvent), 50);
+      };
+    });
+  });
+
+  test("the hero bar opens the chat and a suggested question gets an answer", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("#top").getByRole("button", { name: "Ask AI about Agrim" }).filter({ visible: true }).click();
+    const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+    await expect(chat).toBeVisible();
+    await expect(chat.getByRole("textbox", { name: "Ask a question" })).toBeFocused();
+
+    await chat.getByRole("button", { name: "What's Agrim's strongest project?" }).click();
+    await expect(chat.getByRole("log")).toContainText(ANSWER);
+    // Muted by default: nothing is read aloud.
+    expect(await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken)).toEqual([]);
+
+    await page.keyboard.press("Escape");
+    await expect(chat).toBeHidden();
+  });
+
+  test("with voice on, the answer is read aloud a sentence at a time", async ({ page }) => {
+    await page.goto("/");
+    await page.keyboard.press("ControlOrMeta+k");
+    const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+    const voice = chat.getByRole("button", { name: "Read answers aloud" });
+    await voice.click();
+    await expect(voice).toHaveAttribute("aria-pressed", "true");
+
+    await chat.getByRole("textbox", { name: "Ask a question" }).fill("What did you build?");
+    await chat.getByRole("button", { name: "Send message" }).click();
+    await expect(chat.getByRole("log")).toContainText(ANSWER);
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken.filter(Boolean)))
+      .toEqual(["I built MetaPlay.", "It runs live on Render today."]);
+  });
+
+  test("a failed request shows the error and rolls back the question", async ({ page }) => {
+    await page.route("/api/chat", (route) =>
+      route.fulfill({ status: 429, contentType: "application/json", body: JSON.stringify({ error: "Too many messages. Please wait a moment and try again." }) }),
+    );
+    await page.goto("/");
+    await page.keyboard.press("ControlOrMeta+k");
+    const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+    await chat.getByRole("textbox", { name: "Ask a question" }).fill("Hello?");
+    await chat.getByRole("button", { name: "Send message" }).click();
+    await expect(chat.getByRole("alert")).toHaveText("Too many messages. Please wait a moment and try again.");
+    await expect(chat.getByRole("log")).not.toContainText("Hello?");
+  });
+
+  test("the launcher appears once the hero scrolls away", async ({ page }) => {
+    await page.goto("/");
+    const launcher = page.locator("body > button[aria-keyshortcuts]");
+    await expect(launcher).toBeHidden();
+    await page.evaluate(() => window.scrollTo(0, 2000));
+    await expect(launcher).toBeVisible();
+  });
+});

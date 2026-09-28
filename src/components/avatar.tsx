@@ -171,3 +171,31 @@ export function Avatar() {
     </div>
   );
 }
+
+/* The avatar's face alone, cropped into a circle for the chat header. It
+   shares the mouth frames, so it lip-syncs along with the big one. */
+export function AvatarHead({ className = "" }: { className?: string }) {
+  const { frame } = useSpeech();
+  return (
+    <span aria-hidden className={`relative block overflow-hidden rounded-full bg-[#E6E1D9] ${className}`}>
+      <span className="absolute left-[-73%] top-[-23%] h-[263%] w-[246%]">
+        {HEADS.map((src, i) => (
+          <Image
+            key={src}
+            src={src}
+            alt=""
+            fill
+            sizes="128px"
+            // Eager: inside a closed <dialog> lazy images wait until it opens,
+            // which leaves the circle blank for a moment.
+            loading="eager"
+            className={frame === i ? "opacity-100" : "opacity-0"}
+          />
+        ))}
+        <span className="avatar-eyes absolute inset-0">
+          <Image src="/images/avatar/iris.webp" alt="" fill sizes="128px" loading="eager" />
+        </span>
+      </span>
+    </span>
+  );
+}

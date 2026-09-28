@@ -36,7 +36,7 @@ export default function Home() {
         </div>
       </main>
       <Footer />
-      <AskAgrim />
+      <AskAgrim heroId="top" />
     </>
   );
 }
