@@ -1,5 +1,6 @@
 import { Nav } from "@/components/nav";
 import { Hero } from "@/components/hero";
+import { TechStrip } from "@/components/tech-strip";
 import { Projects } from "@/components/projects";
 import { Leadership } from "@/components/leadership";
 import { Experience } from "@/components/experience";
@@ -13,23 +14,26 @@ export default function Home() {
   return (
     <>
       <Nav />
-      <main className="mx-auto max-w-5xl px-5 sm:px-8">
+      <main>
         <Hero />
-        <Reveal>
-          <Projects />
-        </Reveal>
-        <Reveal>
-          <Leadership />
-        </Reveal>
-        <Reveal>
-          <Experience />
-        </Reveal>
-        <Reveal>
-          <About />
-        </Reveal>
-        <Reveal>
-          <Contact />
-        </Reveal>
+        <TechStrip />
+        <div className="mx-auto max-w-5xl px-5 pt-24 sm:px-8">
+          <Reveal>
+            <Projects />
+          </Reveal>
+          <Reveal>
+            <Leadership />
+          </Reveal>
+          <Reveal>
+            <Experience />
+          </Reveal>
+          <Reveal>
+            <About />
+          </Reveal>
+          <Reveal>
+            <Contact />
+          </Reveal>
+        </div>
       </main>
       <Footer />
       <AskAgrim />

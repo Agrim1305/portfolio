@@ -1,12 +1,12 @@
 /* GitHub and LinkedIn, as their recognisable marks rendered in currentColor so
-   they read monochrome/gold with the rest of the palette rather than as their
+   they read monochrome/orange with the rest of the palette rather than as their
    full brand colours. Glyph paths are the canonical simple-icons outlines. */
 
 const GITHUB_URL = "https://github.com/Agrim1305";
 const LINKEDIN_URL = "https://www.linkedin.com/in/agrim-sharma-821788302/";
 
 const buttonClass =
-  "inline-flex size-10 items-center justify-center rounded-md border border-hairline bg-surface text-ink-muted transition-colors hover:border-accent/60 hover:text-accent";
+  "glass lift inline-flex size-12 items-center justify-center rounded-full text-ink hover:text-accent lg:size-[52px]";
 
 function GithubIcon() {
   return (

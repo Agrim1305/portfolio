@@ -42,6 +42,14 @@ export function useSpeech() {
 
 const supported = () => typeof window !== "undefined" && "speechSynthesis" in window;
 
+const noSubscribe = () => () => {};
+
+/* False on the server and in browsers without speech, so voice controls only
+   render where they work. */
+export function useCanSpeak() {
+  return useSyncExternalStore(noSubscribe, supported, () => false);
+}
+
 // Utterances cancelled by stop() still fire onend later; the generation lets
 // those late events be ignored instead of ending the next answer's mouth.
 let generation = 0;

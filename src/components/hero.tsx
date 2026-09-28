@@ -1,42 +1,37 @@
-import { TickFrame } from "@/components/tick-frame";
+import Image from "next/image";
+import { Avatar } from "@/components/avatar";
+import { AskBar } from "@/components/ask-agrim";
 import { SocialLinks } from "@/components/social-links";
 
 export function Hero() {
   return (
-    <section id="top" className="overflow-x-clip pt-16 sm:pt-28 pb-24 sm:pb-36">
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-10">
-        <div className="relative max-w-3xl">
-          {/* Registration marks: thin guides that converge on the name, then
-              dissolve into the ambient grid. Decorative; hidden on reduced
-              motion. */}
-          <span className="hero-guide-v" aria-hidden />
-          <span className="hero-guide-h" aria-hidden />
+    <section id="top" className="relative isolate overflow-x-clip">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <Image
+          src="/images/topo.svg"
+          alt=""
+          fill
+          sizes="100vw"
+          className="topo-drift object-cover opacity-[0.08]"
+        />
+      </div>
 
-          <div className="sm:hidden mb-7">
-            <TickFrame
-              src="/headshot.jpg"
-              alt=""
-              sizes="160px"
-              variant="titleblock"
-              caption="Agrim Sharma"
-              marks
-              entrance="load"
-              fetchPriority="high"
-              className="w-40 aspect-[4/5]"
-            />
-          </div>
-
+      <div className="wrap grid gap-y-6 pb-16 pt-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:items-center lg:gap-x-12 lg:pb-24 lg:pt-6 xl:grid-cols-[minmax(0,1fr)_500px]">
+        <div>
+          <h1 className="hero-name py-[0.06em] font-display text-[clamp(4.5rem,1.2rem+10.4vw,10.25rem)] font-extrabold leading-[0.9] tracking-[-0.037em] text-ink">
+            <span className="block">Agrim</span> <span className="block">Sharma</span>
+          </h1>
+          {/* Non-breaking spaces keep each separator with the word after it, so
+              a narrow screen breaks before a dot instead of after one. */}
           <p
-            className="hero-rise font-mono text-xs uppercase tracking-[0.2em] text-ink-faint"
+            className="hero-rise mt-3 pb-1 font-serif text-[clamp(2rem,0.9rem+2.2vw,2.625rem)] italic leading-[1.15] text-accent"
             style={{ animationDelay: "0.6s" }}
           >
-            Software · Applied AI · Adelaide
+            Software ·&nbsp;Applied&nbsp;AI ·&nbsp;Adelaide
           </p>
-          <h1 className="hero-name mt-5 font-serif text-6xl sm:text-7xl lg:text-8xl font-medium tracking-tight text-ink">
-            Agrim Sharma
-          </h1>
           <p
-            className="hero-rise mt-8 text-xl sm:text-2xl leading-relaxed text-ink-muted max-w-2xl"
+            id="hero-intro"
+            className="hero-rise mt-6 max-w-[34rem] text-lg leading-[1.55] text-ink-soft lg:text-xl"
             style={{ animationDelay: "0.8s" }}
           >
             Final-year Computer Science student at Adelaide University, majoring
@@ -47,7 +42,7 @@ export function Hero() {
             .
           </p>
           <p
-            className="hero-rise mt-6 flex items-start gap-2.5 font-mono text-[13px] leading-relaxed text-ink-muted"
+            className="hero-rise mt-5 flex items-start gap-2.5 font-mono text-[13px] leading-relaxed text-ink-muted"
             style={{ animationDelay: "0.9s" }}
           >
             <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-accent" />
@@ -57,33 +52,25 @@ export function Hero() {
           </p>
 
           <div
-            className="hero-rise mt-10 flex flex-wrap items-center gap-x-6 gap-y-3"
+            className="hero-rise mt-8 flex flex-wrap items-center gap-2.5 lg:gap-3"
             style={{ animationDelay: "1s" }}
           >
             <a
               href="mailto:agrimsh22@gmail.com"
-              className="link-draw inline-flex min-h-11 items-center text-[15px] text-ink"
+              className="lift inline-flex h-12 items-center rounded-full bg-accent px-6 text-[15px] font-semibold text-paper hover:bg-accent-soft lg:h-[52px] lg:px-7 lg:text-base"
             >
               agrimsh22@gmail.com
             </a>
-            <div className="flex items-center gap-3">
-              <SocialLinks />
-            </div>
+            <SocialLinks />
           </div>
+          <AskBar className="mt-4 flex lg:hidden" />
         </div>
 
-        <div className="hidden sm:block shrink-0 pt-1">
-          <TickFrame
-            src="/headshot.jpg"
-            alt=""
-            sizes="(max-width: 1024px) 208px, 240px"
-            variant="titleblock"
-            caption="Agrim Sharma"
-            marks
-            entrance="load"
-            fetchPriority="high"
-            className="w-52 lg:w-60 aspect-[4/5]"
-          />
+        {/* After the text in the DOM so the name is read first; shown first on
+            small screens. */}
+        <div className="order-first mx-auto w-full max-w-[322px] lg:order-none lg:max-w-none">
+          <Avatar />
+          <AskBar className="mt-6 hidden lg:flex" />
         </div>
       </div>
     </section>

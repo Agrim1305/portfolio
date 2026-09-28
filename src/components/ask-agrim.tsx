@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { X, Send, Sparkles } from "lucide-react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { ArrowUp, X, Send, Sparkles } from "lucide-react";
 import { setPageScrollLocked } from "@/lib/scroll-lock";
 
 // Small models sometimes emit **bold** or __underline__ despite the prompt
@@ -94,6 +94,39 @@ const OPEN_EVENT = "ask:open";
 /* Opens the assistant from anywhere on the page (hero bar, menu, launcher). */
 export function openAsk() {
   window.dispatchEvent(new Event(OPEN_EVENT));
+}
+
+const noSubscribe = () => () => {};
+const isApple = () => /Mac|iPhone|iPad/.test(navigator.userAgent);
+
+/* The command bar under the avatar: looks like an input, opens the chat.
+   Callers set its display, since it sits in different places per breakpoint. */
+export function AskBar({ className = "" }: { className?: string }) {
+  const apple = useSyncExternalStore(noSubscribe, isApple, () => true);
+  return (
+    <button
+      type="button"
+      onClick={openAsk}
+      aria-keyshortcuts="Meta+K Control+K"
+      className={`glass hero-rise w-full items-center gap-3 rounded-2xl pl-5 pr-2 text-left text-[15px] text-ink-muted transition-[border-color,box-shadow] duration-300 hover:border-accent/70 hover:shadow-[0_0_0_4px_rgb(255_91_46/0.12),0_20px_50px_rgb(0_0_0/0.45)] h-14 lg:h-[58px] lg:pr-3 lg:text-base ${className}`}
+      style={{ animationDelay: "1.1s" }}
+    >
+      <Sparkles className="size-4 shrink-0 text-accent" aria-hidden />
+      <span className="flex-1">Ask AI about Agrim</span>
+      <kbd
+        aria-hidden
+        className="hidden rounded-lg border border-ink/20 px-2 py-1 font-mono text-xs text-ink-soft lg:inline"
+      >
+        {apple ? "⌘K" : "Ctrl K"}
+      </kbd>
+      <span
+        aria-hidden
+        className="flex size-10 items-center justify-center rounded-xl bg-accent text-paper lg:hidden"
+      >
+        <ArrowUp className="size-4" />
+      </span>
+    </button>
+  );
 }
 
 export function AskAgrim() {

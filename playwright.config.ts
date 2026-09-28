@@ -1,16 +1,17 @@
 import { defineConfig, devices } from "@playwright/test";
 
 // Runs against the production build: `npm run build` first, then `npx playwright test`.
+// BASE_URL points it at an already-running server instead (e.g. `next dev`).
+const baseURL = process.env.BASE_URL ?? "http://localhost:3100";
+
 export default defineConfig({
   testDir: "e2e",
   fullyParallel: true,
   reporter: "list",
-  use: { baseURL: "http://localhost:3100" },
-  webServer: {
-    command: "npx next start -p 3100",
-    url: "http://localhost:3100",
-    reuseExistingServer: true,
-  },
+  use: { baseURL },
+  webServer: process.env.BASE_URL
+    ? undefined
+    : { command: "npx next start -p 3100", url: baseURL, reuseExistingServer: true },
   projects: [
     {
       name: "desktop",
