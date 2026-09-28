@@ -21,10 +21,10 @@ export default function Home() {
         <Reveal>
           <Leadership />
         </Reveal>
+        <Reveal>
+          <Experience />
+        </Reveal>
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
-          <Reveal>
-            <Experience />
-          </Reveal>
           <Reveal>
             <About />
           </Reveal>

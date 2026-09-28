@@ -251,3 +251,27 @@ test("the merger story opens as a sheet", async ({ page }) => {
   await page.keyboard.press("Escape");
   await expect(sheet).toBeHidden();
 });
+
+test.describe("experience", () => {
+  test("arrow keys move between roles and show each one", async ({ page }) => {
+    await page.goto("/");
+    const tabs = page.getByRole("tablist", { name: "Roles" }).getByRole("tab");
+    await tabs.first().focus();
+    await page.keyboard.press("ArrowDown");
+    await expect(tabs.nth(1)).toBeFocused();
+    await expect(tabs.nth(1)).toHaveAttribute("aria-selected", "true");
+    await expect(page.getByRole("tabpanel")).toContainText("Led the club revival covered above");
+    await page.keyboard.press("End");
+    await expect(page.getByRole("tabpanel")).toContainText("Part-time customer service across two stores");
+  });
+
+  test("only the role with a longer story offers it", async ({ page }) => {
+    await page.goto("/");
+    const tabs = page.getByRole("tablist", { name: "Roles" }).getByRole("tab");
+    await tabs.first().click();
+    await expect(page.getByRole("tabpanel").getByRole("button", { name: "Read the full story" })).toHaveCount(0);
+    await tabs.nth(1).click();
+    await page.getByRole("tabpanel").getByRole("button", { name: "Read the full story" }).click();
+    await expect(page.getByRole("dialog", { name: "Running our side of a two-university club merger" })).toBeVisible();
+  });
+});

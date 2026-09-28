@@ -1,44 +1,6 @@
+import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
-import { SectionHeading } from "@/components/section-heading";
-import { TickFrame } from "@/components/tick-frame";
-
-type Role = {
-  role: string;
-  org: string;
-  dates: string;
-  description: string;
-};
-
-const roles: Role[] = [
-  {
-    role: "Software Engineering Intern, Voice AI",
-    org: "Aurivox · Viemo Capital & Consulting",
-    dates: "Aug 2026 to Nov 2026",
-    description:
-      "Chosen as one of four interns from eleven shortlisted students for a 50-day placement with a startup building a voice AI product. I work across the speech-to-text, language model and text-to-speech stack of a voice-first meeting assistant, reporting to the founder and taking an open brief through to a working prototype. It is the first time I have shipped AI features against a founder's brief rather than a marking rubric.",
-  },
-  {
-    role: "President",
-    org: "Adelaide University Tennis Club",
-    dates: "Jul 2024 to Mar 2026",
-    description:
-      "Led the club revival covered above: merger, constitution, committee, grants, and the award.",
-  },
-  {
-    role: "Assistant Head Coach",
-    org: "Adelaide Rising Stars Tennis Academy",
-    dates: "Mar 2024 to Present",
-    description:
-      "I coach 10+ sessions a week at Tea Tree Gully Tennis Club for more than fifty clients, from juniors to adults, one-on-one and in groups. I run junior and performance squads of up to thirty players in a two-hour block, setting the drill plan and directing assistant coaches across four courts. It has made me good at explaining the same idea a few different ways until it clicks, and at keeping a big group moving on one plan.",
-  },
-  {
-    role: "Retail Assistant",
-    org: "IGA Supermarkets",
-    dates: "Feb 2024 to Oct 2024",
-    description:
-      "Part-time customer service across two stores while studying full-time. Busy retail floor, steady standards, and a lot of practice juggling work and study at the same time.",
-  },
-];
+import { ExperienceRoles } from "@/components/experience-roles";
 
 type Certification = {
   name: string;
@@ -81,18 +43,53 @@ const certifications: Certification[] = [
 const MENTORSHIP_CREDENTIAL_URL =
   "https://www.linkedin.com/feed/update/urn:li:activity:7376092779933835264/";
 
+const rise = (delay: number) => ({ "--rise-delay": `${delay}s` }) as React.CSSProperties;
+
+const credentialLink =
+  "inline-flex min-h-11 items-center gap-1 text-sm text-accent-soft transition-colors hover:text-accent";
+
+/* A photo mounted like a print: white border, slight tilt that straightens
+   under the pointer. */
+function Print({
+  src,
+  alt,
+  caption,
+  aspect,
+  tilt,
+  sizes,
+}: {
+  src: string;
+  alt: string;
+  caption?: string;
+  aspect: string;
+  tilt: string;
+  sizes: string;
+}) {
+  return (
+    <figure>
+      <div
+        className={`relative overflow-hidden rounded-[18px] border-[5px] border-ink shadow-[0_30px_60px_rgb(0_0_0/0.5)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:rotate-0 hover:scale-[1.02] motion-reduce:transition-none ${aspect} ${tilt}`}
+      >
+        <Image src={src} alt={alt} fill sizes={sizes} className="object-cover object-center" />
+      </div>
+      {caption && <figcaption className="mt-4 font-mono text-xs text-ink-muted">{caption}</figcaption>}
+    </figure>
+  );
+}
+
 export function Experience() {
   return (
-    <section id="experience" className="scroll-mt-24 pb-24 sm:pb-36">
-      <SectionHeading
-        number="03"
-        title="Experience"
-        caption="Where I've led and worked"
-      />
+    <section id="experience" className="wrap py-20 lg:py-28">
+      <h2 className="rise font-display text-[clamp(3rem,1.6rem+4.4vw,4.75rem)] font-extrabold leading-[1.05] tracking-[-0.03em] text-ink">
+        Where I&apos;ve led and{" "}
+        <span className="font-serif text-[1.18em] font-medium italic tracking-normal text-accent">
+          worked
+        </span>
+      </h2>
 
       <p
-        className="rise max-w-3xl text-base leading-relaxed text-ink-muted"
-        style={{ "--rise-delay": "0.16s" } as React.CSSProperties}
+        className="rise mt-5 max-w-3xl text-base leading-relaxed text-ink-soft lg:text-[17px]"
+        style={rise(0.08)}
       >
         Across leading a committee, coaching more than fifty clients of every
         age and background, and working a busy retail floor, the common thread
@@ -102,58 +99,38 @@ export function Experience() {
         workplace I want to build my career in.
       </p>
 
-      <div
-        className="rise mt-10"
-        style={{ "--rise-delay": "0.24s" } as React.CSSProperties}
-      >
-        {roles.map((r) => (
-          <div
-            key={r.role + r.org}
-            className="grid gap-x-8 gap-y-2 pb-10 last:pb-0 sm:grid-cols-[170px_1fr]"
-          >
-            <p className="font-mono text-xs leading-7 text-ink-faint">
-              {r.dates}
-            </p>
-            <div className="relative border-l border-hairline pl-6">
-              <span className="absolute -left-[5px] top-2 size-2.5 rounded-full bg-accent ring-4 ring-paper" />
-              <h3 className="text-xl font-semibold text-ink">
-                {r.role}, {r.org}
-              </h3>
-              <p className="mt-3 text-[15px] leading-relaxed text-ink-muted">
-                {r.description}
-              </p>
-            </div>
-          </div>
-        ))}
+      <div className="rise mt-10 lg:mt-14" style={rise(0.16)}>
+        <ExperienceRoles />
       </div>
 
-      {/* Mentorship: kept separate from the roles and given more weight than
-          the certifications, since it is the more significant of the two. */}
-      <div
-        className="rise mt-14 rounded-xl border border-hairline card-draft p-6 sm:p-7"
-        style={{ "--rise-delay": "0.32s" } as React.CSSProperties}
+      <article
+        className="rise mt-16 rounded-3xl border border-hairline bg-surface p-6 lg:mt-20 lg:rounded-[28px] lg:p-11"
+        style={rise(0.24)}
       >
-        <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-accent">
-          Mentorship
-        </p>
-        <div className="mt-4 flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-              <h3 className="text-[15px] text-ink">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_240px] lg:gap-14">
+          <div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-accent-soft">
+              Mentorship
+            </p>
+            <div className="mt-3 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+              <h3 className="font-display text-2xl font-bold leading-snug text-ink lg:text-[28px]">
                 Career Access Mentoring Program
-                <span className="text-ink-faint"> · Adelaide University</span>
+                <span className="font-sans text-lg font-normal text-ink-muted lg:text-xl">
+                  {" "}
+                  · Adelaide University
+                </span>
               </h3>
               <a
                 href={MENTORSHIP_CREDENTIAL_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="link-draw inline-flex min-h-11 items-center gap-1 text-[13px] text-accent"
+                className={credentialLink}
               >
                 Credential
                 <ArrowUpRight className="size-3.5" aria-hidden />
               </a>
             </div>
-            <p className="mt-3 text-[15px] leading-relaxed text-ink-muted">
+            <p className="mt-4 text-base leading-relaxed text-ink-soft lg:text-[17px]">
               A structured 14-hour mentorship through Adelaide University, spread
               across meetings over four to six months, mentored one-on-one by an{" "}
               <span className="hl">APT Analyst at Google Threat Intelligence</span>
@@ -170,66 +147,63 @@ export function Experience() {
               career.
             </p>
           </div>
-          <TickFrame
-            src="/mentorship.jpeg"
-            alt="University of Adelaide Certificate of Completion for the Career Access Mentoring Program"
-            sizes="(max-width: 640px) 160px, 176px"
-            entrance="reveal"
-            className="w-40 sm:w-44 shrink-0 aspect-[800/1132]"
-          />
+          <div className="mx-auto w-44 lg:mx-0 lg:w-full">
+            <Print
+              src="/mentorship.jpeg"
+              alt="University of Adelaide Certificate of Completion for the Career Access Mentoring Program"
+              aspect="aspect-[800/1132]"
+              tilt="rotate-[2deg]"
+              sizes="(min-width: 1024px) 240px, 176px"
+            />
+          </div>
         </div>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <TickFrame
+        <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:gap-10">
+          <Print
             src="/google-sydney-1.jpg"
             alt="Agrim Sharma beside the Google logo sculpture in the Google Sydney office"
-            sizes="(max-width: 640px) 100vw, 340px"
             caption="Visiting my mentor at Google Sydney"
-            objectPosition="center"
-            entrance="reveal"
-            className="aspect-[16/9]"
+            aspect="aspect-[16/9]"
+            tilt="-rotate-[1.5deg]"
+            sizes="(min-width: 640px) 50vw, 100vw"
           />
-          <TickFrame
+          <Print
             src="/google-sydney-2.jpg"
             alt="Agrim Sharma beside the neon Google sign in the Google Sydney office"
-            sizes="(max-width: 640px) 100vw, 340px"
             caption="Google Sydney office"
-            objectPosition="center"
-            entrance="reveal"
-            className="aspect-[16/9]"
+            aspect="aspect-[16/9]"
+            tilt="rotate-[1.5deg]"
+            sizes="(min-width: 640px) 50vw, 100vw"
           />
         </div>
-      </div>
+      </article>
 
-      <div
-        className="rise mt-6 rounded-xl border border-hairline card-draft p-6 sm:p-7"
-        style={{ "--rise-delay": "0.4s" } as React.CSSProperties}
-      >
-        <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-accent">
+      <div className="rise mt-6" style={rise(0.32)}>
+        <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-accent-soft">
           Certifications
         </p>
-        <ul className="mt-4 divide-y divide-hairline">
+        <ul className="mt-4 grid gap-3 sm:grid-cols-2">
           {certifications.map((c) => (
             <li
               key={c.name}
-              className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-3 first:pt-0 last:pb-0 text-[15px]"
+              className="flex flex-col justify-between gap-3 rounded-[22px] border border-hairline bg-surface px-5 pb-3 pt-5"
             >
-              <span className="text-ink">
+              <p className="text-base leading-snug text-ink">
                 {c.name}
-                <span className="text-ink-faint"> · {c.issuer}</span>
-              </span>
-              <span className="flex items-center gap-4">
+                <span className="text-ink-muted"> · {c.issuer}</span>
+              </p>
+              <p className="flex items-center justify-between gap-4">
                 <a
                   href={c.credentialUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="link-draw inline-flex min-h-11 items-center gap-1 text-[13px] text-accent"
+                  className={credentialLink}
                 >
                   Credential
                   <ArrowUpRight className="size-3.5" aria-hidden />
                 </a>
                 <span className="font-mono text-xs text-ink-faint">{c.year}</span>
-              </span>
+              </p>
             </li>
           ))}
         </ul>

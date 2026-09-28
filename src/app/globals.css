@@ -333,6 +333,14 @@ html:has(dialog[open]) {
   outline: none;
 }
 
+/* ---- Experience: the chosen role's card settles in ---- */
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(10px); }
+}
+.role-panel:not([hidden]) {
+  animation: panel-in 0.35s var(--ease-out);
+}
+
 /* ---- Tech strip ---- */
 @keyframes marquee {
   to { transform: translateX(-50%); }
@@ -460,7 +468,8 @@ html:has(dialog[open]) {
   .talk-ring,
   .glow-pulse,
   .topo-drift,
-  .marquee { animation: none; }
+  .marquee,
+  .role-panel:not([hidden]) { animation: none; }
   .link-draw::after { transition: none; }
   [data-tf] .tf-marks,
   [data-tf] .tf-photo {
