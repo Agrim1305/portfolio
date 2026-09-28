@@ -350,14 +350,6 @@ html:has(dialog[open]) {
    that uses it is rebuilt.
    ================================================================ */
 
-@keyframes story-open {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: none; }
-}
-.story[open] .story-body {
-  animation: story-open 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-}
-
 .card-draft {
   background-color: var(--surface);
   background-image:
@@ -477,5 +469,4 @@ html:has(dialog[open]) {
     transform: none;
     filter: none;
   }
-  .story[open] .story-body { animation: none; }
 }

@@ -18,10 +18,10 @@ export default function Home() {
         <Hero />
         <TechStrip />
         <Projects />
+        <Reveal>
+          <Leadership />
+        </Reveal>
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
-          <Reveal>
-            <Leadership />
-          </Reveal>
           <Reveal>
             <Experience />
           </Reveal>

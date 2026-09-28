@@ -229,3 +229,25 @@ test.describe("selected work", () => {
     await expect(page.locator("#top")).toBeAttached();
   });
 });
+
+test("the page never scrolls sideways", async ({ page }) => {
+  await page.goto("/");
+  await page.evaluate(async () => {
+    for (let y = 0; y < document.body.scrollHeight; y += 700) {
+      window.scrollTo(0, y);
+      await new Promise((r) => setTimeout(r, 30));
+    }
+  });
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(overflow).toBeLessThanOrEqual(0);
+});
+
+test("the merger story opens as a sheet", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Read it" }).click();
+  const sheet = page.getByRole("dialog", { name: "Running our side of a two-university club merger" });
+  await expect(sheet).toBeVisible();
+  await expect(sheet.getByRole("heading", { name: "What I did" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(sheet).toBeHidden();
+});

@@ -5,5 +5,6 @@
   "04": "Section number from the old drafting style, dropped from the nav and headings (approval item 14)",
   "05": "Section number from the old drafting style, dropped from the nav and headings (approval item 14)",
   "Portrait · 01": "Title-block plate on the old headshot frame; the avatar replaces the hero photo and the headshot moves to About (approval item 16)",
-  "Agrim Sharma Portrait · 01": "Caption of that same title-block plate (approval item 16)"
+  "Agrim Sharma Portrait · 01": "Caption of that same title-block plate (approval item 16)",
+  "Close": "Toggle label on the old expandable story; the story is now a sheet whose close button is labelled Close for assistive tech"
 }
