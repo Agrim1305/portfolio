@@ -331,7 +331,7 @@ export function AskAgrim() {
             placeholder="Ask a question..."
             maxLength={500}
             disabled={loading}
-            className="flex-1 bg-secondary border border-hairline rounded-lg px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-accent transition-colors disabled:opacity-50"
+            className="flex-1 bg-secondary border border-hairline rounded-lg px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-accent transition-colors disabled:opacity-50"
           />
           <button
             type="submit"

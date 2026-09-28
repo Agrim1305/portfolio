@@ -24,17 +24,12 @@ function Brackets() {
 }
 
 /* The site mark, mirroring app/icon.svg (the favicon) so the logo is identical
-   in the tab and on the page. */
+   in the tab and on the page. Colours are the hex of the surface and accent
+   tokens, because the standalone favicon can't read CSS variables. */
 function Logo() {
   return (
     <svg viewBox="0 0 64 64" className="size-10" aria-hidden>
-      <defs>
-        <linearGradient id="as-logo-grad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#1a1320" />
-          <stop offset="100%" stopColor="#0d1420" />
-        </linearGradient>
-      </defs>
-      <rect width="64" height="64" rx="14" fill="url(#as-logo-grad)" />
+      <rect width="64" height="64" rx="14" fill="#1b1a18" />
       <rect
         x="1.5"
         y="1.5"
@@ -42,7 +37,7 @@ function Logo() {
         height="61"
         rx="12.5"
         fill="none"
-        stroke="#e0b65c"
+        stroke="#e2b05a"
         strokeOpacity="0.25"
         strokeWidth="1.5"
       />
@@ -52,7 +47,7 @@ function Logo() {
         fontFamily="Arial, Helvetica, sans-serif"
         fontSize="34"
         fontWeight="700"
-        fill="#e8bd5e"
+        fill="#e2b05a"
         textAnchor="middle"
         dominantBaseline="central"
         letterSpacing="-1"
