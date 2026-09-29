@@ -26,7 +26,7 @@ const print =
 export function Leadership() {
   const [lead, ...rest] = photos;
   return (
-    <section id="leadership" className="wrap py-20 lg:py-28">
+    <section id="leadership" tabIndex={-1} className="outline-none wrap py-20 lg:py-28">
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,480px)] lg:items-start lg:gap-14">
         <div>
           <p className="rise font-mono text-[11px] uppercase tracking-[0.15em] text-accent-soft lg:text-[13px]">

@@ -267,6 +267,7 @@ test.describe("selected work", () => {
     await skip.focus();
     await expect(skip).toBeVisible();
     await page.keyboard.press("Enter");
+    await expect(page.locator("#leadership")).toBeFocused();
     await expect
       .poll(() => page.evaluate(() => document.getElementById("leadership")!.getBoundingClientRect().top))
       .toBeLessThan(200);
@@ -414,7 +415,8 @@ test.describe("built on court", () => {
 
   test("arrows, timeline dots and arrow keys move between stops", async ({ page }) => {
     await page.goto("/");
-    await page.locator("#court").scrollIntoViewIfNeeded();
+    // The pinned section is taller than the screen; start at its top.
+    await page.locator("#court").evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY));
     await expect(current(page)).toHaveAttribute("aria-label", "1 of 8");
 
     await page.locator("#court").getByRole("button", { name: "Next stop" }).filter({ visible: true }).click();
@@ -428,26 +430,24 @@ test.describe("built on court", () => {
     await expect(current(page)).toHaveAttribute("aria-label", "7 of 8");
   });
 
-  test("a swipe moves to the next stop", async ({ page, isMobile }) => {
-    test.skip(!isMobile, "touch only");
+  test("scrolling down slides the stops sideways, one viewport each", async ({ page, isMobile }) => {
+    test.skip(isMobile, "pinned travel is for wide screens; phones swipe");
     await page.goto("/");
-    const region = page.getByRole("region", { name: "Built on court" });
-    await region.scrollIntoViewIfNeeded();
-    await region.dispatchEvent("pointerdown", { pointerType: "touch", clientX: 300, clientY: 400 });
-    await region.dispatchEvent("pointerup", { pointerType: "touch", clientX: 120, clientY: 400 });
-    await expect(current(page)).toHaveAttribute("aria-label", "2 of 8");
+    const top = await page.locator("#court").evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
+    await page.evaluate((y) => window.scrollTo(0, y + 3 * 900), top);
+    await expect(current(page)).toHaveAttribute("aria-label", "4 of 8");
+    await expect(page.locator("#court").getByRole("group", { name: "4 of 8" })).toBeInViewport({ ratio: 0.6 });
+    // The reveal must fire for a section many screens tall, or it stays blank.
+    await expect(page.locator("#court h2")).toHaveCSS("opacity", "1");
   });
 
-  test("the mouse wheel over the stops scrolls the page, not the stops", async ({ page, isMobile }) => {
-    test.skip(isMobile, "no wheel on touch");
+  test("phones swipe between stops", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "native swipe is the phone layout");
     await page.goto("/");
-    const region = page.getByRole("region", { name: "Built on court" });
-    await region.scrollIntoViewIfNeeded();
-    const before = await page.evaluate(() => window.scrollY);
-    await region.hover();
-    await page.mouse.wheel(0, 500);
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(before + 200);
-    await expect(current(page)).toHaveAttribute("aria-label", "1 of 8");
+    const track = page.locator("#court .pin-track");
+    await track.scrollIntoViewIfNeeded();
+    await track.evaluate((el) => el.scrollTo({ left: el.clientWidth, behavior: "instant" }));
+    await expect(current(page)).toHaveAttribute("aria-label", "2 of 8");
   });
 });
 

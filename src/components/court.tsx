@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
 import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { SkipLink } from "@/components/skip-link";
+import { usePinnedTrack } from "@/lib/pinned-track";
 
 type Stop = {
   /** Short name under the timeline dot. */
@@ -78,175 +79,173 @@ const stops: Stop[] = [
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-/* One stop at a time, with a timeline underneath. Arrows, the timeline dots,
-   the arrow keys and a swipe all move it; the mouse wheel is left to scroll
-   the page. Stops that are out of view are inert, so neither Tab nor a
-   screen reader lands on them. */
+/* One stop per viewport of scroll, sliding sideways, with a timeline
+   underneath (see lib/pinned-track.ts; phones and reduced motion swipe
+   instead). Arrows, the timeline dots and the arrow keys scroll to a stop.
+   Stops that are out of view are inert, so a screen reader doesn't land on
+   them; the live region says which stop is showing. */
 export function Court() {
-  const [current, setCurrent] = useState(0);
-  const swipeStart = useRef<number | null>(null);
   const last = stops.length - 1;
-  const go = (i: number) => setCurrent(Math.max(0, Math.min(last, i)));
+  const { sectionRef, trackRef, active: current, go, onFocus } = usePinnedTrack(stops.length);
 
   const arrow =
     "flex size-12 items-center justify-center rounded-full border border-ink/20 text-ink transition-[opacity,background-color,color,border-color] duration-300 hover:border-accent hover:bg-accent hover:text-paper disabled:pointer-events-none disabled:opacity-30";
 
   return (
-    <section id="court" className="wrap py-20 lg:py-28">
-      <div className="flex items-end justify-between gap-6">
-        <h2 className="rise font-display text-[clamp(3.75rem,2.2rem+4.6vw,5.5rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.035em] text-ink">
-          <span className="block lg:inline">Built on</span>{" "}
-          <span className="block pb-1 font-serif text-[1.18em] font-medium normal-case italic leading-none tracking-normal text-accent lg:inline">
-            court.
-          </span>
-        </h2>
-        <div className="hidden items-center gap-3.5 pb-3 lg:flex">
-          <span aria-hidden className="min-w-16 text-right text-[15px] text-ink-faint">
-            <span className="font-semibold text-ink">{pad(current + 1)}</span> / {pad(stops.length)}
-          </span>
-          <button type="button" aria-label="Previous stop" disabled={current === 0} onClick={() => go(current - 1)} className={arrow}>
-            <ArrowLeft className="size-[18px]" aria-hidden />
-          </button>
-          <button type="button" aria-label="Next stop" disabled={current === last} onClick={() => go(current + 1)} className={arrow}>
-            <ArrowRight className="size-[18px]" aria-hidden />
-          </button>
-        </div>
-      </div>
+    <section
+      id="court"
+      ref={sectionRef}
+      className="pin-section py-20 lg:py-28"
+      style={{ "--slides": stops.length } as React.CSSProperties}
+    >
+      {stops.map((s, i) => (
+        <span key={s.dot} aria-hidden className="pin-marker" style={{ "--i": i } as React.CSSProperties} />
+      ))}
+      <div className="pin-stage">
+        <div className="wrap relative">
+          <SkipLink to="about" />
+          <div className="flex items-end justify-between gap-6">
+            <h2 className="rise font-display text-[clamp(3.75rem,2.2rem+4.6vw,5.5rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.035em] text-ink">
+              <span className="block lg:inline">Built on</span>{" "}
+              <span className="block pb-1 font-serif text-[1.18em] font-medium normal-case italic leading-none tracking-normal text-accent lg:inline">
+                court.
+              </span>
+            </h2>
+            <div className="hidden items-center gap-3.5 pb-3 lg:flex">
+              <span aria-hidden className="min-w-16 text-right text-[15px] text-ink-faint">
+                <span className="font-semibold text-ink">{pad(current + 1)}</span> / {pad(stops.length)}
+              </span>
+              <button type="button" aria-label="Previous stop" disabled={current === 0} onClick={() => go(current - 1)} className={arrow}>
+                <ArrowLeft className="size-[18px]" aria-hidden />
+              </button>
+              <button type="button" aria-label="Next stop" disabled={current === last} onClick={() => go(current + 1)} className={arrow}>
+                <ArrowRight className="size-[18px]" aria-hidden />
+              </button>
+            </div>
+          </div>
 
-      <div
-        role="region"
-        aria-roledescription="carousel"
-        aria-label="Built on court"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === "ArrowRight") go(current + 1);
-          else if (e.key === "ArrowLeft") go(current - 1);
-          else return;
-          e.preventDefault();
-        }}
-        onPointerDown={(e) => {
-          if (e.pointerType !== "mouse") swipeStart.current = e.clientX;
-        }}
-        onPointerUp={(e) => {
-          if (swipeStart.current === null) return;
-          const dx = e.clientX - swipeStart.current;
-          swipeStart.current = null;
-          if (Math.abs(dx) > 40) go(current + (dx < 0 ? 1 : -1));
-        }}
-        onPointerCancel={() => {
-          swipeStart.current = null;
-        }}
-        className="rise relative mt-10 touch-pan-y overflow-hidden rounded-[18px] bg-surface shadow-[inset_0_0_0_1px_rgb(241_239_234/0.08)] lg:mt-14 lg:rounded-[20px]"
-      >
-        {/* The slides only swap `inert`, which screen readers don't announce,
-            so the change is spoken from here. */}
-        <p aria-live="polite" className="sr-only">
-          {current + 1} of {stops.length}: {stops[current].dot}
-        </p>
-        <div
-          className="flex gap-[var(--gap)] transition-transform duration-800 [--gap:1rem] lg:[--gap:2.5rem] ease-[cubic-bezier(0.65,0,0.2,1)] motion-reduce:transition-none lg:gap-10"
-          style={{ transform: `translateX(calc(${-current} * (100% + var(--gap))))` }}
-        >
-          {stops.map((s, i) => (
-            <article
-              key={s.dot}
-              role="group"
-              aria-roledescription="slide"
-              aria-label={`${i + 1} of ${stops.length}`}
-              inert={i !== current}
-              className={`flex w-full shrink-0 flex-col transition-opacity duration-600 motion-reduce:transition-none lg:h-[560px] lg:flex-row ${
-                i === current ? "opacity-100" : "opacity-0"
-              }`}
+          {/* The track is the scroller on phones, so it carries the region
+              and takes focus itself. */}
+          <div className="rise relative mt-10 overflow-hidden rounded-[18px] bg-surface shadow-[inset_0_0_0_1px_rgb(241_239_234/0.08)] lg:mt-12 lg:rounded-[20px]">
+            <p aria-live="polite" className="sr-only">
+              {current + 1} of {stops.length}: {stops[current].dot}
+            </p>
+            <div
+              ref={trackRef}
+              role="region"
+              aria-roledescription="carousel"
+              aria-label="Built on court"
+              tabIndex={0}
+              onFocus={onFocus}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowRight") go(current + 1);
+                else if (e.key === "ArrowLeft") go(current - 1);
+                else return;
+                e.preventDefault();
+              }}
+              className="pin-track flex snap-x snap-mandatory gap-4 overflow-x-auto [scrollbar-width:none] lg:gap-10 [&::-webkit-scrollbar]:hidden"
             >
-              <div className="relative h-[220px] shrink-0 overflow-hidden bg-[#1B1B20] lg:h-full lg:w-[55%]">
-                {s.photo ? (
-                  <Image
-                    src={s.photo.src}
-                    alt={s.photo.alt}
-                    fill
-                    sizes="(min-width: 1024px) 660px, 100vw"
-                    className="object-cover object-[50%_40%]"
-                  />
-                ) : (
-                  <span
-                    aria-hidden
-                    className="absolute -bottom-6 left-5 font-display text-[11rem] font-extrabold leading-none text-transparent [-webkit-text-stroke:1.5px_rgb(255_91_46/0.4)] lg:-bottom-10 lg:left-10 lg:text-[22rem]"
-                  >
-                    {pad(i + 1)}
-                  </span>
-                )}
-              </div>
-              <div className="flex flex-col justify-center px-[22px] py-6 lg:w-[45%] lg:px-14 lg:py-0">
-                <p className="text-[13px] text-ink-faint lg:text-[15px]">
-                  {pad(i + 1)} · {s.dot}
-                </p>
-                <p className="mt-3 font-display text-[clamp(2.25rem,1.6rem+2.2vw,4.25rem)] font-bold leading-none tracking-[-0.035em] text-ink lg:mt-[18px]">
-                  {s.big}
-                </p>
-                {s.title && (
-                  <h3 className="mt-3 text-[17px] font-semibold text-[#D9D6D0] lg:mt-[18px] lg:text-[22px]">
-                    {s.title}
-                  </h3>
-                )}
-                {s.meta && <p className="mt-1 font-mono text-xs text-ink-muted lg:text-[13px]">{s.meta}</p>}
-                <p className="mt-2 text-[15px] leading-[1.55] text-ink-muted first-letter:uppercase lg:mt-3.5 lg:text-lg lg:leading-relaxed">
-                  {s.line}
-                </p>
-                {s.photo && (
-                  <p className="mt-4 font-mono text-xs text-ink-faint">{s.photo.caption}</p>
-                )}
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
+              {stops.map((s, i) => (
+                <article
+                  key={s.dot}
+                  data-index={i}
+                  role="group"
+                  aria-roledescription="slide"
+                  aria-label={`${i + 1} of ${stops.length}`}
+                  inert={i !== current}
+                  className="flex w-full shrink-0 snap-start flex-col lg:h-[min(560px,calc(100svh-27rem))] lg:min-h-[360px] lg:flex-row"
+                >
+                  <div className="relative h-[220px] shrink-0 overflow-hidden bg-[#1B1B20] lg:h-full lg:w-[55%]">
+                    {s.photo ? (
+                      <Image
+                        src={s.photo.src}
+                        alt={s.photo.alt}
+                        fill
+                        sizes="(min-width: 1024px) 660px, 100vw"
+                        className="object-cover object-[50%_40%]"
+                      />
+                    ) : (
+                      <span
+                        aria-hidden
+                        className="absolute -bottom-6 left-5 font-display text-[11rem] font-extrabold leading-none text-transparent [-webkit-text-stroke:1.5px_rgb(255_91_46/0.4)] lg:-bottom-10 lg:left-10 lg:text-[22rem]"
+                      >
+                        {pad(i + 1)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-col justify-center px-[22px] py-6 lg:w-[45%] lg:px-14 lg:py-0">
+                    <p className="text-[13px] text-ink-faint lg:text-[15px]">
+                      {pad(i + 1)} · {s.dot}
+                    </p>
+                    <p className="mt-3 font-display text-[clamp(2.25rem,1.6rem+2.2vw,4.25rem)] font-bold leading-none tracking-[-0.035em] text-ink lg:mt-[18px]">
+                      {s.big}
+                    </p>
+                    {s.title && (
+                      <h3 className="mt-3 text-[17px] font-semibold text-[#D9D6D0] lg:mt-[18px] lg:text-[22px]">
+                        {s.title}
+                      </h3>
+                    )}
+                    {s.meta && <p className="mt-1 font-mono text-xs text-ink-muted lg:text-[13px]">{s.meta}</p>}
+                    <p className="mt-2 text-[15px] leading-[1.55] text-ink-muted first-letter:uppercase lg:mt-3.5 lg:text-lg lg:leading-relaxed">
+                      {s.line}
+                    </p>
+                    {s.photo && (
+                      <p className="mt-4 font-mono text-xs text-ink-faint">{s.photo.caption}</p>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
 
-      {/* Timeline: a rail that fills up to the current stop, one dot per stop. */}
-      <div className="rise mt-6 flex items-center gap-3 lg:mb-8 lg:mt-12 lg:block lg:px-[60px]">
-        <button type="button" aria-label="Previous stop" disabled={current === 0} onClick={() => go(current - 1)} className={`${arrow} shrink-0 lg:hidden`}>
-          <ArrowLeft className="size-[18px]" aria-hidden />
-        </button>
-        <div className="flex flex-1 flex-col items-center gap-2.5">
-          <div className="relative h-11 w-full max-w-[220px] lg:max-w-none">
-            <span aria-hidden className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-ink/18" />
-            <span
-              aria-hidden
-              className="absolute left-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-accent transition-[width] duration-800 ease-[cubic-bezier(0.65,0,0.2,1)] motion-reduce:transition-none"
-              style={{ width: `${(current / last) * 100}%` }}
-            />
-            {stops.map((s, i) => (
-              <button
-                key={s.dot}
-                type="button"
-                onClick={() => go(i)}
-                aria-label={`Go to ${s.dot}`}
-                aria-current={i === current ? "step" : undefined}
-                className="group absolute top-1/2 flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
-                style={{ left: `${(i / last) * 100}%` }}
-              >
-                <span
-                  className={`size-2.5 rounded-full border-2 transition-colors duration-500 lg:size-3.5 ${
-                    i <= current ? "border-accent bg-accent" : "border-ink/35 bg-paper group-hover:border-ink"
-                  }`}
-                />
+          {/* Timeline: a rail that fills up to the current stop, one dot per stop. */}
+          <div className="rise mt-6 flex items-center gap-3 lg:mb-8 lg:mt-12 lg:block lg:px-[60px]">
+            <button type="button" aria-label="Previous stop" disabled={current === 0} onClick={() => go(current - 1)} className={`${arrow} shrink-0 lg:hidden`}>
+              <ArrowLeft className="size-[18px]" aria-hidden />
+            </button>
+            <div className="flex flex-1 flex-col items-center gap-2.5">
+              <div className="relative h-11 w-full max-w-[220px] lg:max-w-none">
+                <span aria-hidden className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-ink/18" />
                 <span
                   aria-hidden
-                  className={`absolute top-[38px] hidden w-[130px] text-center text-sm transition-colors duration-500 lg:block ${
-                    i === current ? "text-ink" : "text-ink-faint"
-                  }`}
-                >
-                  {s.dot}
-                </span>
-              </button>
-            ))}
+                  className="absolute left-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-accent transition-[width] duration-800 ease-[cubic-bezier(0.65,0,0.2,1)] motion-reduce:transition-none"
+                  style={{ width: `${(current / last) * 100}%` }}
+                />
+                {stops.map((s, i) => (
+                  <button
+                    key={s.dot}
+                    type="button"
+                    onClick={() => go(i)}
+                    aria-label={`Go to ${s.dot}`}
+                    aria-current={i === current ? "step" : undefined}
+                    className="group absolute top-1/2 flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
+                    style={{ left: `${(i / last) * 100}%` }}
+                  >
+                    <span
+                      className={`size-2.5 rounded-full border-2 transition-colors duration-500 lg:size-3.5 ${
+                        i <= current ? "border-accent bg-accent" : "border-ink/35 bg-paper group-hover:border-ink"
+                      }`}
+                    />
+                    <span
+                      aria-hidden
+                      className={`absolute top-[38px] hidden w-[130px] text-center text-sm transition-colors duration-500 lg:block ${
+                        i === current ? "text-ink" : "text-ink-faint"
+                      }`}
+                    >
+                      {s.dot}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <p aria-hidden className="text-[13px] text-ink-muted lg:hidden">
+                <span className="font-semibold text-ink">{pad(current + 1)}</span> / {pad(stops.length)} · {stops[current].dot}
+              </p>
+            </div>
+            <button type="button" aria-label="Next stop" disabled={current === last} onClick={() => go(current + 1)} className={`${arrow} shrink-0 border-0 bg-accent text-paper lg:hidden`}>
+              <ArrowRight className="size-[18px]" aria-hidden />
+            </button>
           </div>
-          <p aria-hidden className="text-[13px] text-ink-muted lg:hidden">
-            <span className="font-semibold text-ink">{pad(current + 1)}</span> / {pad(stops.length)} · {stops[current].dot}
-          </p>
         </div>
-        <button type="button" aria-label="Next stop" disabled={current === last} onClick={() => go(current + 1)} className={`${arrow} shrink-0 border-0 bg-accent text-paper lg:hidden`}>
-          <ArrowRight className="size-[18px]" aria-hidden />
-        </button>
       </div>
     </section>
   );

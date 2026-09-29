@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight, Plus, X } from "lucide-react";
 import { CaseStudy, COVER } from "@/components/case-study";
 import { Sheet } from "@/components/sheet";
 import { morphClose, morphOpen } from "@/lib/morph";
+import { SkipLink } from "@/components/skip-link";
 import { usePinnedTrack } from "@/lib/pinned-track";
 import { projects, type Project } from "@/lib/projects";
 
@@ -177,12 +178,7 @@ export function Projects() {
         <span key={p.slug} aria-hidden className="pin-marker" style={{ "--i": i } as React.CSSProperties} />
       ))}
       <div className="pin-stage">
-        <a
-          href="#leadership"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-5 focus:top-[calc(var(--nav-height)+0.5rem)] focus:z-20 focus:rounded-full focus:bg-ink focus:px-4 focus:py-2.5 focus:text-sm focus:font-medium focus:text-paper"
-        >
-          Skip to next section
-        </a>
+        <SkipLink to="leadership" />
         <div className="wrap flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h2 className="font-display text-[clamp(3.75rem,2rem+5.5vw,6.5rem)] font-extrabold uppercase leading-[0.9] tracking-[-0.03em] text-ink">

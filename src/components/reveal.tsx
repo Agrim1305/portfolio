@@ -50,7 +50,10 @@ export function Reveal({
           io.disconnect();
         }
       },
-      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+      // Triggers once the top clears the bottom 12% of the screen. A share of
+      // the section's own area would never be reached by a pinned section
+      // many screens tall.
+      { threshold: 0, rootMargin: "0px 0px -12% 0px" }
     );
     io.observe(el);
     return () => io.disconnect();

@@ -46,7 +46,7 @@ const print =
 export function About() {
   const [lead, ...rest] = principles;
   return (
-    <section id="about" className="wrap py-20 lg:py-28">
+    <section id="about" tabIndex={-1} className="outline-none wrap py-20 lg:py-28">
       <h2 className="rise font-display text-[clamp(3rem,1.6rem+4.4vw,4.75rem)] font-extrabold leading-none tracking-[-0.03em] text-ink">
         About
       </h2>
