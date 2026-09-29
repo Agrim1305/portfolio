@@ -3,17 +3,20 @@
 import { useEffect, useRef } from "react";
 import Image from "next/image";
 
-/* The cloud avatar. Its eyes are two CSS pills on their own layer, not part of
-   the image, so they can blink and follow the cursor. Sizes and positions are
-   percentages of the cloud's box (397 x 342): each eye is 8.6% of the width
-   wide and 19.6% of the width tall, centred at (36%, 57.5%) and (62%, 57.5%).
-   `live` adds the float, the blink and the cursor follow; the chat header uses
-   it still. Purely decorative, so it is hidden from assistive tech. */
+/* The cloud avatar: a vector body, with the eyes as two CSS pills on their own
+   layer so they can blink and follow the cursor. Everything is placed in
+   percentages of the cloud's box (395 x 340): each eye is 8.6% of the width
+   wide and 22.75% of the height tall, centred at (36%, 57.5%) and
+   (62%, 57.5%), and the cursor follow moves them by a share of the box too,
+   so the cloud looks the same at any size. `live` adds the blink and the
+   follow; the chat header uses it still. Decorative, so it is hidden from
+   assistive tech; whatever holds it carries the name. */
 export function Cloud({ live = false, className = "" }: { live?: boolean; className?: string }) {
   const eyes = useRef<HTMLSpanElement>(null);
 
   // The eyes follow the pointer together, eased by a CSS transition and
-  // clamped to a few pixels. Fine pointers only, never under reduced motion.
+  // clamped to a couple of percent of the cloud. Fine pointers only, never
+  // under reduced motion.
   useEffect(() => {
     const el = eyes.current;
     if (!live || !el) return;
@@ -29,8 +32,8 @@ export function Cloud({ live = false, className = "" }: { live?: boolean; classN
       frame = requestAnimationFrame(() => {
         frame = 0;
         const r = el.getBoundingClientRect();
-        el.style.setProperty("--eye-x", `${clamp((x - (r.left + r.width / 2)) / 30, 6)}px`);
-        el.style.setProperty("--eye-y", `${clamp((y - (r.top + r.height * 0.575)) / 30, 4)}px`);
+        el.style.setProperty("--eye-x", `${clamp((x - (r.left + r.width / 2)) / 60, 2.2)}%`);
+        el.style.setProperty("--eye-y", `${clamp((y - (r.top + r.height * 0.575)) / 60, 2)}%`);
       });
     };
     window.addEventListener("pointermove", onMove, { passive: true });
@@ -43,13 +46,12 @@ export function Cloud({ live = false, className = "" }: { live?: boolean; classN
   const eye = `absolute top-[46.1%] h-[22.75%] w-[8.6%] rounded-full bg-[#0E0E0E] ${live ? "cloud-blink" : ""}`;
 
   return (
-    <span aria-hidden className={`relative block aspect-[397/342] ${live ? "cloud-float" : ""} ${className}`}>
+    <span aria-hidden className={`relative block aspect-[395/340] ${className}`}>
       <Image
-        src="/images/cloud.webp"
+        src="/images/cloud.svg"
         alt=""
         fill
-        sizes={live ? "(min-width: 1024px) 360px, 240px" : "48px"}
-        priority={live}
+        loading={live ? "eager" : "lazy"}
         className={live ? "drop-shadow-[0_30px_50px_rgb(240_140_60/0.28)]" : ""}
       />
       <span ref={eyes} className={`absolute inset-0 ${live ? "cloud-eyes" : ""}`}>

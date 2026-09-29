@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { ArrowUp, Sparkles, Volume2, VolumeX, X } from "lucide-react";
 import { Cloud } from "@/components/cloud";
 import {
@@ -100,45 +100,69 @@ const INTRO_MESSAGE: Message = {
 
 const OPEN_EVENT = "ask:open";
 
-/* Opens the assistant from anywhere on the page (hero bar, menu, launcher). */
-export function openAsk() {
-  window.dispatchEvent(new Event(OPEN_EVENT));
+/* Opens the assistant from anywhere on the page (hero card, menu, the cloud,
+   a section's question), optionally sending a first message. */
+export function openAsk(message?: string) {
+  window.dispatchEvent(new CustomEvent<string | undefined>(OPEN_EVENT, { detail: message }));
 }
 
-const noSubscribe = () => () => {};
-const isApple = () => /Mac|iPhone|iPad/.test(navigator.userAgent);
-
-/* The command bar under the cloud: looks like an input, opens the chat.
-   Callers set its display, since it sits in different places per breakpoint. */
-export function AskBar({ className = "" }: { className?: string }) {
-  const apple = useSyncExternalStore(noSubscribe, isApple, () => true);
+/* The hero's open Ask card, under the cloud: the assistant's header, the
+   suggested questions and an input. A question or a submitted message opens
+   the chat window and sends it there. */
+export function AskCard({ className = "" }: { className?: string }) {
+  const [text, setText] = useState("");
   return (
-    <button
-      type="button"
-      onClick={openAsk}
-      aria-keyshortcuts="Meta+K Control+K"
-      className={`glass hero-rise w-full items-center gap-3 rounded-2xl pl-5 pr-2 text-left text-[15px] text-ink-muted transition-[border-color,box-shadow] duration-300 hover:border-accent/70 hover:shadow-[0_0_0_4px_rgb(255_91_46/0.12),0_20px_50px_rgb(0_0_0/0.45)] h-14 lg:h-[58px] lg:pr-3 lg:text-base ${className}`}
+    <div
+      className={`hero-rise rounded-[26px] border border-ink/12 bg-[linear-gradient(180deg,#1B1B20,#141417)] p-5 shadow-[0_40px_80px_rgb(0_0_0/0.45)] lg:p-6 ${className}`}
       style={{ animationDelay: "1.1s" }}
     >
-      <Sparkles className="size-4 shrink-0 text-accent" aria-hidden />
-      <span className="flex-1">Ask AI about Agrim</span>
-      <kbd
-        aria-hidden
-        className="hidden rounded-lg border border-ink/20 px-2 py-1 font-mono text-xs text-ink-soft lg:inline"
+      <p className="font-display text-[20px] font-bold leading-tight lg:text-[22px]">Ask about Agrim</p>
+      <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-muted lg:text-xs">
+        AI assistant · grounded in his portfolio
+      </p>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {SUGGESTED_QUESTIONS.map((q) => (
+          <button
+            key={q}
+            type="button"
+            onClick={() => openAsk(q)}
+            className="min-h-11 rounded-full border border-ink/16 px-4 py-2 text-left text-sm text-[#D6D3CD] transition-colors hover:border-accent hover:text-ink"
+          >
+            {q}
+          </button>
+        ))}
+      </div>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!text.trim()) return;
+          openAsk(text);
+          setText("");
+        }}
+        className="mt-4 flex h-14 items-center gap-2.5 rounded-2xl border border-accent/70 pl-5 pr-2 transition-colors focus-within:border-accent"
       >
-        {apple ? "⌘K" : "Ctrl K"}
-      </kbd>
-      <span
-        aria-hidden
-        className="flex size-10 items-center justify-center rounded-xl bg-accent text-paper lg:hidden"
-      >
-        <ArrowUp className="size-4" />
-      </span>
-    </button>
+        <input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Ask a question…"
+          aria-label="Ask a question"
+          maxLength={500}
+          className="chat-input min-w-0 flex-1 bg-transparent text-base text-ink placeholder:text-ink-faint"
+        />
+        <button
+          type="submit"
+          disabled={!text.trim()}
+          aria-label="Send message"
+          className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent text-paper transition-opacity disabled:opacity-40"
+        >
+          <ArrowUp className="size-5" aria-hidden />
+        </button>
+      </form>
+    </div>
   );
 }
 
-/* `heroId` names the element holding the hero's ask bar. The floating launcher
+/* `heroId` names the element holding the hero's Ask card. The floating launcher
    waits for it to scroll away; without one, the launcher shows from the start. */
 export function AskAgrim({ heroId }: { heroId?: string }) {
   const [open, setOpen] = useState(false);
@@ -176,9 +200,12 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
     requestAnimationFrame(() => returnTo.current?.focus());
   }
 
-  // Opened by the hero bar, the menu, the launcher, or Cmd/Ctrl+K, which also
+  // Opened by the hero card, the menu, the launcher, or Cmd/Ctrl+K, which also
   // closes it again.
-  const onOpenEvent = useEffectEvent(() => show());
+  const onOpenEvent = useEffectEvent((message?: string) => {
+    show();
+    if (message) sendMessage(message);
+  });
   const onKey = useEffectEvent((e: KeyboardEvent) => {
     if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "k") return;
     // Ctrl+K in a text field is "delete to end of line" on macOS; leave it be.
@@ -191,7 +218,7 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
     else show();
   });
   useEffect(() => {
-    const open = () => onOpenEvent();
+    const open = (e: Event) => onOpenEvent((e as CustomEvent<string | undefined>).detail);
     const key = (e: KeyboardEvent) => onKey(e);
     window.addEventListener(OPEN_EVENT, open);
     window.addEventListener("keydown", key);

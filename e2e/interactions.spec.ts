@@ -70,21 +70,21 @@ test("the sliding keywords read as one label and hold still under reduced motion
 test("the cloud is decorative, and holds still under reduced motion", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  const cloud = page.locator("#top .cloud-float");
+  const cloud = page.locator("#hero-cloud > span");
   await expect(cloud).toHaveAttribute("aria-hidden", "true");
-  expect(await cloud.evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
-  expect(await page.locator("#top .cloud-blink").first().evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
+  await expect(cloud.locator("img")).toHaveAttribute("src", "/images/cloud.svg");
+  expect(await cloud.locator(".cloud-blink").first().evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
   await expect(page.getByRole("button", { name: "Hear me" })).toHaveCount(0);
 });
 
-test("the cloud's eyes follow the cursor, a few pixels at most", async ({ page, isMobile }) => {
+test("the cloud's eyes follow the cursor, a small share of the cloud at most", async ({ page, isMobile }) => {
   test.skip(isMobile, "fine pointers only");
   await page.goto("/");
-  const eyes = page.locator("#top .cloud-eyes");
+  const eyes = page.locator("#hero-cloud .cloud-eyes");
   await page.mouse.move(1400, 880);
-  await expect.poll(() => eyes.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m41)).toBe(6);
+  await expect.poll(() => eyes.evaluate((el) => getComputedStyle(el).translate)).toBe("2.2% 2%");
   await page.mouse.move(0, 0);
-  await expect.poll(() => eyes.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m41)).toBe(-6);
+  await expect.poll(() => eyes.evaluate((el) => getComputedStyle(el).translate)).toBe("-2.2% -2%");
 });
 
 test("the stack strip can be paused", async ({ page }) => {
@@ -115,20 +115,30 @@ test.describe("ask Agrim", () => {
     });
   });
 
-  test("the hero bar opens the chat and a suggested question gets an answer", async ({ page }) => {
+  test("a question on the hero card opens the chat with its answer", async ({ page }) => {
     await page.goto("/");
-    await page.locator("#top").getByRole("button", { name: "Ask AI about Agrim" }).filter({ visible: true }).click();
+    await page.locator("#top").getByRole("button", { name: "What's Agrim's strongest project?" }).click();
     const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
     await expect(chat).toBeVisible();
-    await expect(chat.getByRole("textbox", { name: "Ask a question" })).toBeFocused();
-
-    await chat.getByRole("button", { name: "What's Agrim's strongest project?" }).click();
+    await expect(chat.getByRole("log")).toContainText("What's Agrim's strongest project?");
     await expect(chat.getByRole("log")).toContainText(ANSWER);
+    await expect(chat.getByRole("textbox", { name: "Ask a question" })).toBeFocused();
     // Muted by default: nothing is read aloud.
     expect(await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken)).toEqual([]);
 
     await page.keyboard.press("Escape");
     await expect(chat).toBeHidden();
+  });
+
+  test("typing on the hero card sends that message in the chat", async ({ page }) => {
+    await page.goto("/");
+    const input = page.locator("#top").getByRole("textbox", { name: "Ask a question" });
+    await input.fill("Where is he based?");
+    await input.press("Enter");
+    const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+    await expect(chat.getByRole("log")).toContainText("Where is he based?");
+    await expect(chat.getByRole("log")).toContainText(ANSWER);
+    await expect(input).toHaveValue("");
   });
 
   test("with voice on, the answer is read aloud a sentence at a time", async ({ page }) => {
@@ -188,12 +198,13 @@ test.describe("ask Agrim", () => {
 
   test("Escape and the close button return focus to whatever opened it", async ({ page }) => {
     await page.goto("/");
-    const bar = page.locator("#top").getByRole("button", { name: "Ask AI about Agrim" }).filter({ visible: true });
-    await bar.click();
+    const question = page.locator("#top").getByRole("button", { name: "Is he eligible to work in Australia?" });
+    await question.click();
     const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+    await expect(chat.getByRole("log")).toContainText(ANSWER);
     await page.keyboard.press("Escape");
     await expect(chat).toBeHidden();
-    await expect(bar).toBeFocused();
+    await expect(question).toBeFocused();
 
     await page.evaluate(() => window.scrollTo(0, 2000));
     const launcher = page.locator("body > button[aria-keyshortcuts]");

@@ -1,5 +1,5 @@
 import { Cloud } from "@/components/cloud";
-import { AskBar } from "@/components/ask-agrim";
+import { AskCard } from "@/components/ask-agrim";
 import { SocialLinks } from "@/components/social-links";
 
 // The first word again at the end, so the loop slides back to the start
@@ -23,7 +23,7 @@ export function Hero() {
         </svg>
       </div>
 
-      <div className="wrap grid gap-y-6 pb-16 pt-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:items-center lg:gap-x-12 lg:pb-24 lg:pt-6 xl:grid-cols-[minmax(0,1fr)_500px]">
+      <div className="wrap grid gap-y-6 pb-16 pt-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:items-center lg:gap-x-12 lg:pb-24 lg:pt-6 xl:grid-cols-[minmax(0,1fr)_440px]">
         <div>
           {/* Non-breaking spaces keep each separator with the word after it, so
               a narrow screen breaks before a dot instead of after one. */}
@@ -83,24 +83,20 @@ export function Hero() {
             </a>
             <SocialLinks />
           </div>
-          <AskBar className="mt-4 flex lg:hidden" />
         </div>
 
-        {/* After the text in the DOM so the name is read first; shown first on
-            small screens. The cloud is decorative, so nothing here is read. */}
-        <div className="order-first mx-auto w-full max-w-[322px] lg:order-none lg:max-w-none">
-          <div className="hero-fade relative mx-auto mt-4 w-[62%] lg:mt-0 lg:w-[72%]">
+        {/* After the text in the DOM so the name is read first. On small
+            screens the cloud shows first and the Ask card after the text; on
+            wide ones they stack in the right column. The cloud is decorative. */}
+        <div className="contents lg:block">
+          <div id="hero-cloud" className="hero-fade relative order-first mx-auto mt-4 w-[200px] md:w-[240px] lg:mt-0 lg:w-full lg:max-w-[420px]">
             <div
               aria-hidden
               className="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[155%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgb(255_140_70/0.16),rgb(255_91_46/0)_65%)]"
             />
             <Cloud live />
-            <span
-              aria-hidden
-              className="absolute -bottom-[9%] left-1/5 h-[8%] w-3/5 rounded-[50%] bg-[radial-gradient(closest-side,rgb(0_0_0/0.6),transparent)]"
-            />
           </div>
-          <AskBar className="mt-14 hidden lg:flex" />
+          <AskCard className="lg:mt-10" />
         </div>
       </div>
     </section>
