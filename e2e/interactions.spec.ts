@@ -333,9 +333,9 @@ test("the page never scrolls sideways", async ({ page }) => {
   expect(overflow).toBeLessThanOrEqual(0);
 });
 
-test("the merger story opens as the President story", async ({ page }) => {
+test("Leadership opens the whole merger story as the President story", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "Read it" }).click();
+  await page.getByRole("button", { name: "Read the whole story" }).click();
   const sheet = page.getByRole("dialog", { name: "President" });
   await expect(sheet).toBeVisible();
   await expect(sheet.getByRole("heading", { name: "What I did" })).toBeVisible();
