@@ -103,6 +103,9 @@ function Card({
 
       <Link
         href={`/projects/${project.slug}`}
+        // The card opens the case study in place; the route itself is only
+        // for new tabs and shared links, so there is nothing to prefetch.
+        prefetch={false}
         data-expand
         onClick={(e) => {
           // Let new-tab and new-window clicks through to the real page.

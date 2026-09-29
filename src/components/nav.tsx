@@ -19,6 +19,7 @@ function Wordmark() {
   return (
     <Link
       href="/#top"
+      prefetch={false}
       aria-label="Agrim Sharma, back to top"
       className="flex min-h-11 items-center font-display text-xl font-extrabold tracking-tight text-ink"
     >
@@ -31,6 +32,8 @@ export function Nav() {
   const [active, setActive] = useState("");
   const [open, setOpen] = useState(false);
 
+  // Section links point into the home page, so prefetching them (on by
+  // default) would only re-download the page the visitor is already on.
   useEffect(() => {
     // Highlight the last section whose top has passed a line a third of the way
     // down the viewport. A plain scroll listener, since the browser pauses rAF
@@ -90,6 +93,7 @@ export function Nav() {
               <Link
                 key={id}
                 href={`/#${id}`}
+                prefetch={false}
                 aria-current={isActive ? "true" : undefined}
                 className={`flex h-11 items-center rounded-full px-[18px] text-[15px] transition-colors duration-300 ${
                   isActive
@@ -150,6 +154,7 @@ export function Nav() {
               <Link
                 key={id}
                 href={`/#${id}`}
+                prefetch={false}
                 onClick={(e) => goTo(e, id)}
                 aria-current={active === id ? "true" : undefined}
                 className="border-b border-hairline py-3.5 font-display text-[44px] font-extrabold leading-tight tracking-[-0.035em] text-ink transition-colors active:text-accent aria-[current=true]:text-accent"

@@ -1,12 +1,21 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Play, Square } from "lucide-react";
 import { setMuted, speak, stop, useCanSpeak, useSpeech } from "@/lib/speech";
 
 const HEADS = ["/images/avatar/head-0.webp", "/images/avatar/head-1.webp", "/images/avatar/head-2.webp"];
 const LAYER_SIZES = "(min-width: 1280px) 448px, (min-width: 1024px) 380px, 280px";
+
+/* The mouth frames the avatar needs right now. The two talking frames are
+   only fetched once speech first starts, so a visitor who never turns the
+   voice on never downloads them. */
+function useMouthFrames(talking: boolean) {
+  const [warm, setWarm] = useState(false);
+  if (talking && !warm) setWarm(true);
+  return warm ? HEADS : HEADS.slice(0, 1);
+}
 
 /* The layers are laid out in the design's own units: a 520 x 540 box whose
    circle frame is 420 across. Every position is a percentage of that box, so
@@ -16,6 +25,7 @@ export function Avatar() {
   const ref = useRef<HTMLDivElement>(null);
   const { talking, frame } = useSpeech();
   const canSpeak = useCanSpeak();
+  const heads = useMouthFrames(talking);
 
   // Head and eyes follow the pointer. Fine pointers only, and never under
   // reduced motion. Written straight to CSS variables, so no re-render.
@@ -118,7 +128,7 @@ export function Avatar() {
             <Image src="/images/avatar/body.webp" alt="" fill sizes={LAYER_SIZES} loading="eager" />
             <div className="avatar-head absolute inset-0">
               <div className="avatar-idle absolute inset-0 drop-shadow-[0_18px_24px_rgb(0_0_0/0.45)]">
-                {HEADS.map((src, i) => (
+                {heads.map((src, i) => (
                   <Image
                     key={src}
                     src={src}
@@ -175,25 +185,25 @@ export function Avatar() {
 /* The avatar's face alone, cropped into a circle for the chat header. It
    shares the mouth frames, so it lip-syncs along with the big one. */
 export function AvatarHead({ className = "" }: { className?: string }) {
-  const { frame } = useSpeech();
+  const { talking, frame } = useSpeech();
+  const heads = useMouthFrames(talking);
   return (
     <span aria-hidden className={`relative block overflow-hidden rounded-full bg-[#E6E1D9] ${className}`}>
       <span className="absolute left-[-73%] top-[-23%] h-[263%] w-[246%]">
-        {HEADS.map((src, i) => (
+        {heads.map((src, i) => (
           <Image
             key={src}
             src={src}
             alt=""
             fill
-            sizes="128px"
-            // Eager: inside a closed <dialog> lazy images wait until it opens,
-            // which leaves the circle blank for a moment.
-            loading="eager"
+            // The big avatar's sizes, so the browser picks the same files it
+            // already has and the face shows the moment the chat opens.
+            sizes={LAYER_SIZES}
             className={frame === i ? "opacity-100" : "opacity-0"}
           />
         ))}
         <span className="avatar-eyes absolute inset-0">
-          <Image src="/images/avatar/iris.webp" alt="" fill sizes="128px" loading="eager" />
+          <Image src="/images/avatar/iris.webp" alt="" fill sizes={LAYER_SIZES} />
         </span>
       </span>
     </span>

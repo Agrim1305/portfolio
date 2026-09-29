@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Avatar } from "@/components/avatar";
 import { AskBar } from "@/components/ask-agrim";
 import { SocialLinks } from "@/components/social-links";
@@ -6,14 +5,18 @@ import { SocialLinks } from "@/components/social-links";
 export function Hero() {
   return (
     <section id="top" className="relative isolate overflow-x-clip">
+      {/* The topographic texture is drawn as SVG that references the contour
+          file with <use>, not loaded as an image. As an image (or a CSS
+          background or mask) this faint backdrop covered the most pixels and
+          became the page's LCP element; drawn SVG never does. */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <Image
-          src="/images/topo.svg"
-          alt=""
-          fill
-          sizes="100vw"
-          className="topo-drift object-cover opacity-[0.08]"
-        />
+        <svg
+          viewBox="0 0 1036.8 662.4"
+          preserveAspectRatio="xMidYMid slice"
+          className="topo-drift size-full opacity-[0.08]"
+        >
+          <use href="/images/topo.svg#topo" />
+        </svg>
       </div>
 
       <div className="wrap grid gap-y-6 pb-16 pt-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:items-center lg:gap-x-12 lg:pb-24 lg:pt-6 xl:grid-cols-[minmax(0,1fr)_500px]">

@@ -15,11 +15,14 @@ const bricolage = Bricolage_Grotesque({
 });
 
 // Only ever used for italic accent words, so the upright cut is never loaded.
+// Not preloaded: it isn't needed for the first paint to read correctly, and
+// the size-matched fallback keeps the swap from shifting the layout.
 const newsreader = Newsreader({
   variable: "--font-newsreader",
   subsets: ["latin"],
   style: "italic",
   weight: "500",
+  preload: false,
 });
 
 const description =
