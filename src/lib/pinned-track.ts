@@ -45,7 +45,7 @@ export function usePinnedTrack(count: number) {
     let frame = 0;
     const update = () => {
       frame = 0;
-      const travel = section.offsetHeight - window.innerHeight;
+      const travel = Math.max(1, section.offsetHeight - window.innerHeight);
       const progress = Math.min(1, Math.max(0, -section.getBoundingClientRect().top / travel));
       const step = slides.length > 1 ? slides[1].offsetLeft - slides[0].offsetLeft : 0;
       const at = progress * (count - 1);

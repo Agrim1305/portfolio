@@ -71,16 +71,16 @@
   outline-offset: 2px;
 }
 
-/* Anchor targets clear the sticky header (64px, or 96px from lg). Lenis reads
-   this too, so it needs no offset of its own. */
+/* --nav-height is the sticky header's height. Anchor targets clear it with
+   room to spare; Lenis reads the padding too, so it needs no offset of its
+   own. */
 html {
   --nav-height: 4rem;
-  --nav-offset: 5.5rem;
   scroll-behavior: smooth;
-  scroll-padding-top: var(--nav-offset);
+  scroll-padding-top: 5.5rem;
   @media (width >= 64rem) {
     --nav-height: 6rem;
-    --nav-offset: 7rem;
+    scroll-padding-top: 7rem;
   }
 }
 
