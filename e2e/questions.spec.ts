@@ -111,6 +111,8 @@ test.describe("section questions", () => {
     await expect(chat.getByRole("log")).toContainText("Is he eligible to work in Australia?");
     await expect(chat.getByRole("log")).toContainText("Yes, from December 2026.");
     await expect(bubble(page)).toHaveCount(0);
+    await page.keyboard.press("Escape");
+    await expect(cloud(page)).toBeFocused();
   });
 
   test("a dot's question shows on hover and on focus, sends on click, and Escape puts it away", async ({ page }) => {
@@ -122,8 +124,13 @@ test.describe("section questions", () => {
     await cloud(page).focus();
     await expect(bubble(page)).toBeVisible();
     await expect(cloud(page)).toHaveAccessibleDescription("What does Agrim do at Aurivox?");
+    // Tab goes from the cloud into its question, and the tooltip stays.
+    await page.keyboard.press("Tab");
+    await expect(bubble(page).getByRole("button", { name: "What does Agrim do at Aurivox?" })).toBeFocused();
+    await expect(bubble(page)).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(bubble(page)).toBeHidden();
+    await expect(cloud(page)).toBeFocused();
 
     await cloud(page).hover();
     await bubble(page).getByRole("button", { name: "What does Agrim do at Aurivox?" }).click();
@@ -161,6 +168,7 @@ test.describe("section questions", () => {
 
     await bubble(page).getByRole("button", { name: "Dismiss this question" }).click();
     await expect(bubble(page)).toHaveCount(0);
+    await expect(cloud(page)).toBeFocused();
     await page.mouse.wheel(0, 40);
     await page.waitForTimeout(1100);
     await expect(bubble(page)).toHaveCount(0);

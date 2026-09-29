@@ -39,6 +39,9 @@ export function Dock({
   const cornerRef = useRef<HTMLDivElement>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
   const [peek, setPeek] = useState(false);
+  // Escape put the tooltip away; focus alone won't bring it back until the
+  // pointer or focus leaves the corner.
+  const quiet = useRef(false);
   // Section questions start once the hero is gone, and wait while the chat
   // is open.
   const { question, fits, see, done } = useSectionQuestion(heroGone && !open, bubbleRef, cornerRef);
@@ -127,57 +130,30 @@ export function Dock({
       // its own as a tooltip above it, and it stays while the pointer or focus
       // moves onto it. Escape puts it away.
       onPointerEnter={() => {
+        quiet.current = false;
         setPeek(true);
         see();
       }}
       onPointerLeave={() => setPeek(false)}
       onFocus={() => {
+        if (quiet.current) return;
         setPeek(true);
         see();
       }}
       onBlur={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget)) setPeek(false);
+        if (e.currentTarget.contains(e.relatedTarget)) return;
+        quiet.current = false;
+        setPeek(false);
       }}
       onKeyDown={(e) => {
         if (e.key !== "Escape" || !bubbleShown) return;
         e.stopPropagation();
+        quiet.current = true;
         if (tooltip) setPeek(false);
         else done();
+        buttonRef.current?.focus();
       }}
     >
-      {question && (
-        <div
-          ref={bubbleRef}
-          id="dock-question"
-          // Padding, not a margin, under the bubble, so the pointer can cross
-          // from the cloud to the bubble without leaving the corner.
-          className={`absolute bottom-full right-0 w-[200px] pb-2.5 transition-[opacity,translate,visibility] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
-            bubbleShown ? "pointer-events-auto visible opacity-100" : "invisible translate-y-1.5 opacity-0"
-          }`}
-        >
-          <div className="relative rounded-2xl rounded-br-md bg-ink text-paper shadow-[0_18px_40px_rgb(0_0_0/0.45)]">
-            <button
-              id="dock-question-text"
-              type="button"
-              onClick={() => {
-                done();
-                onAsk(question.text);
-              }}
-              className="block w-full rounded-2xl rounded-br-md py-3 pl-3.5 pr-9 text-left text-[13px] font-medium leading-snug"
-            >
-              {question.text}
-            </button>
-            <button
-              type="button"
-              onClick={done}
-              aria-label="Dismiss this question"
-              className="absolute right-1 top-1 flex size-7 items-center justify-center rounded-full text-paper/60 transition-colors hover:text-paper"
-            >
-              <X className="size-3.5" aria-hidden />
-            </button>
-          </div>
-        </div>
-      )}
       <button
         ref={buttonRef}
         type="button"
@@ -197,6 +173,46 @@ export function Dock({
           <span aria-hidden className="absolute right-[10%] top-[8%] size-2 rounded-full bg-accent ring-2 ring-paper" />
         )}
       </button>
+      {/* After the cloud, so Tab goes from the cloud to its question. */}
+      {question && (
+        <div
+          ref={bubbleRef}
+          id="dock-question"
+          // Padding, not a margin, under the bubble, so the pointer can cross
+          // from the cloud to the bubble without leaving the corner.
+          className={`absolute bottom-full right-0 w-[200px] pb-2.5 transition-[opacity,translate,visibility] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
+            bubbleShown ? "pointer-events-auto visible opacity-100" : "invisible translate-y-1.5 opacity-0"
+          }`}
+        >
+          <div className="relative rounded-2xl rounded-br-md bg-ink text-paper shadow-[0_18px_40px_rgb(0_0_0/0.45)]">
+            <button
+              id="dock-question-text"
+              type="button"
+              onClick={() => {
+                // The question is about to go, so the chat hands focus back
+                // to the cloud when it closes.
+                buttonRef.current?.focus();
+                done();
+                onAsk(question.text);
+              }}
+              className="block w-full rounded-2xl rounded-br-md py-3 pl-3.5 pr-9 text-left text-[13px] font-medium leading-snug"
+            >
+              {question.text}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                buttonRef.current?.focus();
+                done();
+              }}
+              aria-label="Dismiss this question"
+              className="absolute right-1 top-1 flex size-7 items-center justify-center rounded-full text-paper/60 transition-colors hover:text-paper"
+            >
+              <X className="size-3.5" aria-hidden />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
