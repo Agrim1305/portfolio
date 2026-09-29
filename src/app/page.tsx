@@ -28,10 +28,10 @@ export default function Home() {
         <Reveal>
           <Court />
         </Reveal>
+        <Reveal>
+          <About />
+        </Reveal>
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
-          <Reveal>
-            <About />
-          </Reveal>
           <Reveal>
             <Contact />
           </Reveal>
