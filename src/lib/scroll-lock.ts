@@ -6,7 +6,11 @@ const notify = () => scrollListeners.forEach((listener) => listener());
 
 export function registerLenis(instance: Lenis | null) {
   lenis = instance;
-  instance?.on("scroll", notify);
+  if (!instance) return;
+  instance.on("scroll", notify);
+  // The page may have moved before Lenis started (a scroll during hydration,
+  // a restored position), so everything catches up once now.
+  notify();
 }
 
 /* Calls `listener` every time Lenis moves the page. Lenis emits inside its own
