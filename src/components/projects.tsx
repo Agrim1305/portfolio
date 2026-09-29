@@ -176,9 +176,6 @@ export function Projects() {
       className="pin-section py-20 lg:py-28"
       style={{ "--slides": total } as React.CSSProperties}
     >
-      {projects.map((p, i) => (
-        <span key={p.slug} aria-hidden className="pin-marker" style={{ "--i": i } as React.CSSProperties} />
-      ))}
       <div className="pin-stage">
         <SkipLink to="leadership" />
         <div className="wrap">

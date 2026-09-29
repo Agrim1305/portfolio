@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { addSnapPoint, scrollToY } from "@/lib/scroll-lock";
+import { onLenisScroll, scrollToY } from "@/lib/scroll-lock";
 
 /* Where the track pins. Everywhere else it is a native sideways scroller with
-   scroll-snap. Keep in step with the media query in globals.css. */
+   scroll-snap. Keep in step with the pin variant and .pin-* in globals.css. */
 const PIN_QUERY = "(min-width: 48rem) and (prefers-reduced-motion: no-preference)";
+
+// How long the page must sit still before a pinned section comes to rest on
+// its nearest slide: long enough that a trackpad's momentum has run out.
+const SETTLE_AFTER_MS = 150;
 
 function subscribe(onChange: () => void) {
   const mq = window.matchMedia(PIN_QUERY);
@@ -11,11 +15,13 @@ function subscribe(onChange: () => void) {
   return () => mq.removeEventListener("change", onChange);
 }
 
-/* Scroll-pinned sideways travel. The section is one viewport tall per slide
-   and its stage sticks to the top; scrolling through it maps progress to a
-   translateX on the track, one slide per viewport. Unpinned, the track scrolls
-   sideways itself. Either way `active` is the slide in view and `go` moves to
-   one: pinned, by scrolling the window to that slide's position. */
+/* Scroll-pinned sideways travel. The section's stage sticks to the top for
+   80svh of scroll per slide, and every frame Lenis moves the page, the track
+   is translated by the same share of its width, so the slides glide rather
+   than step. Once scrolling stops inside the section, the page settles on the
+   nearest slide. Unpinned, the track scrolls sideways itself. Either way
+   `active` is the slide nearest the middle and `go` moves to one: pinned, by
+   scrolling the window to that slide's position. */
 export function usePinnedTrack(count: number) {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -41,29 +47,75 @@ export function usePinnedTrack(count: number) {
       return () => io.disconnect();
     }
 
-    const unsnap = [...section.querySelectorAll<HTMLElement>(".pin-marker")].map(addSnapPoint);
-    let frame = 0;
+    const gaps = Math.max(1, count - 1);
+    let travel = 1;
+    let step = 0;
+    const measure = () => {
+      travel = Math.max(1, section.offsetHeight - window.innerHeight);
+      step = slides.length > 1 ? slides[1].offsetLeft - slides[0].offsetLeft : 0;
+    };
+    const progress = () => Math.min(1, Math.max(0, -section.getBoundingClientRect().top / travel));
+
+    // A still page inside the section glides to the nearest slide. Not while
+    // a finger or the mouse is down, which is a drag that has only paused.
+    let held = false;
+    let idle = 0;
+    const settle = () => {
+      const p = progress();
+      if (held || p <= 0 || p >= 1) return;
+      const y = section.getBoundingClientRect().top + window.scrollY + (Math.round(p * gaps) / gaps) * travel;
+      if (Math.abs(y - window.scrollY) > 1) scrollToY(y, { settle: true });
+    };
+    const waitForStill = () => {
+      clearTimeout(idle);
+      idle = window.setTimeout(settle, SETTLE_AFTER_MS);
+    };
+
+    let x = NaN;
+    let travelling = false;
     const update = () => {
-      frame = 0;
-      const travel = Math.max(1, section.offsetHeight - window.innerHeight);
-      const progress = Math.min(1, Math.max(0, -section.getBoundingClientRect().top / travel));
-      const step = slides.length > 1 ? slides[1].offsetLeft - slides[0].offsetLeft : 0;
-      const at = progress * (count - 1);
-      track.style.transform = `translate3d(${-at * step}px, 0, 0)`;
+      const p = progress();
+      const at = p * gaps;
+      if (-at * step !== x) {
+        x = -at * step;
+        track.style.transform = `translate3d(${x}px, 0, 0)`;
+      }
+      // Only a track that is moving gets its own compositor layer.
+      if (travelling !== (p > 0 && p < 1)) {
+        travelling = !travelling;
+        track.style.willChange = travelling ? "transform" : "";
+      }
       setActive(Math.round(at));
+      waitForStill();
     };
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(update);
+    const onResize = () => {
+      measure();
+      update();
     };
+    const hold = (down: boolean) => () => {
+      held = down;
+      if (!down) waitForStill();
+    };
+    const holdEvents = [
+      ["touchstart", hold(true)],
+      ["touchend", hold(false)],
+      ["touchcancel", hold(false)],
+      ["mousedown", hold(true)],
+      ["mouseup", hold(false)],
+    ] as const;
+
+    measure();
     update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
+    const offScroll = onLenisScroll(update);
+    window.addEventListener("resize", onResize, { passive: true });
+    for (const [type, listener] of holdEvents) window.addEventListener(type, listener, { passive: true });
     return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      cancelAnimationFrame(frame);
-      unsnap.forEach((remove) => remove());
+      offScroll();
+      window.removeEventListener("resize", onResize);
+      for (const [type, listener] of holdEvents) window.removeEventListener(type, listener);
+      clearTimeout(idle);
       track.style.transform = "";
+      track.style.willChange = "";
     };
   }, [pinned, count]);
 
@@ -74,7 +126,7 @@ export function usePinnedTrack(count: number) {
     if (pinned) {
       const top = section.getBoundingClientRect().top + window.scrollY;
       const travel = section.offsetHeight - window.innerHeight;
-      scrollToY(top + (count > 1 ? (to / (count - 1)) * travel : 0), immediate);
+      scrollToY(top + (count > 1 ? (to / (count - 1)) * travel : 0), { immediate });
       return;
     }
     trackRef.current?.querySelector(`[data-index="${to}"]`)?.scrollIntoView({

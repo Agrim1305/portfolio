@@ -236,9 +236,9 @@ test.describe("selected work", () => {
       top: el.getBoundingClientRect().top + window.scrollY,
       height: (el as HTMLElement).offsetHeight,
     }));
-    // One viewport of scroll per card.
-    expect(height).toBe(8 * 900);
-    await page.evaluate((y) => window.scrollTo(0, y), top + 7 * 900);
+    // 80svh of scroll per card after the first, plus the pinned screen itself.
+    expect(height).toBe(7 * 720 + 900);
+    await page.evaluate((y) => window.scrollTo(0, y), top + 7 * 720);
     await expect(page.locator("#projects").getByRole("group", { name: "8 of 8" })).toBeInViewport({ ratio: 0.6 });
     await expect(page.getByText("8 / 8")).toBeVisible();
     await page.evaluate((y) => window.scrollTo(0, y), top + height + 200);
@@ -434,11 +434,11 @@ test.describe("built on court", () => {
     await expect(current(page)).toHaveAttribute("aria-label", "7 of 8");
   });
 
-  test("scrolling down slides the stops sideways, one viewport each", async ({ page, isMobile }) => {
+  test("scrolling down slides the stops sideways, 80svh each", async ({ page, isMobile }) => {
     test.skip(isMobile, "pinned travel is for wide screens; phones swipe");
     await page.goto("/");
     const top = await page.locator("#court").evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
-    await page.evaluate((y) => window.scrollTo(0, y + 3 * 900), top);
+    await page.evaluate((y) => window.scrollTo(0, y + 3 * 720), top);
     await expect(current(page)).toHaveAttribute("aria-label", "4 of 8");
     await expect(page.locator("#court").getByRole("group", { name: "4 of 8" })).toBeInViewport({ ratio: 0.6 });
     // The reveal must fire for a section many screens tall, or it stays blank.

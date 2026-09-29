@@ -79,7 +79,7 @@ const stops: Stop[] = [
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-/* One stop per viewport of scroll, sliding sideways, with a timeline
+/* One stop per 80svh of scroll, sliding sideways, with a timeline
    underneath (see lib/pinned-track.ts; phones and reduced motion swipe
    instead). Arrows, the timeline dots and the arrow keys scroll to a stop.
    Stops that are out of view are inert, so a screen reader doesn't land on
@@ -98,9 +98,6 @@ export function Court() {
       className="pin-section py-20 lg:py-28"
       style={{ "--slides": stops.length } as React.CSSProperties}
     >
-      {stops.map((s, i) => (
-        <span key={s.dot} aria-hidden className="pin-marker" style={{ "--i": i } as React.CSSProperties} />
-      ))}
       <div className="pin-stage">
         <div className="wrap relative pin:flex pin:min-h-0 pin:flex-1 pin:flex-col pin:justify-center">
           <SkipLink to="about" />

@@ -1,27 +1,23 @@
 import type Lenis from "lenis";
-import Snap from "lenis/snap";
 
 let lenis: Lenis | null = null;
-let snap: Snap | null = null;
-const snapPoints = new Map<HTMLElement, (() => void) | undefined>();
+const scrollListeners = new Set<() => void>();
+const notify = () => scrollListeners.forEach((listener) => listener());
 
 export function registerLenis(instance: Lenis | null) {
   lenis = instance;
-  snap?.destroy();
-  // CSS scroll-snap fights Lenis's own smoothing (the page jitters back and
-  // forth), so snap points go through Lenis's snap instead. Proximity only:
-  // stopping between two points is allowed, as is scrolling past the last.
-  snap = instance ? new Snap(instance, { type: "proximity", distanceThreshold: "30%" }) : null;
-  for (const el of snapPoints.keys()) snapPoints.set(el, snap?.addElement(el, { align: ["start"] }));
+  instance?.on("scroll", notify);
 }
 
-/* Snaps the window to an element's top when a scroll ends near it. Without
-   Lenis (reduced motion) there is nothing to snap for, so it does nothing. */
-export function addSnapPoint(el: HTMLElement) {
-  snapPoints.set(el, snap?.addElement(el, { align: ["start"] }));
+/* Calls `listener` every time Lenis moves the page. Lenis emits inside its own
+   animation frame, right after it sets the scroll position, so anything
+   written here (a transform, a CSS variable) lands in the same frame as the
+   scroll and never trails it. Without Lenis (reduced motion) nothing scroll
+   linked runs, so there is nothing to call. */
+export function onLenisScroll(listener: () => void) {
+  scrollListeners.add(listener);
   return () => {
-    snapPoints.get(el)?.();
-    snapPoints.delete(el);
+    scrollListeners.delete(listener);
   };
 }
 
@@ -40,9 +36,13 @@ export function scrollToSection(el: HTMLElement) {
   else el.scrollIntoView();
 }
 
+// The site's --ease-out, as a function of time for Lenis.
+const easeOut = (t: number) => (t >= 1 ? 1 : 1 - 2 ** (-10 * t));
+
 /* Scrolls the window to a position, through Lenis when it is running so the
-   two never fight. */
-export function scrollToY(y: number, immediate = false) {
-  if (lenis) lenis.scrollTo(y, { immediate });
+   two never fight. `settle` is the slower glide a pinned section uses to come
+   to rest on a slide. */
+export function scrollToY(y: number, { immediate = false, settle = false } = {}) {
+  if (lenis) lenis.scrollTo(y, settle ? { duration: 0.6, easing: easeOut } : { immediate });
   else window.scrollTo({ top: y, behavior: immediate ? "instant" : "smooth" });
 }
