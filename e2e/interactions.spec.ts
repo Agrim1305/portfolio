@@ -153,6 +153,59 @@ test.describe("ask Agrim", () => {
     await expect(chat.getByRole("log")).not.toContainText("Hello?");
   });
 
+  test("the chat is a small window: the page behind stays scrollable and clickable", async ({ page, isMobile }) => {
+    await page.goto("/");
+    await page.keyboard.press("ControlOrMeta+k");
+    const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+    await expect(chat).toBeVisible();
+    await expect(chat).toHaveAttribute("aria-modal", "false");
+
+    const box = (await chat.boundingBox())!;
+    if (!isMobile) {
+      expect(box.width).toBeCloseTo(380, 0);
+      expect(box.height).toBeCloseTo(540, 0);
+    }
+
+    // On phones the sheet covers most of the screen; scroll the strip above it.
+    await page.mouse.move(40, isMobile ? 90 : 300);
+    await page.mouse.wheel(0, 800);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(200);
+    if (!isMobile) {
+      await page.getByRole("navigation", { name: "Sections" }).getByRole("link", { name: "About" }).click();
+      await expect
+        .poll(() => page.evaluate(() => document.getElementById("about")!.getBoundingClientRect().top))
+        .toBeLessThan(200);
+      await expect(chat).toBeVisible();
+    }
+  });
+
+  test("Escape and the close button return focus to whatever opened it", async ({ page }) => {
+    await page.goto("/");
+    const bar = page.locator("#top").getByRole("button", { name: "Ask AI about Agrim" }).filter({ visible: true });
+    await bar.click();
+    const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+    await page.keyboard.press("Escape");
+    await expect(chat).toBeHidden();
+    await expect(bar).toBeFocused();
+
+    await page.evaluate(() => window.scrollTo(0, 2000));
+    const launcher = page.locator("body > button[aria-keyshortcuts]");
+    await launcher.click();
+    await chat.getByRole("button", { name: "Close chat" }).click();
+    await expect(chat).toBeHidden();
+    await expect(launcher).toBeFocused();
+  });
+
+  test("Cmd+K toggles the window, even from its own input", async ({ page }) => {
+    await page.goto("/");
+    const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+    await page.keyboard.press("ControlOrMeta+k");
+    await expect(chat).toBeVisible();
+    await expect(chat.getByRole("textbox", { name: "Ask a question" })).toBeFocused();
+    await page.keyboard.press("Meta+k");
+    await expect(chat).toBeHidden();
+  });
+
   test("the launcher appears once the hero scrolls away", async ({ page }) => {
     await page.goto("/");
     const launcher = page.locator("body > button[aria-keyshortcuts]");

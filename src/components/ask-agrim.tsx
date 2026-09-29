@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from "react";
 import { ArrowUp, Sparkles, Volume2, VolumeX, X } from "lucide-react";
 import { AvatarHead } from "@/components/avatar";
-import { Sheet } from "@/components/sheet";
 import {
   setMuted,
   speak,
@@ -152,6 +151,9 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
   const canSpeak = useCanSpeak();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const launcherRef = useRef<HTMLButtonElement>(null);
+  // Where focus goes back to when the window closes: whatever opened it.
+  const returnTo = useRef<HTMLElement | null>(null);
   // Read inside the streaming loop, so an answer still arriving after the
   // chat closes keeps filling in but stops talking.
   const openRef = useRef(open);
@@ -159,23 +161,43 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
     openRef.current = open;
   }, [open]);
 
-  // Opened by the hero bar, the menu, the launcher, or Cmd/Ctrl+K.
+  function show() {
+    if (openRef.current) return;
+    const from = document.activeElement;
+    returnTo.current = from instanceof HTMLElement && from !== document.body ? from : launcherRef.current;
+    setOpen(true);
+  }
+
+  function close() {
+    if (!openRef.current) return;
+    setOpen(false);
+    stop();
+    // After the render that shows the launcher again, so it can take focus.
+    requestAnimationFrame(() => returnTo.current?.focus());
+  }
+
+  // Opened by the hero bar, the menu, the launcher, or Cmd/Ctrl+K, which also
+  // closes it again.
+  const onOpenEvent = useEffectEvent(() => show());
+  const onKey = useEffectEvent((e: KeyboardEvent) => {
+    if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "k") return;
+    // Ctrl+K in a text field is "delete to end of line" on macOS; leave it be.
+    // Cmd+K has no such meaning, so it still works from the chat's own input.
+    const target = e.target as HTMLElement;
+    const inField = target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName);
+    if (inField && !e.metaKey) return;
+    e.preventDefault();
+    if (openRef.current) close();
+    else show();
+  });
   useEffect(() => {
-    const onOpen = () => setOpen(true);
-    const onKey = (e: KeyboardEvent) => {
-      // Ctrl+K in a text field is "delete to end of line" on macOS; leave it be.
-      const target = e.target as HTMLElement;
-      if (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        setOpen(true);
-      }
-    };
-    window.addEventListener(OPEN_EVENT, onOpen);
-    window.addEventListener("keydown", onKey);
+    const open = () => onOpenEvent();
+    const key = (e: KeyboardEvent) => onKey(e);
+    window.addEventListener(OPEN_EVENT, open);
+    window.addEventListener("keydown", key);
     return () => {
-      window.removeEventListener(OPEN_EVENT, onOpen);
-      window.removeEventListener("keydown", onKey);
+      window.removeEventListener(OPEN_EVENT, open);
+      window.removeEventListener("keydown", key);
     };
   }, []);
 
@@ -197,11 +219,6 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
   useEffect(() => {
     if (open) inputRef.current?.focus();
   }, [open]);
-
-  function close() {
-    setOpen(false);
-    stop();
-  }
 
   async function sendMessage(text: string) {
     const trimmed = text.trim();
@@ -307,12 +324,19 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
   return (
     <>
       <button
+        ref={launcherRef}
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={show}
         aria-label="Ask AI about Agrim"
         aria-keyshortcuts="Meta+K Control+K"
-        className={`glass fixed bottom-5 right-5 z-30 flex h-12 items-center gap-2.5 rounded-full pl-4 pr-5 transition-[opacity,translate,visibility] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
-          launcherShown && !open ? "visible opacity-100" : "invisible translate-y-3 opacity-0"
+        aria-expanded={open}
+        aria-controls="ask-agrim"
+        // Visibility only waits out the fade when hiding; showing is instant, so
+        // focus can return to the launcher the moment the chat closes.
+        className={`glass fixed bottom-6 right-6 z-30 flex h-12 items-center gap-2.5 rounded-full pl-4 pr-5 duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
+          launcherShown && !open
+            ? "visible opacity-100 transition-[opacity,translate]"
+            : "invisible translate-y-3 opacity-0 transition-[opacity,translate,visibility]"
         }`}
       >
         <Sparkles className="size-4 text-accent" aria-hidden />
@@ -320,21 +344,32 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
         <span className="text-[15px] font-medium text-ink sm:hidden">Ask AI</span>
       </button>
 
-      <Sheet
-        open={open}
-        onClose={close}
-        labelledBy="ask-agrim-title"
-        className="inset-x-0 bottom-0 top-auto h-[calc(100dvh-6.5rem)] w-full rounded-t-[26px] border-t border-white/12 bg-sheet lg:bottom-auto lg:left-[max(2rem,calc(50vw-600px))] lg:right-auto lg:top-28 lg:h-[min(760px,calc(100dvh-9rem))] lg:w-[660px] lg:rounded-[26px] lg:border"
+      {/* A small window, not a modal: no backdrop, no scroll lock and no focus
+          trap, so the page stays usable behind it. Below md it is a bottom
+          sheet. */}
+      <div
+        id="ask-agrim"
+        role="dialog"
+        aria-modal="false"
+        aria-labelledby="ask-agrim-title"
+        hidden={!open}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") {
+            e.stopPropagation();
+            close();
+          }
+        }}
+        className="chat-window fixed inset-x-0 bottom-0 z-50 h-[85dvh] overflow-hidden rounded-t-[22px] border border-b-0 border-white/14 bg-sheet text-ink shadow-[0_30px_80px_rgb(0_0_0/0.6)] md:inset-x-auto md:bottom-6 md:right-6 md:h-[min(540px,calc(100dvh-3rem))] md:w-[380px] md:rounded-[22px] md:border-b"
       >
         <div className="flex h-full flex-col">
-          <span aria-hidden className="mx-auto mt-2.5 h-[5px] w-10 rounded-full bg-ink/25 lg:hidden" />
-          <div className="flex items-center gap-3 border-b border-hairline py-3.5 pl-5 pr-4 lg:gap-3.5 lg:py-5 lg:pl-6 lg:pr-5">
-            <AvatarHead className="size-[52px] shrink-0 lg:size-11" />
+          <span aria-hidden className="mx-auto mt-2.5 h-[5px] w-10 shrink-0 rounded-full bg-ink/25 md:hidden" />
+          <div className="flex items-center gap-2.5 border-b border-hairline px-4 py-3 md:py-3.5">
+            <AvatarHead className="size-10 shrink-0 md:size-9" />
             <div className="min-w-0 flex-1">
-              <p id="ask-agrim-title" className="font-display text-[19px] font-extrabold lg:text-[21px]">
+              <p id="ask-agrim-title" className="font-display text-[17px] font-bold leading-tight">
                 Ask about Agrim
               </p>
-              <p className="font-mono text-[11px] uppercase tracking-wider text-ink-muted">
+              <p className="font-mono text-[10px] uppercase leading-snug tracking-[0.06em] text-ink-muted">
                 AI assistant · grounded in his portfolio
               </p>
             </div>
@@ -345,7 +380,7 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
                 aria-pressed={!muted}
                 aria-label="Read answers aloud"
                 title={muted ? "Voice off" : "Voice on"}
-                className={`flex size-11 shrink-0 items-center justify-center rounded-full border transition-colors ${
+                className={`flex size-10 shrink-0 items-center justify-center rounded-full border transition-colors ${
                   muted ? "border-ink/20 text-ink-muted hover:text-ink" : "border-accent text-accent-soft"
                 }`}
               >
@@ -356,9 +391,9 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
               type="button"
               onClick={close}
               aria-label="Close chat"
-              className="flex size-11 shrink-0 items-center justify-center rounded-full border border-ink/20 text-ink-soft transition-colors hover:text-ink"
+              className="flex size-10 shrink-0 items-center justify-center rounded-full border border-ink/20 text-ink-soft transition-colors hover:text-ink"
             >
-              <X className="size-5" aria-hidden />
+              <X className="size-[18px]" aria-hidden />
             </button>
           </div>
 
@@ -367,7 +402,7 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
             role="log"
             aria-live="polite"
             aria-busy={loading}
-            className="thin-scroll flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-5 lg:gap-3.5 lg:p-6"
+            className="thin-scroll flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-4"
           >
             {messages.map((m, i) => {
               // The streaming assistant bubble is empty until the first token
@@ -376,7 +411,7 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
               return (
                 <div
                   key={i}
-                  className={`max-w-[85%] break-words px-4 py-3 text-[15px] leading-relaxed lg:px-[18px] lg:py-3.5 lg:text-base ${
+                  className={`max-w-[88%] break-words px-3.5 py-2.5 text-[15px] leading-relaxed md:text-sm ${
                     m.role === "user"
                       ? "self-end rounded-[18px_18px_6px_18px] bg-accent font-medium text-paper"
                       : "self-start rounded-[18px_18px_18px_6px] bg-surface-raised text-[#E4E1DB]"
@@ -407,13 +442,13 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
 
           {/* Suggested questions, only before the conversation gets going */}
           {messages.length === 1 && !loading && (
-            <div className="flex gap-2 overflow-x-auto px-4 pb-3 lg:flex-wrap lg:px-6">
+            <div className="flex flex-wrap gap-1.5 px-4 pb-3">
               {SUGGESTED_QUESTIONS.map((q) => (
                 <button
                   key={q}
                   type="button"
                   onClick={() => sendMessage(q)}
-                  className="h-11 shrink-0 whitespace-nowrap rounded-full border border-ink/20 px-3.5 text-sm text-ink-soft transition-colors hover:border-accent hover:text-ink"
+                  className="min-h-10 rounded-full border border-ink/20 px-3 py-1.5 text-left text-[13px] text-ink-soft transition-colors hover:border-accent hover:text-ink"
                 >
                   {q}
                 </button>
@@ -426,7 +461,7 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
               e.preventDefault();
               sendMessage(input);
             }}
-            className="mx-4 mb-6 flex h-14 items-center gap-2.5 rounded-2xl border border-ink/15 bg-paper pl-4 pr-1.5 transition-colors focus-within:border-accent lg:mx-5 lg:mb-5 lg:h-[58px] lg:pl-[18px] lg:pr-2"
+            className="mx-4 mb-4 flex h-[54px] shrink-0 items-center gap-2.5 rounded-[14px] border border-ink/15 bg-paper pl-4 pr-1.5 transition-colors focus-within:border-accent"
           >
             <input
               ref={inputRef}
@@ -450,7 +485,7 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
             </button>
           </form>
         </div>
-      </Sheet>
+      </div>
     </>
   );
 }

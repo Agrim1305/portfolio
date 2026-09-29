@@ -260,7 +260,24 @@ html:has(dialog[open]) {
   scrollbar-color: rgb(255 91 46 / 0.35) transparent;
 }
 
-/* ---- Chat ---- */
+/* ---- Chat ----
+   The window rises in and drops out. It shows and hides with the hidden
+   attribute, so without @starting-style or allow-discrete it simply appears
+   and disappears. */
+.chat-window {
+  transition: opacity 0.25s ease, translate 0.35s var(--ease-out),
+    display 0.35s allow-discrete;
+}
+.chat-window[hidden] {
+  opacity: 0;
+  translate: 0 16px;
+}
+@starting-style {
+  .chat-window:not([hidden]) {
+    opacity: 0;
+    translate: 0 16px;
+  }
+}
 /* The input's bar shows focus with its border, so the ring would double it. */
 .chat-input:focus-visible {
   outline: none;
@@ -304,7 +321,8 @@ html:has(dialog[open]) {
   .lift:hover,
   .lift:active { transform: none; }
   .sheet,
-  .sheet::backdrop { transition: none; }
+  .sheet::backdrop,
+  .chat-window { transition: none; }
   .keywords,
   .topo-drift,
   .marquee,
