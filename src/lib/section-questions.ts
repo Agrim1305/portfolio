@@ -58,7 +58,9 @@ function sectionInView() {
    shadow, which is a card, a pill or a line. Bare layout boxes are not. */
 function isContent(el: Element) {
   if (el.matches("html, body, main, section, header, footer")) return false;
-  if (el.matches("img, svg, video, canvas, input, textarea, select, button, a")) return true;
+  // A hit test lands on the innermost element: an icon's <path>, a <span> in
+  // a link. What it belongs to is what counts.
+  if (el.closest("img, svg, video, canvas, input, textarea, select, button, a")) return true;
   if ([...el.childNodes].some((n) => n.nodeType === Node.TEXT_NODE && n.textContent!.trim())) return true;
   const s = getComputedStyle(el);
   return s.backgroundColor !== "rgba(0, 0, 0, 0)" || s.backgroundImage !== "none" || s.boxShadow !== "none";
