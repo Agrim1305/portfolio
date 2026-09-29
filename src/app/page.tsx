@@ -31,11 +31,9 @@ export default function Home() {
         <Reveal>
           <About />
         </Reveal>
-        <div className="mx-auto max-w-5xl px-5 sm:px-8">
-          <Reveal>
-            <Contact />
-          </Reveal>
-        </div>
+        <Reveal>
+          <Contact />
+        </Reveal>
       </main>
       <Footer />
       <AskAgrim heroId="top" />

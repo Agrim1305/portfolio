@@ -2,8 +2,8 @@
    they read monochrome/orange with the rest of the palette rather than as their
    full brand colours. Glyph paths are the canonical simple-icons outlines. */
 
-const GITHUB_URL = "https://github.com/Agrim1305";
-const LINKEDIN_URL = "https://www.linkedin.com/in/agrim-sharma-821788302/";
+export const GITHUB_URL = "https://github.com/Agrim1305";
+export const LINKEDIN_URL = "https://www.linkedin.com/in/agrim-sharma-821788302/";
 
 const buttonClass =
   "glass lift inline-flex size-12 items-center justify-center rounded-full text-ink hover:text-accent lg:size-[52px]";

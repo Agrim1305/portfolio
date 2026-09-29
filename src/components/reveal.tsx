@@ -7,7 +7,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 const useIsoLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
-/* Wraps a section so its `.draw-line` and `.rise` descendants animate in as it
+/* Wraps a section so its `.rise` descendants animate in as it
    enters view. Content is fully visible without JS (the hidden state only
    applies once the root is "armed"), and anything already on screen at load is
    shown immediately without a flash. */
