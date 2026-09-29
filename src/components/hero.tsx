@@ -2,6 +2,10 @@ import { Avatar } from "@/components/avatar";
 import { AskBar } from "@/components/ask-agrim";
 import { SocialLinks } from "@/components/social-links";
 
+// The first word again at the end, so the loop slides back to the start
+// instead of jumping.
+const KEYWORDS = ["software engineer.", "problem solver.", "competitor.", "coach.", "software engineer."];
+
 export function Hero() {
   return (
     <section id="top" className="relative isolate overflow-x-clip">
@@ -21,17 +25,30 @@ export function Hero() {
 
       <div className="wrap grid gap-y-6 pb-16 pt-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:items-center lg:gap-x-12 lg:pb-24 lg:pt-6 xl:grid-cols-[minmax(0,1fr)_500px]">
         <div>
-          <h1 className="hero-name py-[0.06em] font-display text-[clamp(4.5rem,1.2rem+10.4vw,10.25rem)] font-extrabold leading-[0.9] tracking-[-0.037em] text-ink">
-            <span className="block">Agrim</span> <span className="block">Sharma</span>
-          </h1>
           {/* Non-breaking spaces keep each separator with the word after it, so
               a narrow screen breaks before a dot instead of after one. */}
-          <p
-            className="hero-rise mt-3 pb-1 font-serif text-[clamp(2rem,0.9rem+2.2vw,2.625rem)] italic leading-[1.15] text-accent"
-            style={{ animationDelay: "0.6s" }}
-          >
+          <p className="hero-rise font-mono text-xs uppercase tracking-[0.2em] text-ink-faint lg:text-sm">
             Software ·&nbsp;Applied&nbsp;AI ·&nbsp;Adelaide
           </p>
+          <h1 className="hero-name mt-3 py-[0.06em] font-display text-[clamp(4.5rem,1.2rem+10.4vw,10.25rem)] font-extrabold leading-[0.9] tracking-[-0.037em] text-ink">
+            <span className="block">Agrim</span> <span className="block">Sharma</span>
+          </h1>
+          {/* A role is needed for the label to count; img reads the moving
+              words as one still phrase. */}
+          <div
+            role="img"
+            aria-label="Software engineer, problem solver, competitor, coach"
+            className="hero-rise mt-1 h-[1.2em] overflow-hidden font-serif text-[clamp(2.25rem,1rem+4vw,4.75rem)] italic leading-[1.2] text-accent"
+            style={{ animationDelay: "0.6s" }}
+          >
+            <div aria-hidden className="keywords flex flex-col whitespace-nowrap">
+              {KEYWORDS.map((word, i) => (
+                <span key={i} className="h-[1.2em]">
+                  {word}
+                </span>
+              ))}
+            </div>
+          </div>
           <p
             id="hero-intro"
             className="hero-rise mt-6 max-w-[34rem] text-lg leading-[1.55] text-ink-soft lg:text-xl"

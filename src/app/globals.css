@@ -122,9 +122,8 @@ html:has(dialog[open]) {
 }
 
 /* ---- Hero entrance ----
-   The name wipes in from the left while the avatar's frame draws out, then the
-   avatar resolves from blurred to sharp inside it, sharing the wipe's easing
-   and its 0.5s hand-off. */
+   The name wipes in from the left and the avatar fades in alongside it, with
+   the same easing, duration and 0.5s delay. */
 @keyframes name-wipe {
   from { clip-path: inset(0 100% 0 0); }
   to { clip-path: inset(0 0 0 0); }
@@ -133,14 +132,8 @@ html:has(dialog[open]) {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: none; }
 }
-@keyframes frame-draw {
-  0% { opacity: 0; transform: scale(0.06); }
-  25% { opacity: 1; }
-  100% { opacity: 1; transform: scale(1); }
-}
-@keyframes photo-resolve {
-  0% { opacity: 0; filter: blur(14px); }
-  100% { opacity: 1; filter: blur(0); }
+@keyframes fade-in {
+  from { opacity: 0; }
 }
 .hero-name {
   animation: name-wipe 0.6s var(--ease-draw) 0.5s both;
@@ -149,11 +142,31 @@ html:has(dialog[open]) {
   opacity: 0;
   animation: rise-in 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
 }
-.hero-frame {
-  animation: frame-draw 0.5s var(--ease-draw) both;
+.hero-fade {
+  animation: fade-in 0.6s var(--ease-draw) 0.5s both;
 }
-.hero-photo {
-  animation: photo-resolve 0.6s var(--ease-draw) 0.5s both;
+
+/* The sliding keywords under the name: each holds for about two seconds,
+   then slides up. The column holds five rows (the first repeats last), so
+   each step is a fifth of its height. */
+@keyframes keywords {
+  0%, 20% { transform: translateY(0); }
+  25%, 45% { transform: translateY(-20%); }
+  50%, 70% { transform: translateY(-40%); }
+  75%, 95% { transform: translateY(-60%); }
+  100% { transform: translateY(-80%); }
+}
+.keywords {
+  animation: keywords 10s var(--ease-draw) infinite;
+}
+
+/* The hero's faint contour backdrop drifts slowly. */
+@keyframes topo-drift {
+  0%, 100% { transform: translate(0, 0) scale(1.05); }
+  50% { transform: translate(-40px, 20px) scale(1.08); }
+}
+.topo-drift {
+  animation: topo-drift 40s ease-in-out infinite;
 }
 
 /* ---- Section reveal: content settles as it enters view (see <Reveal>) ---- */
@@ -241,72 +254,6 @@ html:has(dialog[open]) {
   from { opacity: 0; }
 }
 
-/* ---- Avatar ----
-   Pointer position arrives as --nx/--ny in [-1, 1]. Offsets are percentages of
-   the layer itself, so the effect scales with the avatar. */
-.avatar {
-  --nx: 0;
-  --ny: 0;
-}
-.avatar-head {
-  transform-origin: 50% 60.3%;
-  transform: translate(calc(var(--nx) * 1.8%), calc(var(--ny) * 1.25%))
-    rotate(calc(var(--nx) * 7deg));
-  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.avatar-eyes {
-  mask: url(/images/avatar/eye-mask.png) 0 0 / 100% 100% no-repeat;
-  -webkit-mask: url(/images/avatar/eye-mask.png) 0 0 / 100% 100% no-repeat;
-}
-.avatar-iris {
-  transform: translate(calc(var(--nx) * 0.8%), calc(var(--ny) * 0.35%));
-  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-@keyframes breathe {
-  0%, 100% { transform: scale(1, 1); }
-  50% { transform: scale(1.006, 1.014); }
-}
-@keyframes idle-head {
-  0%, 100% { transform: rotate(0deg) translateY(0); }
-  30% { transform: rotate(-1.2deg) translateY(-1px); }
-  65% { transform: rotate(0.9deg) translateY(1px); }
-}
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-@keyframes talk-ring {
-  from { transform: scale(0.96); opacity: 0.7; }
-  to { transform: scale(1.14); opacity: 0; }
-}
-@keyframes glow-pulse {
-  0%, 100% { opacity: 0.75; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.08); }
-}
-@keyframes topo-drift {
-  0%, 100% { transform: translate(0, 0) scale(1.05); }
-  50% { transform: translate(-40px, 20px) scale(1.08); }
-}
-.avatar-breathe {
-  transform-origin: 50% 100%;
-  animation: breathe 4.8s ease-in-out infinite;
-}
-.avatar-idle {
-  transform-origin: 50% 60.3%;
-  animation: idle-head 7s ease-in-out infinite;
-}
-.ring-spin {
-  animation: spin 60s linear infinite;
-}
-.talk-ring {
-  animation: talk-ring 1.2s ease-out infinite;
-}
-.glow-pulse {
-  animation: glow-pulse 9s ease-in-out infinite;
-}
-.topo-drift {
-  animation: topo-drift 40s ease-in-out infinite;
-}
-
 /* Thin accent scrollbar for scrolling panels inside sheets. */
 .thin-scroll {
   scrollbar-width: thin;
@@ -351,21 +298,14 @@ html:has(dialog[open]) {
   html { scroll-behavior: auto; }
   .hero-name { animation: none; clip-path: none; }
   .hero-rise { opacity: 1; animation: none; }
-  .hero-frame,
-  .hero-photo { animation: none; opacity: 1; filter: none; transform: none; }
+  .hero-fade { animation: none; }
   .rise,
   .lift { transition: none; }
   .lift:hover,
   .lift:active { transform: none; }
   .sheet,
   .sheet::backdrop { transition: none; }
-  .avatar-head,
-  .avatar-iris { transition: none; }
-  .avatar-breathe,
-  .avatar-idle,
-  .ring-spin,
-  .talk-ring,
-  .glow-pulse,
+  .keywords,
   .topo-drift,
   .marquee,
   .role-panel:not([hidden]) { animation: none; }

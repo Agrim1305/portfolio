@@ -55,7 +55,7 @@ test.describe("avatar voice", () => {
     expect(await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken)).toEqual([]);
   });
 
-  test("Hear me reads the intro, moves the mouth, and remembers the choice", async ({ page }) => {
+  test("Hear me reads the intro and remembers the choice", async ({ page }) => {
     await page.goto("/");
     const hear = page.getByRole("button", { name: "Hear me" });
     await expect(hear).toHaveAttribute("aria-pressed", "false");
@@ -65,20 +65,19 @@ test.describe("avatar voice", () => {
     const spoken = await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken);
     expect(spoken.join(" ")).toContain("Final-year Computer Science student at Adelaide University");
 
-    // Some mouth frame other than the closed one shows while talking.
-    await expect
-      .poll(() =>
-        page.evaluate(() =>
-          [...document.querySelectorAll<HTMLImageElement>("img[src*='head-']")].findIndex(
-            (img) => getComputedStyle(img).opacity === "1",
-          ),
-        ),
-      )
-      .toBeGreaterThan(0);
-
     await expect(hear).toHaveAttribute("aria-pressed", "false", { timeout: 5000 });
     expect(await page.evaluate(() => localStorage.getItem("voice"))).toBe("on");
   });
+});
+
+test("the sliding keywords read as one label and hold still under reduced motion", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const words = page.getByLabel("Software engineer, problem solver, competitor, coach");
+  await expect(words.locator("[aria-hidden]")).toHaveCount(1);
+  expect(await words.locator(".keywords").evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
+  await expect(words.getByText("software engineer.").first()).toBeInViewport();
+  await expect(words.getByText("problem solver.")).not.toBeInViewport();
 });
 
 test("the stack strip can be paused", async ({ page }) => {
