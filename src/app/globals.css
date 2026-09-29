@@ -76,9 +76,12 @@
 
 /* --nav-height is the sticky header's height. Anchor targets clear it with
    room to spare; Lenis reads the padding too, so it needs no offset of its
-   own. */
+   own. --corner-clear is the floating Ask pill's footprint from the bottom
+   of the screen (its margin, its height and a gap), which a pinned stage
+   keeps free so no text sits under the pill. */
 html {
   --nav-height: 4rem;
+  --corner-clear: 5.25rem;
   scroll-behavior: smooth;
   scroll-padding-top: 5.5rem;
   @media (width >= 64rem) {
@@ -289,7 +292,7 @@ html:has(dialog[open]) {
     justify-content: center;
     overflow: clip;
     padding-top: var(--nav-height);
-    padding-bottom: 1.5rem;
+    padding-bottom: var(--corner-clear);
   }
   .pin-track {
     overflow: visible;
