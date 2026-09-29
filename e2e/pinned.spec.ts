@@ -165,7 +165,7 @@ for (const [width, height] of [
     test.use({ viewport: { width, height } });
 
     for (const id of ["projects", "court"]) {
-      test(`every ${id} slide and its text fit on screen, clear of the Ask pill`, async ({ page, isMobile }) => {
+      test(`every ${id} slide and its text fit on screen, clear of the docked cloud`, async ({ page, isMobile }) => {
         test.skip(isMobile, "pinned travel is for wide screens");
         await page.goto("/");
         for (let i = 0; i < 8; i++) {
@@ -175,7 +175,7 @@ for (const [width, height] of [
           for (const line of text) {
             expect(inside(line, slide) && inside(line, screen), `slide ${i + 1}: "${line.text}"`).toBe(true);
           }
-          expect(lines.filter((line) => overlaps(line, pill)), `slide ${i + 1}: text under the pill`).toEqual([]);
+          expect(lines.filter((line) => overlaps(line, pill)), `slide ${i + 1}: text under the docked cloud`).toEqual([]);
         }
       });
     }

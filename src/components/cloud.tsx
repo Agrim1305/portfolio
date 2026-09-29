@@ -46,7 +46,7 @@ export function Cloud({ live = false, className = "" }: { live?: boolean; classN
   const eye = `absolute top-[46.1%] h-[22.75%] w-[8.6%] rounded-full bg-[#0E0E0E] ${live ? "cloud-blink" : ""}`;
 
   return (
-    <span aria-hidden className={`relative block aspect-[395/340] ${className}`}>
+    <span aria-hidden className={`cloud relative block aspect-[395/340] ${className}`}>
       <Image
         src="/images/cloud.svg"
         alt=""

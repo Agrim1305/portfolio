@@ -76,12 +76,12 @@
 
 /* --nav-height is the sticky header's height. Anchor targets clear it with
    room to spare; Lenis reads the padding too, so it needs no offset of its
-   own. --corner-clear is the floating Ask pill's footprint from the bottom
-   of the screen (its margin, its height and a gap), which a pinned stage
-   keeps free so no text sits under the pill. */
+   own. --corner-clear is the docked cloud's footprint from the bottom of the
+   screen (its margin, its height and a gap), which a pinned stage keeps free
+   so no text sits under it. */
 html {
   --nav-height: 4rem;
-  --corner-clear: 5.25rem;
+  --corner-clear: 6.75rem;
   scroll-behavior: smooth;
   scroll-padding-top: 5.5rem;
   @media (width >= 64rem) {
@@ -168,6 +168,14 @@ html:has(dialog[open]) {
 .cloud-eyes {
   translate: var(--eye-x, 0) var(--eye-y, 0);
   transition: translate 0.25s var(--ease-out);
+}
+
+/* The docked cloud is scaled up while it sits in the hero (see dock.tsx);
+   its focus ring is drawn thinner by the same factor, so it stays 2px on
+   screen. */
+.dock:focus-visible {
+  outline-width: calc(2px / var(--scale, 1));
+  outline-offset: calc(4px / var(--scale, 1));
 }
 
 /* The sliding keywords under the name: each holds for about two seconds,

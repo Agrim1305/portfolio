@@ -15,6 +15,12 @@ function subscribe(onChange: () => void) {
   return () => mq.removeEventListener("change", onChange);
 }
 
+/* Whether scroll-linked motion is on: md up with motion allowed. The pinned
+   sections travel then, and the cloud flies from the hero to its dock. */
+export function usePinned() {
+  return useSyncExternalStore(subscribe, () => window.matchMedia(PIN_QUERY).matches, () => false);
+}
+
 /* Scroll-pinned sideways travel. The section's stage sticks to the top for
    80svh of scroll per slide, and every frame Lenis moves the page, the track
    is translated by the same share of its width, so the slides glide rather
@@ -25,7 +31,7 @@ function subscribe(onChange: () => void) {
 export function usePinnedTrack(count: number) {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const pinned = useSyncExternalStore(subscribe, () => window.matchMedia(PIN_QUERY).matches, () => false);
+  const pinned = usePinned();
   const [active, setActive] = useState(0);
 
   useEffect(() => {

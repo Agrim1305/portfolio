@@ -198,7 +198,7 @@ export function Court() {
           </div>
 
           {/* Timeline: a rail that fills up to the current stop, one dot per stop. */}
-          <div className="rise mt-6 flex items-center gap-3 lg:mb-6 lg:mt-8 lg:block lg:px-[60px]">
+          <div className="rise mt-6 flex items-center gap-3 lg:mb-4 lg:mt-6 lg:block lg:px-[60px]">
             <button type="button" aria-label="Previous stop" disabled={current === 0} onClick={() => go(current - 1)} className={`${arrow} shrink-0 lg:hidden`}>
               <ArrowLeft className="size-[18px]" aria-hidden />
             </button>

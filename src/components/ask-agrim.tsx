@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useEffectEvent, useRef, useState } from "react";
-import { ArrowUp, Sparkles, Volume2, VolumeX, X } from "lucide-react";
+import { ArrowUp, Volume2, VolumeX, X } from "lucide-react";
 import { Cloud } from "@/components/cloud";
+import { Dock } from "@/components/dock";
 import {
   setMuted,
   speak,
@@ -162,20 +163,20 @@ export function AskCard({ className = "" }: { className?: string }) {
   );
 }
 
-/* `heroId` names the element holding the hero's Ask card. The floating launcher
-   waits for it to scroll away; without one, the launcher shows from the start. */
+/* The chat window and its button, the docked cloud. `heroId` names the hero,
+   where the cloud starts (see dock.tsx); without one it is docked from the
+   start. */
 export function AskAgrim({ heroId }: { heroId?: string }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([INTRO_MESSAGE]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [launcherShown, setLauncherShown] = useState(!heroId);
   const { muted } = useSpeech();
   const canSpeak = useCanSpeak();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const launcherRef = useRef<HTMLButtonElement>(null);
+  const dockRef = useRef<HTMLButtonElement>(null);
   // Where focus goes back to when the window closes: whatever opened it.
   const returnTo = useRef<HTMLElement | null>(null);
   // Read inside the streaming loop, so an answer still arriving after the
@@ -188,7 +189,7 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
   function show() {
     if (openRef.current) return;
     const from = document.activeElement;
-    returnTo.current = from instanceof HTMLElement && from !== document.body ? from : launcherRef.current;
+    returnTo.current = from instanceof HTMLElement && from !== document.body ? from : dockRef.current;
     setOpen(true);
   }
 
@@ -196,11 +197,11 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
     if (!openRef.current) return;
     setOpen(false);
     stop();
-    // After the render that shows the launcher again, so it can take focus.
+    // A frame later, once the window has gone, so focus lands on the page.
     requestAnimationFrame(() => returnTo.current?.focus());
   }
 
-  // Opened by the hero card, the menu, the launcher, or Cmd/Ctrl+K, which also
+  // Opened by the hero card, the menu, the cloud, or Cmd/Ctrl+K, which also
   // closes it again.
   const onOpenEvent = useEffectEvent((message?: string) => {
     show();
@@ -227,14 +228,6 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
       window.removeEventListener("keydown", key);
     };
   }, []);
-
-  useEffect(() => {
-    const hero = heroId && document.getElementById(heroId);
-    if (!hero) return;
-    const io = new IntersectionObserver(([entry]) => setLauncherShown(!entry.isIntersecting));
-    io.observe(hero);
-    return () => io.disconnect();
-  }, [heroId]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -350,30 +343,11 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
 
   return (
     <>
-      <button
-        ref={launcherRef}
-        type="button"
-        onClick={show}
-        aria-label="Ask AI about Agrim"
-        aria-keyshortcuts="Meta+K Control+K"
-        aria-expanded={open}
-        aria-controls="ask-agrim"
-        // Visibility only waits out the fade when hiding; showing is instant, so
-        // focus can return to the launcher the moment the chat closes.
-        className={`glass fixed bottom-6 right-6 z-30 flex h-12 items-center gap-2.5 rounded-full pl-4 pr-5 duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
-          launcherShown && !open
-            ? "visible opacity-100 transition-[opacity,translate]"
-            : "invisible translate-y-3 opacity-0 transition-[opacity,translate,visibility]"
-        }`}
-      >
-        <Sparkles className="size-4 text-accent" aria-hidden />
-        <span className="hidden text-[15px] font-medium text-ink sm:inline">Ask AI about Agrim</span>
-        <span className="text-[15px] font-medium text-ink sm:hidden">Ask AI</span>
-      </button>
+      <Dock heroId={heroId} open={open} onClick={show} buttonRef={dockRef} />
 
       {/* A small window, not a modal: no backdrop, no scroll lock and no focus
-          trap, so the page stays usable behind it. Below md it is a bottom
-          sheet. */}
+          trap, so the page stays usable behind it. It opens above the docked
+          cloud; below md it is a bottom sheet. */}
       <div
         id="ask-agrim"
         role="dialog"
@@ -386,7 +360,7 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
             close();
           }
         }}
-        className="chat-window fixed inset-x-0 bottom-0 z-50 h-[85dvh] overflow-hidden rounded-t-[22px] border border-b-0 border-white/14 bg-sheet text-ink shadow-[0_30px_80px_rgb(0_0_0/0.6)] md:inset-x-auto md:bottom-6 md:right-6 md:h-[min(540px,calc(100dvh-3rem))] md:w-[380px] md:rounded-[22px] md:border-b"
+        className="chat-window fixed inset-x-0 bottom-0 z-50 h-[85dvh] overflow-hidden rounded-t-[22px] border border-b-0 border-white/14 bg-sheet text-ink shadow-[0_30px_80px_rgb(0_0_0/0.6)] md:inset-x-auto md:bottom-[7.25rem] md:right-6 md:h-[min(540px,calc(100dvh-8.75rem))] md:w-[380px] md:rounded-[22px] md:border-b"
       >
         <div className="flex h-full flex-col">
           <span aria-hidden className="mx-auto mt-2.5 h-[5px] w-10 shrink-0 rounded-full bg-ink/25 md:hidden" />

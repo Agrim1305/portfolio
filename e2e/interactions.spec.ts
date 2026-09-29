@@ -80,11 +80,82 @@ test("the cloud is decorative, and holds still under reduced motion", async ({ p
 test("the cloud's eyes follow the cursor, a small share of the cloud at most", async ({ page, isMobile }) => {
   test.skip(isMobile, "fine pointers only");
   await page.goto("/");
-  const eyes = page.locator("#hero-cloud .cloud-eyes");
+  const eyes = page.locator("body > button[aria-keyshortcuts] .cloud-eyes");
   await page.mouse.move(1400, 880);
   await expect.poll(() => eyes.evaluate((el) => getComputedStyle(el).translate)).toBe("2.2% 2%");
   await page.mouse.move(0, 0);
   await expect.poll(() => eyes.evaluate((el) => getComputedStyle(el).translate)).toBe("-2.2% -2%");
+});
+
+test.describe("the docked cloud", () => {
+  const dock = (page: import("@playwright/test").Page) => page.getByRole("button", { name: "Ask AI about Agrim" });
+  const box = async (page: import("@playwright/test").Page, selector: string) =>
+    page.locator(selector).evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.x, y: r.y, width: r.width, height: r.height, right: innerWidth - r.right, bottom: innerHeight - r.bottom };
+    });
+  const scroll = async (page: import("@playwright/test").Page, y: number) => {
+    await page.evaluate((y) => window.scrollTo({ top: y, behavior: "instant" }), y);
+    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+  };
+
+  test("starts as the hero's cloud, glides into the corner, and back up again", async ({ page, isMobile }) => {
+    test.skip(isMobile, "the cloud travels on wide screens");
+    await page.goto("/");
+    // Once the button takes over, the hero's own copy steps aside so there is
+    // only ever one cloud, and the button sits exactly where it was.
+    await expect(page.locator("#hero-cloud .cloud")).toHaveCSS("visibility", "hidden");
+    const slot = await box(page, "#hero-cloud");
+    const atTop = await box(page, "body > button[aria-keyshortcuts]");
+    for (const k of ["x", "y", "width", "height"] as const) expect(Math.abs(atTop[k] - slot[k])).toBeLessThan(1);
+
+    await scroll(page, 150);
+    const midway = await box(page, "body > button[aria-keyshortcuts]");
+    expect(midway.width).toBeLessThan(slot.width);
+    expect(midway.width).toBeGreaterThan(92);
+
+    await scroll(page, 2000);
+    const docked = await box(page, "body > button[aria-keyshortcuts]");
+    expect(docked.width).toBeCloseTo(92, 0);
+    expect(docked.right).toBeCloseTo(24, 0);
+    expect(docked.bottom).toBeCloseTo(24, 0);
+
+    await scroll(page, 0);
+    const back = await box(page, "body > button[aria-keyshortcuts]");
+    for (const k of ["x", "y", "width"] as const) expect(Math.abs(back[k] - slot[k])).toBeLessThan(1);
+  });
+
+  test("on phones and under reduced motion nothing travels: the cloud fades in once the hero is gone", async ({ page, isMobile }) => {
+    if (!isMobile) await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await expect(page.locator("#hero-cloud .cloud")).toBeVisible();
+    await expect(dock(page)).toBeHidden();
+    await scroll(page, 2000);
+    await expect(dock(page)).toBeVisible();
+    expect(await dock(page).evaluate((el) => getComputedStyle(el).transform)).toBe("none");
+    const margin = isMobile ? 16 : 24;
+    await expect.poll(() => box(page, "body > button[aria-keyshortcuts]")).toMatchObject({ right: margin, bottom: margin });
+  });
+
+  test("is a button the keyboard can reach, and the chat opens above it", async ({ page, isMobile }) => {
+    await page.goto("/");
+    await scroll(page, 2000);
+    await dock(page).focus();
+    await expect(dock(page)).toBeFocused();
+    await page.keyboard.press("Enter");
+    const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+    await expect(chat).toBeVisible();
+    await expect(dock(page)).toHaveAttribute("aria-expanded", "true");
+    if (!isMobile) {
+      const cloud = (await dock(page).boundingBox())!;
+      // Once the window has risen into place, it ends above the cloud.
+      await expect.poll(async () => (await chat.boundingBox())!.y + (await chat.boundingBox())!.height).toBeLessThanOrEqual(cloud.y);
+      await expect(dock(page)).toBeVisible();
+    }
+    await page.keyboard.press("Escape");
+    await expect(chat).toBeHidden();
+    await expect(dock(page)).toBeFocused();
+  });
 });
 
 test("the stack strip can be paused", async ({ page }) => {
@@ -224,13 +295,6 @@ test.describe("ask Agrim", () => {
     await expect(chat).toBeHidden();
   });
 
-  test("the launcher appears once the hero scrolls away", async ({ page }) => {
-    await page.goto("/");
-    const launcher = page.locator("body > button[aria-keyshortcuts]");
-    await expect(launcher).toBeHidden();
-    await page.evaluate(() => window.scrollTo(0, 2000));
-    await expect(launcher).toBeVisible();
-  });
 });
 
 test.describe("selected work", () => {

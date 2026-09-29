@@ -87,7 +87,10 @@ export function Hero() {
 
         {/* After the text in the DOM so the name is read first. On small
             screens the cloud shows first and the Ask card after the text; on
-            wide ones they stack in the right column. The cloud is decorative. */}
+            wide ones they stack in the right column. The cloud is decorative.
+            From md up with motion allowed, the chat's cloud button takes its
+            place and flies from here to the corner as the page scrolls (see
+            dock.tsx). */}
         <div className="contents lg:block">
           <div id="hero-cloud" className="hero-fade relative order-first mx-auto mt-4 w-[200px] md:w-[240px] lg:mt-0 lg:w-full lg:max-w-[420px]">
             <div
