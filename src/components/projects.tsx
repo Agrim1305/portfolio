@@ -40,15 +40,17 @@ function Card({
       onClick={(e) => {
         if (!(e.target as Element).closest("a")) onOpen(e.currentTarget);
       }}
-      // On wide screens the card keeps the reference's 1110 x 650 shape but
-      // shrinks to leave room for the heading in a short viewport.
-      className="group relative flex min-h-[460px] w-[calc(100vw-4.625rem)] max-w-[520px] shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-3xl lg:aspect-[1110/650] lg:h-[min(650px,calc(100svh-25rem))] lg:min-h-[380px] lg:w-auto lg:max-w-[calc(min(1200px,100vw-4rem)-90px)] lg:justify-end lg:rounded-[28px]"
+      // On wide screens the card keeps the reference's 1110 x 650 shape. Pinned,
+      // it takes the height the heading leaves, and the screenshot gives way
+      // before the text does; the width never drops below what the text needs.
+      className="group relative flex min-h-[460px] w-[calc(100vw-4.625rem)] max-w-[520px] shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-3xl pin:h-[clamp(20rem,100%,40.625rem)] pin:min-h-0 lg:aspect-[1110/650] lg:w-auto lg:min-w-[min(46rem,calc(100vw-10rem))] lg:max-w-[calc(min(1200px,100vw-4rem)-90px)] lg:rounded-[28px] lg:motion-reduce:h-[min(650px,calc(100svh-25rem))] lg:motion-reduce:min-h-[380px]"
       style={{ background: cover.bg }}
     >
       {media ? (
-        // In the card's flow on small screens, so a long summary pushes the card
-        // taller instead of running over the screenshot.
-        <div className="relative mx-5 mt-16 aspect-[276/200] shrink-0 overflow-hidden rounded-xl border border-white/14 shadow-[0_24px_48px_rgb(0_0_0/0.5)] lg:absolute lg:left-[6.3%] lg:top-[9.2%] lg:mx-0 lg:mt-0 lg:aspect-auto lg:h-[64.6%] lg:w-[87.4%] lg:rounded-2xl lg:shadow-[0_40px_80px_rgb(0_0_0/0.5)]">
+        // In the card's flow, so a long summary pushes the card taller (phones)
+        // or the screenshot shorter (a fixed-height card), and never runs over
+        // it. On wide screens the text overlaps its foot under the gradient.
+        <div className="relative mx-5 mt-16 aspect-[276/200] shrink-0 overflow-hidden rounded-xl border border-white/14 shadow-[0_24px_48px_rgb(0_0_0/0.5)] pin:aspect-auto pin:min-h-0 pin:flex-1 lg:mx-[6.3%] lg:mt-14 lg:-mb-12 lg:aspect-auto lg:min-h-0 lg:flex-1 lg:rounded-2xl lg:shadow-[0_40px_80px_rgb(0_0_0/0.5)]">
           <Image
             src={media.src}
             alt={media.alt}
@@ -179,44 +181,44 @@ export function Projects() {
       ))}
       <div className="pin-stage">
         <SkipLink to="leadership" />
-        <div className="wrap flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <h2 className="font-display text-[clamp(3.75rem,2rem+5.5vw,6.5rem)] font-extrabold uppercase leading-[0.9] tracking-[-0.03em] text-ink">
-              <span className="block">Selected</span>{" "}
+        <div className="wrap">
+          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
+            <h2 className="font-display text-[3.75rem] font-extrabold uppercase leading-[0.9] tracking-[-0.03em] text-ink md:text-[clamp(3rem,1.2rem+3.8vw,4.75rem)]">
+              <span className="block md:inline">Selected</span>{" "}
               {/* The reference ghosts this word almost into the page; this is the
                   faintest grey that still clears 3:1 for large text. */}
-              <span className="block text-[#636167]">work</span>
+              <span className="block text-[#636167] md:inline">work</span>
             </h2>
-            <p className="mt-4 text-[15px] text-ink-muted lg:text-base">
-              Problem, approach, and impact. The stack comes second.
-            </p>
-          </div>
-          <div className="hidden items-center gap-5 pb-1.5 md:flex">
-            <div aria-hidden className="h-[3px] w-[220px] overflow-hidden rounded-full bg-ink/12">
-              <div
-                className="h-full rounded-full bg-accent transition-[width] duration-500 motion-reduce:transition-none"
-                style={{ width: `${((active + 1) / total) * 100}%` }}
-              />
+            <div className="hidden items-center gap-5 md:flex">
+              <div aria-hidden className="h-[3px] w-[220px] overflow-hidden rounded-full bg-ink/12">
+                <div
+                  className="h-full rounded-full bg-accent transition-[width] duration-500 motion-reduce:transition-none"
+                  style={{ width: `${((active + 1) / total) * 100}%` }}
+                />
+              </div>
+              <span aria-hidden className="min-w-14 font-mono text-sm text-ink-faint">
+                {active + 1} / {total}
+              </span>
+              {[
+                { label: "Previous project", to: active - 1, Icon: ArrowLeft },
+                { label: "Next project", to: active + 1, Icon: ArrowRight },
+              ].map(({ label, to, Icon }) => (
+                <button
+                  key={label}
+                  type="button"
+                  aria-label={label}
+                  disabled={to < 0 || to >= total}
+                  onClick={() => go(to)}
+                  className="flex size-14 items-center justify-center rounded-full border border-ink/25 text-ink transition-colors duration-300 hover:border-accent hover:bg-accent hover:text-paper disabled:pointer-events-none disabled:opacity-30"
+                >
+                  <Icon className="size-5" aria-hidden />
+                </button>
+              ))}
             </div>
-            <span aria-hidden className="min-w-14 font-mono text-sm text-ink-faint">
-              {active + 1} / {total}
-            </span>
-            {[
-              { label: "Previous project", to: active - 1, Icon: ArrowLeft },
-              { label: "Next project", to: active + 1, Icon: ArrowRight },
-            ].map(({ label, to, Icon }) => (
-              <button
-                key={label}
-                type="button"
-                aria-label={label}
-                disabled={to < 0 || to >= total}
-                onClick={() => go(to)}
-                className="flex size-14 items-center justify-center rounded-full border border-ink/25 text-ink transition-colors duration-300 hover:border-accent hover:bg-accent hover:text-paper disabled:pointer-events-none disabled:opacity-30"
-              >
-                <Icon className="size-5" aria-hidden />
-              </button>
-            ))}
           </div>
+          <p className="mt-4 text-[15px] text-ink-muted md:mt-3 lg:text-base">
+            Problem, approach, and impact. The stack comes second.
+          </p>
         </div>
 
         <div
@@ -232,11 +234,11 @@ export function Projects() {
             else return;
             e.preventDefault();
           }}
-          className="mt-10 lg:mt-12"
+          className="mt-10 pin:mt-6 pin:min-h-0 pin:max-h-[40.625rem] pin:flex-1"
         >
           <div
             ref={trackRef}
-            className="pin-track flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-5 [scroll-padding-inline:1.25rem] [scrollbar-width:none] motion-reduce:scroll-auto sm:px-8 sm:[scroll-padding-inline:2rem] lg:gap-6 lg:px-[max(2rem,calc(50vw-600px))] lg:[scroll-padding-inline:max(2rem,calc(50vw-600px))] [&::-webkit-scrollbar]:hidden"
+            className="pin-track flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-5 [scroll-padding-inline:1.25rem] [scrollbar-width:none] motion-reduce:scroll-auto pin:h-full sm:px-8 sm:[scroll-padding-inline:2rem] lg:gap-6 lg:px-[max(2rem,calc(50vw-600px))] lg:[scroll-padding-inline:max(2rem,calc(50vw-600px))] [&::-webkit-scrollbar]:hidden"
           >
             {projects.map((project, i) => (
               <Card

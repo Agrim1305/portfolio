@@ -42,6 +42,9 @@
     monospace;
 }
 
+/* Where Selected work and Built on court pin (see lib/pinned-track.ts). */
+@custom-variant pin (@media (width >= 48rem) and (prefers-reduced-motion: no-preference));
+
 /* The page column: 1200px of content with side gutters. */
 @utility wrap {
   margin-inline: auto;
@@ -268,9 +271,11 @@ html:has(dialog[open]) {
    Wide screens with motion allowed: the section is one viewport tall per
    slide, its stage sticks to the top, and lib/pinned-track.ts slides the track
    as the page scrolls. A marker per slide is a Lenis snap point (see
-   lib/scroll-lock.ts). Elsewhere the track is a native sideways scroller with
-   its own snap, and the markers do nothing. Keep the media query in step with
-   PIN_QUERY. */
+   lib/scroll-lock.ts). The stage is exactly one screen under the nav: the
+   heading keeps its size and the slides take what is left, so nothing falls
+   below the fold. Elsewhere the track is a native sideways scroller with its
+   own snap, and the markers do nothing. Keep the media query in step with
+   PIN_QUERY and the pin variant. */
 .pin-marker {
   display: none;
 }
@@ -289,6 +294,7 @@ html:has(dialog[open]) {
     justify-content: center;
     overflow: clip;
     padding-top: var(--nav-height);
+    padding-bottom: 1.5rem;
   }
   .pin-track {
     overflow: visible;

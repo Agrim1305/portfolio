@@ -63,6 +63,7 @@ async function reachable(page: Page, route: string) {
     if (!(await trigger.isVisible())) continue;
     // Pinned cards sit off to the side until focus brings them into view.
     await trigger.focus();
+    await expect(trigger).toBeInViewport();
     await trigger.click();
     await page.locator("dialog[open]").first().waitFor();
     const s = await page.evaluate(snapshot);
@@ -71,6 +72,8 @@ async function reachable(page: Page, route: string) {
     all.hrefs.push(...s.hrefs);
     await page.keyboard.press("Escape");
     await expect(page.locator("dialog[open]")).toHaveCount(0);
+    // The sheet shrinks back into its card; clicks land on the page only after.
+    await page.waitForFunction(() => !(document as { activeViewTransition?: unknown }).activeViewTransition);
   }
   return all;
 }

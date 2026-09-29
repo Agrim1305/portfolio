@@ -286,7 +286,11 @@ test.describe("selected work", () => {
 
   test("a card opens its case study in place, with the page's own URL", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("link", { name: "Open case study for MetaPlay" }).click();
+    // The second card sits off to the side until focus brings it into view.
+    const open = page.getByRole("link", { name: "Open case study for MetaPlay" });
+    await open.focus();
+    await expect(open).toBeInViewport();
+    await open.click();
     const sheet = page.getByRole("dialog", { name: "MetaPlay" });
     await expect(sheet).toBeVisible();
     await expect(page).toHaveURL(/\/projects\/metaplay$/);

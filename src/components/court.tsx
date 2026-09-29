@@ -102,16 +102,16 @@ export function Court() {
         <span key={s.dot} aria-hidden className="pin-marker" style={{ "--i": i } as React.CSSProperties} />
       ))}
       <div className="pin-stage">
-        <div className="wrap relative">
+        <div className="wrap relative pin:flex pin:min-h-0 pin:flex-1 pin:flex-col pin:justify-center">
           <SkipLink to="about" />
           <div className="flex items-end justify-between gap-6">
-            <h2 className="rise font-display text-[clamp(3.75rem,2.2rem+4.6vw,5.5rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.035em] text-ink">
-              <span className="block lg:inline">Built on</span>{" "}
-              <span className="block pb-1 font-serif text-[1.18em] font-medium normal-case italic leading-none tracking-normal text-accent lg:inline">
+            <h2 className="rise font-display text-[3.75rem] font-extrabold uppercase leading-[0.95] tracking-[-0.035em] text-ink md:text-[clamp(3rem,1.2rem+3.8vw,4.75rem)]">
+              <span className="block md:inline">Built on</span>{" "}
+              <span className="block pb-1 font-serif text-[1.18em] font-medium normal-case italic leading-none tracking-normal text-accent md:inline">
                 court.
               </span>
             </h2>
-            <div className="hidden items-center gap-3.5 pb-3 lg:flex">
+            <div className="hidden items-center gap-3.5 pb-2 lg:flex">
               <span aria-hidden className="min-w-16 text-right text-[15px] text-ink-faint">
                 <span className="font-semibold text-ink">{pad(current + 1)}</span> / {pad(stops.length)}
               </span>
@@ -126,7 +126,7 @@ export function Court() {
 
           {/* The track is the scroller on phones, so it carries the region
               and takes focus itself. */}
-          <div className="rise relative mt-10 overflow-hidden rounded-[18px] bg-surface shadow-[inset_0_0_0_1px_rgb(241_239_234/0.08)] lg:mt-12 lg:rounded-[20px]">
+          <div className="rise relative mt-10 overflow-hidden rounded-[18px] bg-surface shadow-[inset_0_0_0_1px_rgb(241_239_234/0.08)] pin:mt-6 pin:min-h-0 pin:max-h-[35rem] pin:flex-1 lg:rounded-[20px]">
             <p aria-live="polite" className="sr-only">
               {current + 1} of {stops.length}: {stops[current].dot}
             </p>
@@ -143,7 +143,7 @@ export function Court() {
                 else return;
                 e.preventDefault();
               }}
-              className="pin-track flex snap-x snap-mandatory gap-4 overflow-x-auto [scrollbar-width:none] lg:gap-10 [&::-webkit-scrollbar]:hidden"
+              className="pin-track flex snap-x snap-mandatory gap-4 overflow-x-auto [scrollbar-width:none] pin:h-full lg:gap-10 [&::-webkit-scrollbar]:hidden"
             >
               {stops.map((s, i) => (
                 <article
@@ -153,9 +153,11 @@ export function Court() {
                   aria-roledescription="slide"
                   aria-label={`${i + 1} of ${stops.length}`}
                   inert={i !== current}
-                  className="flex w-full shrink-0 snap-start flex-col lg:h-[min(560px,calc(100svh-27rem))] lg:min-h-[360px] lg:flex-row"
+                  // Pinned, the stop takes the height the heading and timeline
+                  // leave; on a narrow stage the photo gives way before the text.
+                  className="flex w-full shrink-0 snap-start flex-col pin:h-full lg:flex-row lg:motion-reduce:h-[min(560px,calc(100svh-27rem))] lg:motion-reduce:min-h-[360px]"
                 >
-                  <div className="relative h-[220px] shrink-0 overflow-hidden bg-[#1B1B20] lg:h-full lg:w-[55%]">
+                  <div className="relative h-[220px] shrink-0 overflow-hidden bg-[#1B1B20] pin:h-auto pin:min-h-0 pin:flex-1 lg:h-full lg:w-[55%] lg:flex-none">
                     {s.photo ? (
                       <Image
                         src={s.photo.src}
@@ -199,7 +201,7 @@ export function Court() {
           </div>
 
           {/* Timeline: a rail that fills up to the current stop, one dot per stop. */}
-          <div className="rise mt-6 flex items-center gap-3 lg:mb-8 lg:mt-12 lg:block lg:px-[60px]">
+          <div className="rise mt-6 flex items-center gap-3 lg:mb-6 lg:mt-8 lg:block lg:px-[60px]">
             <button type="button" aria-label="Previous stop" disabled={current === 0} onClick={() => go(current - 1)} className={`${arrow} shrink-0 lg:hidden`}>
               <ArrowLeft className="size-[18px]" aria-hidden />
             </button>
