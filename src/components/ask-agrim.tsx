@@ -152,11 +152,20 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
   const canSpeak = useCanSpeak();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  // Read inside the streaming loop, so an answer still arriving after the
+  // chat closes keeps filling in but stops talking.
+  const openRef = useRef(open);
+  useEffect(() => {
+    openRef.current = open;
+  }, [open]);
 
   // Opened by the hero bar, the menu, the launcher, or Cmd/Ctrl+K.
   useEffect(() => {
     const onOpen = () => setOpen(true);
     const onKey = (e: KeyboardEvent) => {
+      // Ctrl+K in a text field is "delete to end of line" on macOS; leave it be.
+      const target = e.target as HTMLElement;
+      if (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setOpen(true);
@@ -252,7 +261,7 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
         received += chunk;
         const [sentences, rest] = takeSentences(unspoken + chunk);
         unspoken = rest;
-        sentences.forEach(speak);
+        if (openRef.current) sentences.forEach((s) => speak(s));
         setMessages((prev) => {
           const copy = prev.slice();
           const last = copy[copy.length - 1];
@@ -263,7 +272,7 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
           return copy;
         });
       }
-      speak(unspoken);
+      if (openRef.current) speak(unspoken);
 
       if (!received.trim()) {
         setError("The assistant didn't return a response. Try again.");

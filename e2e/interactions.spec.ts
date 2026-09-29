@@ -318,3 +318,42 @@ test.describe("built on court", () => {
     await expect(current(page)).toHaveAttribute("aria-label", "1 of 8");
   });
 });
+
+test("closing the chat mid-answer stops the voice", async ({ page }) => {
+  // A slow stream: the second sentence arrives after the chat has closed.
+  await page.route("/api/chat", async (route) => {
+    await new Promise((r) => setTimeout(r, 600));
+    await route.fulfill({ status: 200, contentType: "text/plain", body: "First sentence. Second sentence." });
+  });
+  await page.addInitScript(() => {
+    const w = window as unknown as { __spoken: string[] };
+    w.__spoken = [];
+    window.speechSynthesis.cancel = () => {};
+    window.speechSynthesis.speak = (u) => {
+      w.__spoken.push(u.text);
+    };
+    localStorage.setItem("voice", "on");
+  });
+  await page.goto("/");
+  await page.keyboard.press("ControlOrMeta+k");
+  const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+  await chat.getByRole("textbox", { name: "Ask a question" }).fill("Hi");
+  await chat.getByRole("button", { name: "Send message" }).click();
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(1200);
+  expect(await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken.filter(Boolean))).toEqual([]);
+});
+
+test("Ctrl+K inside a text field is left alone", async ({ page }) => {
+  await page.goto("/");
+  await page.keyboard.press("ControlOrMeta+k");
+  const input = page.getByRole("dialog", { name: "Ask about Agrim" }).getByRole("textbox", { name: "Ask a question" });
+  await input.fill("hello world");
+  await input.press("Home");
+  const prevented = await input.evaluate((el) => {
+    const e = new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true, cancelable: true });
+    el.dispatchEvent(e);
+    return e.defaultPrevented;
+  });
+  expect(prevented).toBe(false);
+});

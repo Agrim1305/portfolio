@@ -138,8 +138,12 @@ export function Court() {
         }}
         className="rise relative mt-10 touch-pan-y overflow-hidden rounded-[18px] bg-surface shadow-[inset_0_0_0_1px_rgb(241_239_234/0.08)] lg:mt-14 lg:rounded-[20px]"
       >
+        {/* The slides only swap `inert`, which screen readers don't announce,
+            so the change is spoken from here. */}
+        <p aria-live="polite" className="sr-only">
+          {current + 1} of {stops.length}: {stops[current].dot}
+        </p>
         <div
-          aria-live="polite"
           className="flex gap-[var(--gap)] transition-transform duration-800 [--gap:1rem] lg:[--gap:2.5rem] ease-[cubic-bezier(0.65,0,0.2,1)] motion-reduce:transition-none lg:gap-10"
           style={{ transform: `translateX(calc(${-current} * (100% + var(--gap))))` }}
         >
