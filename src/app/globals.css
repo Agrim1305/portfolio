@@ -170,6 +170,24 @@ html:has(dialog[open]) {
   transition: translate 0.25s var(--ease-out);
 }
 
+/* Its moods follow the chat (see ask-agrim.tsx). Thinking, while a question
+   waits for its first word: the eyes glance up and aside. Answering, while
+   the words stream in: a small, gentle bounce, eyes up toward the chat.
+   Under reduced motion only the eye positions change. */
+@keyframes cloud-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5%); }
+}
+.cloud[data-mood="thinking"] .cloud-eyes {
+  translate: 3% -6%;
+}
+.cloud[data-mood="answering"] .cloud-eyes {
+  translate: -2% -3%;
+}
+.cloud[data-mood="answering"] {
+  animation: cloud-bounce 0.7s ease-in-out infinite;
+}
+
 /* The docked cloud is scaled up while it sits in the hero (see dock.tsx);
    its focus ring is drawn thinner by the same factor, so it stays 2px on
    screen. */
@@ -395,6 +413,7 @@ html:has(dialog[open]) {
   .cloud-eyes { transition: none; }
   .keywords,
   .cloud-blink,
+  .cloud[data-mood],
   .topo-drift,
   .marquee,
   .role-panel:not([hidden]) { animation: none; }

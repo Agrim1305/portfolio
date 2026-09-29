@@ -340,10 +340,13 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
   const lastMessage = messages[messages.length - 1];
   const waitingForFirstToken =
     lastMessage?.role !== "assistant" || lastMessage.content === "";
+  // The cloud thinks while the request waits for its first token, and
+  // answers while the tokens stream in.
+  const mood = !loading ? "idle" : waitingForFirstToken ? "thinking" : "answering";
 
   return (
     <>
-      <Dock heroId={heroId} open={open} onClick={show} buttonRef={dockRef} />
+      <Dock heroId={heroId} open={open} mood={mood} onClick={show} buttonRef={dockRef} />
 
       {/* A small window, not a modal: no backdrop, no scroll lock and no focus
           trap, so the page stays usable behind it. It opens above the docked

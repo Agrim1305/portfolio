@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useState, type RefObject } from "react";
-import { Cloud } from "@/components/cloud";
+import { Cloud, type Mood } from "@/components/cloud";
 import { usePinned } from "@/lib/pinned-track";
 import { onLenisScroll } from "@/lib/scroll-lock";
 
@@ -20,11 +20,13 @@ const DOCKED_AT = 0.8;
 export function Dock({
   heroId,
   open,
+  mood,
   onClick,
   buttonRef,
 }: {
   heroId?: string;
   open: boolean;
+  mood: Mood;
   onClick: () => void;
   buttonRef: RefObject<HTMLButtonElement | null>;
 }) {
@@ -114,7 +116,7 @@ export function Dock({
       }`}
     >
       <span className="hero-fade block">
-        <Cloud live />
+        <Cloud live mood={mood} />
       </span>
     </button>
   );

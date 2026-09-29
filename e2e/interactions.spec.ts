@@ -158,6 +158,58 @@ test.describe("the docked cloud", () => {
   });
 });
 
+test.describe("the cloud's moods follow the chat stream", () => {
+  // The chat endpoint as a stream the test feeds by hand.
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      const w = window as unknown as { chunk: (text: string) => void; end: () => void };
+      const realFetch = window.fetch;
+      window.fetch = async (input, init) => {
+        if (!String(input).includes("/api/chat")) return realFetch(input, init);
+        let controller!: ReadableStreamDefaultController<Uint8Array>;
+        const body = new ReadableStream<Uint8Array>({ start: (c) => void (controller = c) });
+        w.chunk = (text) => controller.enqueue(new TextEncoder().encode(text));
+        w.end = () => controller.close();
+        return new Response(body, { status: 200, headers: { "Content-Type": "text/plain" } });
+      };
+    });
+  });
+
+  for (const reduced of [false, true]) {
+    test(reduced ? "under reduced motion, as still eye positions" : "idle, thinking, answering, idle", async ({ page }) => {
+      if (reduced) await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.goto("/");
+      await page.evaluate(() => window.scrollTo({ top: 2000, behavior: "instant" }));
+      const cloud = page.getByRole("button", { name: "Ask AI about Agrim" }).locator(".cloud");
+      const eyes = cloud.locator(".cloud-eyes");
+      const bounce = () => cloud.evaluate((el) => getComputedStyle(el).animationName);
+      await expect(cloud).toHaveAttribute("data-mood", "idle");
+
+      await page.keyboard.press("ControlOrMeta+k");
+      const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+      await chat.getByRole("textbox", { name: "Ask a question" }).fill("Hi");
+      await chat.getByRole("button", { name: "Send message" }).click();
+      // Sent, nothing back yet: the eyes glance up and aside.
+      await expect(cloud).toHaveAttribute("data-mood", "thinking");
+      await expect.poll(() => eyes.evaluate((el) => getComputedStyle(el).translate)).toBe("3% -6%");
+      expect(await bounce()).toBe("none");
+
+      // The first words arrive: a small bounce, eyes toward the chat.
+      await page.evaluate(() => (window as unknown as { chunk: (t: string) => void }).chunk("Agrim is "));
+      await expect(cloud).toHaveAttribute("data-mood", "answering");
+      await expect.poll(() => eyes.evaluate((el) => getComputedStyle(el).translate)).toBe("-2% -3%");
+      expect(await bounce()).toBe(reduced ? "none" : "cloud-bounce");
+
+      // The stream ends: back to idle.
+      await page.evaluate(() => (window as unknown as { chunk: (t: string) => void; end: () => void }).chunk("in Adelaide."));
+      await page.evaluate(() => (window as unknown as { end: () => void }).end());
+      await expect(chat.getByRole("log")).toContainText("Agrim is in Adelaide.");
+      await expect(cloud).toHaveAttribute("data-mood", "idle");
+      expect(await bounce()).toBe("none");
+    });
+  }
+});
+
 test("the stack strip can be paused", async ({ page }) => {
   await page.goto("/");
   const pause = page.getByRole("button", { name: "Pause the stack strip" });

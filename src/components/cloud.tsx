@@ -9,9 +9,21 @@ import Image from "next/image";
    wide and 22.75% of the height tall, centred at (36%, 57.5%) and
    (62%, 57.5%), and the cursor follow moves them by a share of the box too,
    so the cloud looks the same at any size. `live` adds the blink and the
-   follow; the chat header uses it still. Decorative, so it is hidden from
-   assistive tech; whatever holds it carries the name. */
-export function Cloud({ live = false, className = "" }: { live?: boolean; className?: string }) {
+   follow; the chat header uses it still. `mood` is the chat's state (see
+   ask-agrim.tsx), shown with the eyes and a bounce in globals.css.
+   Decorative, so it is hidden from assistive tech; whatever holds it carries
+   the name. */
+export type Mood = "idle" | "thinking" | "answering";
+
+export function Cloud({
+  live = false,
+  mood = "idle",
+  className = "",
+}: {
+  live?: boolean;
+  mood?: Mood;
+  className?: string;
+}) {
   const eyes = useRef<HTMLSpanElement>(null);
 
   // The eyes follow the pointer together, eased by a CSS transition and
@@ -46,7 +58,7 @@ export function Cloud({ live = false, className = "" }: { live?: boolean; classN
   const eye = `absolute top-[46.1%] h-[22.75%] w-[8.6%] rounded-full bg-[#0E0E0E] ${live ? "cloud-blink" : ""}`;
 
   return (
-    <span aria-hidden className={`cloud relative block aspect-[395/340] ${className}`}>
+    <span aria-hidden data-mood={mood} className={`cloud relative block aspect-[395/340] ${className}`}>
       <Image
         src="/images/cloud.svg"
         alt=""
