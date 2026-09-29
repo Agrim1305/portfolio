@@ -74,10 +74,13 @@
 /* Anchor targets clear the sticky header (64px, or 96px from lg). Lenis reads
    this too, so it needs no offset of its own. */
 html {
+  --nav-height: 4rem;
+  --nav-offset: 5.5rem;
   scroll-behavior: smooth;
-  scroll-padding-top: 5.5rem;
+  scroll-padding-top: var(--nav-offset);
   @media (width >= 64rem) {
-    scroll-padding-top: 7rem;
+    --nav-height: 6rem;
+    --nav-offset: 7rem;
   }
 }
 
@@ -220,38 +223,86 @@ html:has(dialog[open]) {
   }
 }
 
-/* ---- Case study morph ----
-   On wide screens a card grows into its case study through a view transition
-   (see projects.tsx). The sheet's own entrance steps aside there so the two
-   don't stack; closing still eases out. */
+/* ---- Card to sheet morph ----
+   On wide screens a card grows into its sheet, and shrinks back on close,
+   through a view transition (see lib/morph.ts). The open sheet carries the
+   name; the card borrows it for the moment of the swap. The sheet's own
+   entrance and exit step aside there so the two don't stack, and the page
+   veil fades with the root. Timing follows the reference: the frame grows for
+   0.62s while the content arrives 0.28s in. */
+.sheet.morph[open] {
+  view-transition-name: morph;
+}
 @media (width >= 64rem) {
-  .sheet.morph[open] {
+  .sheet.morph {
     transition: none;
   }
 }
-::view-transition-group(case-study) {
+::view-transition-group(root) {
+  animation-duration: 0.5s;
+}
+::view-transition-group(morph) {
   animation-duration: 0.62s;
   animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-/* The card fades early and the case study arrives a beat later, so the growing
-   shape reads first and the two layers never fight. */
-::view-transition-old(case-study),
-::view-transition-new(case-study) {
+::view-transition-old(morph),
+::view-transition-new(morph) {
   height: 100%;
   object-fit: cover;
   object-position: top;
 }
-::view-transition-old(case-study) {
+::view-transition-old(morph) {
   animation: vt-out 0.3s ease both;
 }
-::view-transition-new(case-study) {
-  animation: vt-in 0.4s ease 0.18s both;
+::view-transition-new(morph) {
+  animation: vt-in 0.4s ease 0.28s both;
 }
 @keyframes vt-out {
   to { opacity: 0; }
 }
 @keyframes vt-in {
   from { opacity: 0; }
+}
+
+/* ---- Pinned sideways travel (Selected work, Built on court) ----
+   Wide screens with motion allowed: the section is one viewport tall per
+   slide, its stage sticks to the top, and lib/pinned-track.ts slides the track
+   as the page scrolls. A marker per slide is a Lenis snap point (see
+   lib/scroll-lock.ts). Elsewhere the track is a native sideways scroller with
+   its own snap, and the markers do nothing. Keep the media query in step with
+   PIN_QUERY. */
+.pin-marker {
+  display: none;
+}
+@media (width >= 48rem) and (prefers-reduced-motion: no-preference) {
+  .pin-section {
+    position: relative;
+    height: calc(var(--slides) * 100svh);
+    padding-block: 0;
+  }
+  .pin-stage {
+    position: sticky;
+    top: 0;
+    display: flex;
+    height: 100svh;
+    flex-direction: column;
+    justify-content: center;
+    overflow: clip;
+    padding-top: var(--nav-height);
+  }
+  .pin-track {
+    overflow: visible;
+    scroll-snap-type: none;
+    will-change: transform;
+  }
+  .pin-marker {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: calc(var(--i) * 100svh);
+    width: 1px;
+    height: 1px;
+  }
 }
 
 /* Thin accent scrollbar for scrolling panels inside sheets. */

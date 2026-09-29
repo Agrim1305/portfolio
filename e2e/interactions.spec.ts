@@ -227,12 +227,48 @@ test.describe("selected work", () => {
     await expect(prev).toBeEnabled();
   });
 
-  test("the track scrolls sideways and the current card follows", async ({ page }) => {
+  test("scrolling down moves the cards sideways, then the page carries on", async ({ page, isMobile }) => {
+    test.skip(isMobile, "pinned travel is for wide screens; phones swipe");
     await page.goto("/");
-    const track = page.getByRole("region", { name: "Selected work" });
+    const section = page.locator("#projects");
+    const { top, height } = await section.evaluate((el) => ({
+      top: el.getBoundingClientRect().top + window.scrollY,
+      height: (el as HTMLElement).offsetHeight,
+    }));
+    // One viewport of scroll per card.
+    expect(height).toBe(8 * 900);
+    await page.evaluate((y) => window.scrollTo(0, y), top + 7 * 900);
+    await expect(page.locator("#projects").getByRole("group", { name: "8 of 8" })).toBeInViewport({ ratio: 0.6 });
+    await expect(page.getByText("8 / 8")).toBeVisible();
+    await page.evaluate((y) => window.scrollTo(0, y), top + height + 200);
+    await expect(section).not.toBeInViewport();
+  });
+
+  test("phones swipe the cards sideways and the current card follows", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "native swipe is the phone layout");
+    await page.goto("/");
+    const track = page.locator("#projects .pin-track");
     await track.scrollIntoViewIfNeeded();
     await track.evaluate((el) => el.scrollTo({ left: el.scrollWidth, behavior: "instant" }));
-    await expect(track.getByRole("group", { name: "8 of 8" })).toBeInViewport({ ratio: 0.6 });
+    await expect(page.locator("#projects").getByRole("group", { name: "8 of 8" })).toBeInViewport({ ratio: 0.6 });
+  });
+
+  test("Tab onto an off-screen card brings it into view", async ({ page, isMobile }) => {
+    test.skip(isMobile, "pinned travel is for wide screens");
+    await page.goto("/");
+    await page.getByRole("link", { name: "Open case study for Pathfinder" }).focus();
+    await expect(page.locator("#projects").getByRole("group", { name: "7 of 8" })).toBeInViewport({ ratio: 0.6 });
+  });
+
+  test("the skip link jumps past the cards", async ({ page }) => {
+    await page.goto("/");
+    const skip = page.locator("#projects").getByRole("link", { name: "Skip to next section" });
+    await skip.focus();
+    await expect(skip).toBeVisible();
+    await page.keyboard.press("Enter");
+    await expect
+      .poll(() => page.evaluate(() => document.getElementById("leadership")!.getBoundingClientRect().top))
+      .toBeLessThan(200);
   });
 
   test("the mouse wheel over the cards still scrolls the page", async ({ page, isMobile }) => {
@@ -248,7 +284,7 @@ test.describe("selected work", () => {
 
   test("a card opens its case study in place, with the page's own URL", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("link", { name: "Read the case study for MetaPlay" }).click();
+    await page.getByRole("link", { name: "Open case study for MetaPlay" }).click();
     const sheet = page.getByRole("dialog", { name: "MetaPlay" });
     await expect(sheet).toBeVisible();
     await expect(page).toHaveURL(/\/projects\/metaplay$/);
@@ -261,7 +297,7 @@ test.describe("selected work", () => {
 
   test("keyboard: Enter opens, Escape closes and focus returns to the card", async ({ page }) => {
     await page.goto("/");
-    const link = page.getByRole("link", { name: "Read the case study for Pacific Village Explorer" });
+    const link = page.getByRole("link", { name: "Open case study for Pacific Village Explorer" });
     await link.focus();
     await page.keyboard.press("Enter");
     const sheet = page.getByRole("dialog", { name: "Pacific Village Explorer" });
@@ -274,7 +310,9 @@ test.describe("selected work", () => {
 
   test("Back closes an open case study", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("link", { name: "Read the case study for Pathfinder" }).click();
+    const link = page.getByRole("link", { name: "Open case study for Pathfinder" });
+    await link.focus();
+    await link.click();
     await expect(page.getByRole("dialog", { name: "Pathfinder" })).toBeVisible();
     await page.goBack();
     await expect(page.getByRole("dialog", { name: "Pathfinder" })).toBeHidden();

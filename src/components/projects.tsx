@@ -7,26 +7,11 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Plus, X } from "lucide-react";
 import { CaseStudy, COVER } from "@/components/case-study";
 import { Sheet } from "@/components/sheet";
+import { morphClose, morphOpen } from "@/lib/morph";
+import { usePinnedTrack } from "@/lib/pinned-track";
 import { projects, type Project } from "@/lib/projects";
 
 const slugFromPath = () => window.location.pathname.match(/^\/projects\/([^/]+)/)?.[1];
-const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-/* On wide screens the card grows into the case study (View Transitions API).
-   Anywhere that can't, or under reduced motion, the sheet simply opens. */
-function morphFrom(card: HTMLElement | null, update: () => void) {
-  const canMorph =
-    card &&
-    "startViewTransition" in document &&
-    !prefersReducedMotion() &&
-    window.matchMedia("(min-width: 64rem)").matches;
-  if (!canMorph) return update();
-  card.style.viewTransitionName = "case-study";
-  document.startViewTransition(() => {
-    card.style.viewTransitionName = "";
-    update();
-  });
-}
 
 function Card({
   project,
@@ -54,13 +39,15 @@ function Card({
       onClick={(e) => {
         if (!(e.target as Element).closest("a")) onOpen(e.currentTarget);
       }}
-      className="group relative flex min-h-[460px] w-[calc(100vw-4.625rem)] max-w-[520px] shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-3xl lg:aspect-[1110/650] lg:min-h-0 lg:w-[calc(min(1200px,100vw-4rem)-90px)] lg:max-w-none lg:justify-end lg:rounded-[28px]"
+      // On wide screens the card keeps the reference's 1110 x 650 shape but
+      // shrinks to leave room for the heading in a short viewport.
+      className="group relative flex min-h-[460px] w-[calc(100vw-4.625rem)] max-w-[520px] shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-3xl lg:aspect-[1110/650] lg:h-[min(650px,calc(100svh-25rem))] lg:min-h-[380px] lg:w-auto lg:max-w-[calc(min(1200px,100vw-4rem)-90px)] lg:justify-end lg:rounded-[28px]"
       style={{ background: cover.bg }}
     >
       {media ? (
         // In the card's flow on small screens, so a long summary pushes the card
         // taller instead of running over the screenshot.
-        <div className="relative mx-5 mt-6 aspect-[276/200] shrink-0 overflow-hidden rounded-xl border border-white/14 shadow-[0_24px_48px_rgb(0_0_0/0.5)] lg:absolute lg:left-[6.3%] lg:top-[9.2%] lg:mx-0 lg:mt-0 lg:aspect-auto lg:h-[64.6%] lg:w-[87.4%] lg:rounded-2xl lg:shadow-[0_40px_80px_rgb(0_0_0/0.5)]">
+        <div className="relative mx-5 mt-16 aspect-[276/200] shrink-0 overflow-hidden rounded-xl border border-white/14 shadow-[0_24px_48px_rgb(0_0_0/0.5)] lg:absolute lg:left-[6.3%] lg:top-[9.2%] lg:mx-0 lg:mt-0 lg:aspect-auto lg:h-[64.6%] lg:w-[87.4%] lg:rounded-2xl lg:shadow-[0_40px_80px_rgb(0_0_0/0.5)]">
           <Image
             src={media.src}
             alt={media.alt}
@@ -89,7 +76,7 @@ function Card({
             {project.summary}
           </p>
         </div>
-        <div className="flex min-h-10 items-center justify-between gap-4 pr-12 lg:block lg:shrink-0 lg:pr-0 lg:text-right">
+        <div className="flex min-h-10 items-center justify-between gap-4 lg:block lg:shrink-0 lg:text-right">
           {stat && (
             <p className="flex items-baseline gap-2 lg:flex-col lg:items-end lg:gap-1">
               <span className="font-display text-2xl font-extrabold leading-none text-ink lg:text-3xl">
@@ -113,66 +100,51 @@ function Card({
           e.preventDefault();
           onOpen(e.currentTarget.closest("article")!);
         }}
-        className="absolute bottom-5 right-5 flex size-11 items-center justify-center gap-2 rounded-full bg-accent text-paper lg:glass lg:bottom-auto lg:top-3 lg:right-5 lg:h-[38px] lg:w-auto lg:pl-4 lg:pr-3.5 lg:text-sm lg:font-medium lg:text-ink"
+        className="glass absolute right-3 top-3 z-10 flex h-11 items-center gap-2 rounded-full pl-4 pr-3.5 text-sm font-medium text-ink lg:right-5 lg:h-[38px]"
       >
-        <span className="max-lg:sr-only">Read the case study</span>
+        Open case study
         <span className="sr-only"> for {project.title}</span>
-        <Plus className="size-4 lg:size-[18px] lg:text-accent" aria-hidden />
+        <Plus className="size-[18px] text-accent" aria-hidden />
       </Link>
     </article>
   );
 }
 
 export function Projects() {
-  const trackRef = useRef<HTMLDivElement>(null);
+  const total = projects.length;
+  const { sectionRef, trackRef, pinned, active, go, onFocus } = usePinnedTrack(total);
   const bodyRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(0);
   const [open, setOpen] = useState<number | null>(null);
   // Whether the open case study added a history entry that Back should undo.
   const pushed = useRef(false);
-
-  // The card most in view is the current one.
+  const openRef = useRef(open);
   useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) setActive(Number((e.target as HTMLElement).dataset.index));
-        }
-      },
-      { root: track, threshold: 0.6 },
-    );
-    track.querySelectorAll("[data-index]").forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, []);
+    openRef.current = open;
+  }, [open]);
+  const cardAt = (i: number) => trackRef.current?.querySelector<HTMLElement>(`[data-index="${i}"]`);
 
-  // Back and Forward move between the home page and an open case study.
+  // Back and Forward move between the home page and an open case study. The
+  // sheet shrinks back into its card on the way out.
   useEffect(() => {
     const onPop = () => {
       const i = projects.findIndex((p) => p.slug === slugFromPath());
       pushed.current = i >= 0;
-      setOpen(i >= 0 ? i : null);
+      if (i >= 0) return setOpen(i);
+      const current = openRef.current;
+      if (current !== null) morphClose(cardAt(current), () => flushSync(() => setOpen(null)));
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
+    // cardAt only reads a ref.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  function goTo(i: number) {
-    const card = trackRef.current?.querySelector(`[data-index="${i}"]`);
-    card?.scrollIntoView({
-      inline: "start",
-      block: "nearest",
-      behavior: prefersReducedMotion() ? "auto" : "smooth",
-    });
-  }
 
   // The address bar shows the case study's own URL while it is open, so it can
   // be shared, and a reload lands on the full page.
   function openCase(i: number, card: HTMLElement) {
     window.history.pushState(null, "", `/projects/${projects[i].slug}`);
     pushed.current = true;
-    morphFrom(card, () => flushSync(() => setOpen(i)));
+    morphOpen(card, () => flushSync(() => setOpen(i)));
   }
 
   function switchCase(i: number) {
@@ -185,93 +157,120 @@ export function Projects() {
     if (pushed.current) {
       pushed.current = false;
       window.history.back(); // the popstate handler closes the sheet
-    } else {
-      setOpen(null);
+    } else if (open !== null) {
+      morphClose(cardAt(open), () => flushSync(() => setOpen(null)));
     }
   }
 
-  const total = projects.length;
   const current = open === null ? null : projects[open];
   const prev = open !== null && open > 0 ? open - 1 : null;
   const next = open !== null && open < total - 1 ? open + 1 : null;
 
   return (
-    <section id="projects" className="py-20 lg:py-28">
-      <div className="wrap flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <h2 className="font-display text-[clamp(3.75rem,2rem+5.5vw,6.5rem)] font-extrabold uppercase leading-[0.9] tracking-[-0.03em] text-ink">
-            <span className="block">Selected</span>{" "}
-            {/* The reference ghosts this word almost into the page; this is the
-                faintest grey that still clears 3:1 for large text. */}
-            <span className="block text-[#636167]">work</span>
-          </h2>
-          <p className="mt-4 text-[15px] text-ink-muted lg:text-base">
-            Problem, approach, and impact. The stack comes second.
-          </p>
-        </div>
-        <div className="hidden items-center gap-5 pb-1.5 lg:flex">
-          <div aria-hidden className="h-[3px] w-[220px] overflow-hidden rounded-full bg-ink/12">
-            <div
-              className="h-full rounded-full bg-accent transition-[width] duration-500 motion-reduce:transition-none"
-              style={{ width: `${((active + 1) / total) * 100}%` }}
-            />
+    <section
+      id="projects"
+      ref={sectionRef}
+      className="pin-section py-20 lg:py-28"
+      style={{ "--slides": total } as React.CSSProperties}
+    >
+      {projects.map((p, i) => (
+        <span key={p.slug} aria-hidden className="pin-marker" style={{ "--i": i } as React.CSSProperties} />
+      ))}
+      <div className="pin-stage">
+        <a
+          href="#leadership"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-5 focus:top-[calc(var(--nav-height)+0.5rem)] focus:z-20 focus:rounded-full focus:bg-ink focus:px-4 focus:py-2.5 focus:text-sm focus:font-medium focus:text-paper"
+        >
+          Skip to next section
+        </a>
+        <div className="wrap flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h2 className="font-display text-[clamp(3.75rem,2rem+5.5vw,6.5rem)] font-extrabold uppercase leading-[0.9] tracking-[-0.03em] text-ink">
+              <span className="block">Selected</span>{" "}
+              {/* The reference ghosts this word almost into the page; this is the
+                  faintest grey that still clears 3:1 for large text. */}
+              <span className="block text-[#636167]">work</span>
+            </h2>
+            <p className="mt-4 text-[15px] text-ink-muted lg:text-base">
+              Problem, approach, and impact. The stack comes second.
+            </p>
           </div>
-          <span aria-hidden className="min-w-14 font-mono text-sm text-ink-faint">
-            {active + 1} / {total}
-          </span>
-          {[
-            { label: "Previous project", to: active - 1, Icon: ArrowLeft },
-            { label: "Next project", to: active + 1, Icon: ArrowRight },
-          ].map(({ label, to, Icon }) => (
-            <button
-              key={label}
-              type="button"
-              aria-label={label}
-              disabled={to < 0 || to >= total}
-              onClick={() => goTo(to)}
-              className="flex size-14 items-center justify-center rounded-full border border-ink/25 text-ink transition-colors duration-300 hover:border-accent hover:bg-accent hover:text-paper disabled:pointer-events-none disabled:opacity-30"
-            >
-              <Icon className="size-5" aria-hidden />
-            </button>
+          <div className="hidden items-center gap-5 pb-1.5 md:flex">
+            <div aria-hidden className="h-[3px] w-[220px] overflow-hidden rounded-full bg-ink/12">
+              <div
+                className="h-full rounded-full bg-accent transition-[width] duration-500 motion-reduce:transition-none"
+                style={{ width: `${((active + 1) / total) * 100}%` }}
+              />
+            </div>
+            <span aria-hidden className="min-w-14 font-mono text-sm text-ink-faint">
+              {active + 1} / {total}
+            </span>
+            {[
+              { label: "Previous project", to: active - 1, Icon: ArrowLeft },
+              { label: "Next project", to: active + 1, Icon: ArrowRight },
+            ].map(({ label, to, Icon }) => (
+              <button
+                key={label}
+                type="button"
+                aria-label={label}
+                disabled={to < 0 || to >= total}
+                onClick={() => go(to)}
+                className="flex size-14 items-center justify-center rounded-full border border-ink/25 text-ink transition-colors duration-300 hover:border-accent hover:bg-accent hover:text-paper disabled:pointer-events-none disabled:opacity-30"
+              >
+                <Icon className="size-5" aria-hidden />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div
+          role="region"
+          aria-roledescription="carousel"
+          aria-label="Selected work"
+          tabIndex={0}
+          onFocus={onFocus}
+          onKeyDown={(e) => {
+            if (e.target !== e.currentTarget) return;
+            if (e.key === "ArrowRight") go(active + 1);
+            else if (e.key === "ArrowLeft") go(active - 1);
+            else return;
+            e.preventDefault();
+          }}
+          className="mt-10 lg:mt-12"
+        >
+          <div
+            ref={trackRef}
+            className="pin-track flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-5 [scroll-padding-inline:1.25rem] [scrollbar-width:none] motion-reduce:scroll-auto sm:px-8 sm:[scroll-padding-inline:2rem] lg:gap-6 lg:px-[max(2rem,calc(50vw-600px))] lg:[scroll-padding-inline:max(2rem,calc(50vw-600px))] [&::-webkit-scrollbar]:hidden"
+          >
+            {projects.map((project, i) => (
+              <Card
+                key={project.slug}
+                project={project}
+                index={i}
+                total={total}
+                onOpen={(card) => openCase(i, card)}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div aria-hidden className={`wrap mt-5 flex gap-1.5 ${pinned ? "hidden" : "md:hidden"}`}>
+          {projects.map((p, i) => (
+            <span
+              key={p.slug}
+              className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${
+                i === active ? "w-[22px] bg-accent" : "w-1.5 bg-ink/25"
+              }`}
+            />
           ))}
         </div>
-      </div>
-
-      <div
-        ref={trackRef}
-        role="region"
-        aria-roledescription="carousel"
-        aria-label="Selected work"
-        tabIndex={0}
-        className="mt-10 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-5 [scroll-padding-inline:1.25rem] [scrollbar-width:none] motion-reduce:scroll-auto sm:px-8 sm:[scroll-padding-inline:2rem] lg:mt-16 lg:gap-6 lg:px-[max(2rem,calc(50vw-600px))] lg:[scroll-padding-inline:max(2rem,calc(50vw-600px))] [&::-webkit-scrollbar]:hidden"
-      >
-        {projects.map((project, i) => (
-          <Card
-            key={project.slug}
-            project={project}
-            index={i}
-            total={total}
-            onOpen={(card) => openCase(i, card)}
-          />
-        ))}
-      </div>
-
-      <div aria-hidden className="wrap mt-5 flex gap-1.5 lg:hidden">
-        {projects.map((p, i) => (
-          <span
-            key={p.slug}
-            className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${
-              i === active ? "w-[22px] bg-accent" : "w-1.5 bg-ink/25"
-            }`}
-          />
-        ))}
       </div>
 
       <Sheet
         open={current !== null}
         onClose={closeCase}
         labelledBy="case-study-title"
-        className="morph inset-x-0 bottom-0 top-auto h-[calc(100dvh-3rem)] w-full overflow-hidden rounded-t-[26px] border-t border-white/12 bg-sheet [view-transition-name:case-study] lg:inset-x-[max(2rem,calc(50vw-600px))] lg:top-6 lg:bottom-6 lg:h-auto lg:w-auto lg:rounded-[28px] lg:border"
+        className="morph inset-x-0 bottom-0 top-auto h-[calc(100dvh-3rem)] w-full overflow-hidden rounded-t-[26px] border-t border-white/12 bg-sheet lg:inset-x-[max(2rem,calc(50vw-600px))] lg:top-6 lg:bottom-6 lg:h-auto lg:w-auto lg:rounded-[28px] lg:border"
       >
         {current && (
           <div ref={bodyRef} className="thin-scroll h-full overflow-y-auto">

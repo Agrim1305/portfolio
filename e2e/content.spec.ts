@@ -61,6 +61,8 @@ async function reachable(page: Page, route: string) {
   for (let i = 0; i < (await triggers.count()); i++) {
     const trigger = triggers.nth(i);
     if (!(await trigger.isVisible())) continue;
+    // Pinned cards sit off to the side until focus brings them into view.
+    await trigger.focus();
     await trigger.click();
     await page.locator("dialog[open]").first().waitFor();
     const s = await page.evaluate(snapshot);

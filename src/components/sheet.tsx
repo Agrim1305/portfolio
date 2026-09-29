@@ -4,9 +4,10 @@ import { useEffect, useRef } from "react";
 import { setPageScrollLocked } from "@/lib/scroll-lock";
 
 /* A modal sheet built on the native <dialog>. showModal() supplies the focus
-   trap, Escape to close, an inert page behind, and focus return on close, so
-   none of that is hand-rolled. Clicking the backdrop closes it too. Callers
-   size, place and colour it with `className`. */
+   trap, an inert page behind, and focus return on close, so none of that is
+   hand-rolled. Escape and a backdrop click ask the caller to close, so a close
+   can animate (or update history) the same way whichever route it takes.
+   Callers size, place and colour it with `className`. */
 export function Sheet({
   open,
   onClose,
@@ -39,7 +40,18 @@ export function Sheet({
       ref={ref}
       aria-label={label}
       aria-labelledby={labelledBy}
-      onClose={onClose}
+      onCancel={(e) => {
+        // The browser only lets a page hold Escape back after a user
+        // gesture; otherwise the dialog closes itself and onClose follows.
+        if (!e.cancelable) return;
+        e.preventDefault();
+        onClose();
+      }}
+      // Also fires after the caller closes the sheet itself; `open` is false
+      // by then, so it is not reported twice.
+      onClose={() => {
+        if (open) onClose();
+      }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
