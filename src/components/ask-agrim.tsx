@@ -2,7 +2,7 @@
 
 import { useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from "react";
 import { ArrowUp, Sparkles, Volume2, VolumeX, X } from "lucide-react";
-import { AvatarHead } from "@/components/avatar";
+import { Cloud } from "@/components/cloud";
 import {
   setMuted,
   speak,
@@ -108,7 +108,7 @@ export function openAsk() {
 const noSubscribe = () => () => {};
 const isApple = () => /Mac|iPhone|iPad/.test(navigator.userAgent);
 
-/* The command bar under the avatar: looks like an input, opens the chat.
+/* The command bar under the cloud: looks like an input, opens the chat.
    Callers set its display, since it sits in different places per breakpoint. */
 export function AskBar({ className = "" }: { className?: string }) {
   const apple = useSyncExternalStore(noSubscribe, isApple, () => true);
@@ -364,7 +364,7 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
         <div className="flex h-full flex-col">
           <span aria-hidden className="mx-auto mt-2.5 h-[5px] w-10 shrink-0 rounded-full bg-ink/25 md:hidden" />
           <div className="flex items-center gap-2.5 border-b border-hairline px-4 py-3 md:py-3.5">
-            <AvatarHead className="size-10 shrink-0 md:size-9" />
+            <Cloud className="w-11 shrink-0 md:w-10" />
             <div className="min-w-0 flex-1">
               <p id="ask-agrim-title" className="font-display text-[17px] font-bold leading-tight">
                 Ask about Agrim

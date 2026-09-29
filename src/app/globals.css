@@ -131,7 +131,7 @@ html:has(dialog[open]) {
 }
 
 /* ---- Hero entrance ----
-   The name wipes in from the left and the avatar fades in alongside it, with
+   The name wipes in from the left and the cloud fades in alongside it, with
    the same easing, duration and 0.5s delay. */
 @keyframes name-wipe {
   from { clip-path: inset(0 100% 0 0); }
@@ -153,6 +153,27 @@ html:has(dialog[open]) {
 }
 .hero-fade {
   animation: fade-in 0.6s var(--ease-draw) 0.5s both;
+}
+
+/* The cloud floats slowly and blinks every few seconds, both eyes at once.
+   Its eyes follow the cursor through --eye-x/--eye-y (see cloud.tsx). */
+@keyframes cloud-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes cloud-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+.cloud-float {
+  animation: cloud-float 6s ease-in-out infinite;
+}
+.cloud-blink {
+  animation: cloud-blink 5.5s ease-in-out infinite;
+}
+.cloud-eyes {
+  transform: translate(var(--eye-x, 0), var(--eye-y, 0));
+  transition: transform 0.25s ease-out;
 }
 
 /* The sliding keywords under the name: each holds for about two seconds,
@@ -368,8 +389,11 @@ html:has(dialog[open]) {
   .lift:active { transform: none; }
   .sheet,
   .sheet::backdrop,
-  .chat-window { transition: none; }
+  .chat-window,
+  .cloud-eyes { transition: none; }
   .keywords,
+  .cloud-float,
+  .cloud-blink,
   .topo-drift,
   .marquee,
   .role-panel:not([hidden]) { animation: none; }

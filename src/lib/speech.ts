@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 
-/* Voice state shared by Hear me and the assistant. Speech uses the browser's
+/* Voice state for the assistant. Speech uses the browser's
    own voice (speechSynthesis). Voice starts muted and the visitor's choice is
    remembered. */
 

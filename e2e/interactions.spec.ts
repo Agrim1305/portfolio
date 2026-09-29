@@ -25,7 +25,7 @@ test.describe("mobile menu", () => {
   });
 });
 
-test.describe("avatar voice", () => {
+test.describe("voice", () => {
   // A stand-in voice: reports a word boundary every 150ms and finishes after
   // 1.2s, and records what it was asked to say.
   test.beforeEach(async ({ page }) => {
@@ -54,20 +54,6 @@ test.describe("avatar voice", () => {
     await page.waitForTimeout(500);
     expect(await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken)).toEqual([]);
   });
-
-  test("Hear me reads the intro and remembers the choice", async ({ page }) => {
-    await page.goto("/");
-    const hear = page.getByRole("button", { name: "Hear me" });
-    await expect(hear).toHaveAttribute("aria-pressed", "false");
-    await hear.click();
-    await expect(hear).toHaveAttribute("aria-pressed", "true");
-
-    const spoken = await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken);
-    expect(spoken.join(" ")).toContain("Final-year Computer Science student at Adelaide University");
-
-    await expect(hear).toHaveAttribute("aria-pressed", "false", { timeout: 5000 });
-    expect(await page.evaluate(() => localStorage.getItem("voice"))).toBe("on");
-  });
 });
 
 test("the sliding keywords read as one label and hold still under reduced motion", async ({ page }) => {
@@ -79,6 +65,26 @@ test("the sliding keywords read as one label and hold still under reduced motion
   expect(await words.locator(".keywords").evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
   await expect(words.getByText("software engineer.").first()).toBeInViewport();
   await expect(words.getByText("problem solver.")).not.toBeInViewport();
+});
+
+test("the cloud is decorative, and holds still under reduced motion", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const cloud = page.locator("#top .cloud-float");
+  await expect(cloud).toHaveAttribute("aria-hidden", "true");
+  expect(await cloud.evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
+  expect(await page.locator("#top .cloud-blink").first().evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
+  await expect(page.getByRole("button", { name: "Hear me" })).toHaveCount(0);
+});
+
+test("the cloud's eyes follow the cursor, a few pixels at most", async ({ page, isMobile }) => {
+  test.skip(isMobile, "fine pointers only");
+  await page.goto("/");
+  const eyes = page.locator("#top .cloud-eyes");
+  await page.mouse.move(1400, 880);
+  await expect.poll(() => eyes.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m41)).toBe(6);
+  await page.mouse.move(0, 0);
+  await expect.poll(() => eyes.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).m41)).toBe(-6);
 });
 
 test("the stack strip can be paused", async ({ page }) => {

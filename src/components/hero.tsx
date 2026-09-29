@@ -1,4 +1,4 @@
-import { Avatar } from "@/components/avatar";
+import { Cloud } from "@/components/cloud";
 import { AskBar } from "@/components/ask-agrim";
 import { SocialLinks } from "@/components/social-links";
 
@@ -87,10 +87,20 @@ export function Hero() {
         </div>
 
         {/* After the text in the DOM so the name is read first; shown first on
-            small screens. */}
+            small screens. The cloud is decorative, so nothing here is read. */}
         <div className="order-first mx-auto w-full max-w-[322px] lg:order-none lg:max-w-none">
-          <Avatar />
-          <AskBar className="mt-6 hidden lg:flex" />
+          <div className="hero-fade relative mx-auto mt-4 w-[62%] lg:mt-0 lg:w-[72%]">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[155%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgb(255_140_70/0.16),rgb(255_91_46/0)_65%)]"
+            />
+            <Cloud live />
+            <span
+              aria-hidden
+              className="absolute -bottom-[9%] left-1/5 h-[8%] w-3/5 rounded-[50%] bg-[radial-gradient(closest-side,rgb(0_0_0/0.6),transparent)]"
+            />
+          </div>
+          <AskBar className="mt-14 hidden lg:flex" />
         </div>
       </div>
     </section>
