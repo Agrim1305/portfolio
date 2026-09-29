@@ -180,7 +180,7 @@ test.describe("selected work", () => {
     const track = page.getByRole("region", { name: "Selected work" });
     await track.scrollIntoViewIfNeeded();
     await track.evaluate((el) => el.scrollTo({ left: el.scrollWidth, behavior: "instant" }));
-    await expect(page.getByRole("group", { name: "8 of 8" })).toBeInViewport({ ratio: 0.6 });
+    await expect(track.getByRole("group", { name: "8 of 8" })).toBeInViewport({ ratio: 0.6 });
   });
 
   test("the mouse wheel over the cards still scrolls the page", async ({ page, isMobile }) => {
@@ -273,5 +273,48 @@ test.describe("experience", () => {
     await tabs.nth(1).click();
     await page.getByRole("tabpanel").getByRole("button", { name: "Read the full story" }).click();
     await expect(page.getByRole("dialog", { name: "Running our side of a two-university club merger" })).toBeVisible();
+  });
+});
+
+test.describe("built on court", () => {
+  const current = (page: import("@playwright/test").Page) =>
+    page.locator("#court [aria-roledescription='slide']:not([inert])");
+
+  test("arrows, timeline dots and arrow keys move between stops", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("#court").scrollIntoViewIfNeeded();
+    await expect(current(page)).toHaveAttribute("aria-label", "1 of 8");
+
+    await page.locator("#court").getByRole("button", { name: "Next stop" }).filter({ visible: true }).click();
+    await expect(current(page)).toHaveAttribute("aria-label", "2 of 8");
+
+    await page.getByRole("button", { name: "Go to Premier League" }).click();
+    await expect(current(page)).toContainText("Premier League");
+
+    await page.getByRole("region", { name: "Built on court" }).focus();
+    await page.keyboard.press("ArrowLeft");
+    await expect(current(page)).toHaveAttribute("aria-label", "7 of 8");
+  });
+
+  test("a swipe moves to the next stop", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "touch only");
+    await page.goto("/");
+    const region = page.getByRole("region", { name: "Built on court" });
+    await region.scrollIntoViewIfNeeded();
+    await region.dispatchEvent("pointerdown", { pointerType: "touch", clientX: 300, clientY: 400 });
+    await region.dispatchEvent("pointerup", { pointerType: "touch", clientX: 120, clientY: 400 });
+    await expect(current(page)).toHaveAttribute("aria-label", "2 of 8");
+  });
+
+  test("the mouse wheel over the stops scrolls the page, not the stops", async ({ page, isMobile }) => {
+    test.skip(isMobile, "no wheel on touch");
+    await page.goto("/");
+    const region = page.getByRole("region", { name: "Built on court" });
+    await region.scrollIntoViewIfNeeded();
+    const before = await page.evaluate(() => window.scrollY);
+    await region.hover();
+    await page.mouse.wheel(0, 500);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(before + 200);
+    await expect(current(page)).toHaveAttribute("aria-label", "1 of 8");
   });
 });
