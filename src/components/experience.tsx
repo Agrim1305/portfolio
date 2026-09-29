@@ -81,11 +81,14 @@ export function Experience() {
   return (
     <section id="experience" className="wrap py-20 lg:py-28">
       <h2 className="rise font-display text-[clamp(3rem,1.6rem+4.4vw,4.75rem)] font-extrabold leading-[1.05] tracking-[-0.03em] text-ink">
-        Where I&apos;ve led and{" "}
+        Where I&apos;ve{" "}
         <span className="font-serif text-[1.18em] font-medium italic tracking-normal text-accent">
           worked
         </span>
       </h2>
+      <p className="rise mt-3 text-[15px] text-ink-muted lg:text-[17px]" style={rise(0.04)}>
+        Hover a role for the short version. Read more for the full story.
+      </p>
 
       <p
         className="rise mt-5 max-w-3xl text-base leading-relaxed text-ink-soft lg:text-[17px]"

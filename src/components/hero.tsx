@@ -33,14 +33,14 @@ export function Hero() {
           <h1 className="hero-name mt-3 py-[0.06em] font-display text-[clamp(4.5rem,1.2rem+10.4vw,10.25rem)] font-extrabold leading-[0.9] tracking-[-0.037em] text-ink">
             <span className="block">Agrim</span> <span className="block">Sharma</span>
           </h1>
-          {/* A role is needed for the label to count; img reads the moving
-              words as one still phrase. */}
+          {/* Screen readers get the four words once, as plain text; the
+              sliding copy is visual only. */}
           <div
-            role="img"
-            aria-label="Software engineer, problem solver, competitor, coach"
+            data-keywords
             className="hero-rise mt-1 h-[1.2em] overflow-hidden font-serif text-[clamp(2.25rem,1rem+4vw,4.75rem)] italic leading-[1.2] text-accent"
             style={{ animationDelay: "0.6s" }}
           >
+            <span className="sr-only">Software engineer, problem solver, competitor, coach</span>
             <div aria-hidden className="keywords flex flex-col whitespace-nowrap">
               {KEYWORDS.map((word, i) => (
                 <span key={i} className="h-[1.2em]">

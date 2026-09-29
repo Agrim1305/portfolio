@@ -73,7 +73,8 @@ test.describe("avatar voice", () => {
 test("the sliding keywords read as one label and hold still under reduced motion", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  const words = page.getByLabel("Software engineer, problem solver, competitor, coach");
+  const words = page.locator("[data-keywords]");
+  await expect(words.getByText("Software engineer, problem solver, competitor, coach")).toHaveClass(/sr-only/);
   await expect(words.locator("[aria-hidden]")).toHaveCount(1);
   expect(await words.locator(".keywords").evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
   await expect(words.getByText("software engineer.").first()).toBeInViewport();
@@ -332,14 +333,16 @@ test("the page never scrolls sideways", async ({ page }) => {
   expect(overflow).toBeLessThanOrEqual(0);
 });
 
-test("the merger story opens as a sheet", async ({ page }) => {
+test("the merger story opens as the President story", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "Read it" }).click();
-  const sheet = page.getByRole("dialog", { name: "Running our side of a two-university club merger" });
+  const sheet = page.getByRole("dialog", { name: "President" });
   await expect(sheet).toBeVisible();
   await expect(sheet.getByRole("heading", { name: "What I did" })).toBeVisible();
+  await expect(page).toHaveURL(/#story-president$/);
   await page.keyboard.press("Escape");
   await expect(sheet).toBeHidden();
+  await expect(page).toHaveURL(/\/$/);
 });
 
 test.describe("experience", () => {
@@ -355,14 +358,53 @@ test.describe("experience", () => {
     await expect(page.getByRole("tabpanel")).toContainText("Part-time customer service across two stores");
   });
 
-  test("only the role with a longer story offers it", async ({ page }) => {
+  test("every role opens its full story, and Back closes it", async ({ page }) => {
     await page.goto("/");
     const tabs = page.getByRole("tablist", { name: "Roles" }).getByRole("tab");
-    await tabs.first().click();
-    await expect(page.getByRole("tabpanel").getByRole("button", { name: "Read the full story" })).toHaveCount(0);
-    await tabs.nth(1).click();
+    const names = ["Software Engineering Intern, Voice AI", "President", "Assistant Head Coach", "Retail Assistant"];
+    const ids = ["aurivox", "president", "coaching", "retail"];
+    for (let i = 0; i < 4; i++) {
+      await tabs.nth(i).click();
+      await page.getByRole("tabpanel").getByRole("button", { name: "Read the full story" }).click();
+      const sheet = page.getByRole("dialog", { name: names[i] });
+      await expect(sheet).toBeVisible();
+      await expect(page).toHaveURL(new RegExp(`#story-${ids[i]}$`));
+      await page.goBack();
+      await expect(sheet).toBeHidden();
+    }
+  });
+
+  test("the close button closes a story and returns focus to its button", async ({ page }) => {
+    await page.goto("/");
+    const read = page.getByRole("tabpanel").getByRole("button", { name: "Read the full story" });
+    await read.click();
+    const sheet = page.getByRole("dialog", { name: "Software Engineering Intern, Voice AI" });
+    await expect(sheet).toContainText("Chosen as one of four interns from eleven shortlisted students");
+    await sheet.getByRole("button", { name: "Close" }).click();
+    await expect(sheet).toBeHidden();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(read).toBeFocused();
+  });
+
+  test("next and previous role move through the stories", async ({ page, isMobile }) => {
+    test.skip(isMobile, "the role buttons are in the wide header");
+    await page.goto("/");
     await page.getByRole("tabpanel").getByRole("button", { name: "Read the full story" }).click();
-    await expect(page.getByRole("dialog", { name: "Running our side of a two-university club merger" })).toBeVisible();
+    await page.getByRole("button", { name: "Next role" }).click();
+    await expect(page.getByRole("dialog", { name: "President" })).toBeVisible();
+    await expect(page).toHaveURL(/#story-president$/);
+    await page.getByRole("button", { name: "Previous role" }).click();
+    await expect(page.getByRole("dialog", { name: "Software Engineering Intern, Voice AI" })).toBeVisible();
+  });
+
+  test("a story link opens the page with that story showing", async ({ page }) => {
+    await page.goto("/#story-coaching");
+    const sheet = page.getByRole("dialog", { name: "Assistant Head Coach" });
+    await expect(sheet).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(sheet).toBeHidden();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("#top")).toBeAttached();
   });
 });
 
