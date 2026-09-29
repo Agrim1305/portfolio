@@ -4,6 +4,7 @@ import { TechStrip } from "@/components/tech-strip";
 import { Projects } from "@/components/projects";
 import { Leadership } from "@/components/leadership";
 import { Experience } from "@/components/experience";
+import { Google } from "@/components/google";
 import { Court } from "@/components/court";
 import { About } from "@/components/about";
 import { Contact } from "@/components/contact";
@@ -24,6 +25,9 @@ export default function Home() {
         </Reveal>
         <Reveal>
           <Experience />
+        </Reveal>
+        <Reveal>
+          <Google />
         </Reveal>
         <Reveal>
           <Court />

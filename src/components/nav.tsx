@@ -11,6 +11,7 @@ const sections = [
   { id: "projects", label: "Projects" },
   { id: "leadership", label: "Leadership" },
   { id: "experience", label: "Experience" },
+  { id: "google", label: "Google" },
   { id: "about", label: "About" },
   { id: "contact", label: "Contact" },
 ];
