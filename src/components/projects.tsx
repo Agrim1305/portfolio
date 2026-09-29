@@ -173,6 +173,9 @@ export function Projects() {
     <section
       id="projects"
       ref={sectionRef}
+      // The card in view, for the assistant's question about it (see
+      // lib/section-questions.ts).
+      data-active={active}
       className="pin-section py-20 lg:py-28"
       style={{ "--slides": total } as React.CSSProperties}
     >

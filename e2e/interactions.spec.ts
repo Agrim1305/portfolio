@@ -80,7 +80,9 @@ test("the cloud is decorative, and holds still under reduced motion", async ({ p
 test("the cloud's eyes follow the cursor, a small share of the cloud at most", async ({ page, isMobile }) => {
   test.skip(isMobile, "fine pointers only");
   await page.goto("/");
-  const eyes = page.locator("body > button[aria-keyshortcuts] .cloud-eyes");
+  // Hydrated: the cloud button has taken over from the hero's copy.
+  await expect(page.locator("#hero-cloud .cloud")).toHaveCSS("visibility", "hidden");
+  const eyes = page.locator("button.dock .cloud-eyes");
   await page.mouse.move(1400, 880);
   await expect.poll(() => eyes.evaluate((el) => getComputedStyle(el).translate)).toBe("2.2% 2%");
   await page.mouse.move(0, 0);
@@ -106,22 +108,22 @@ test.describe("the docked cloud", () => {
     // only ever one cloud, and the button sits exactly where it was.
     await expect(page.locator("#hero-cloud .cloud")).toHaveCSS("visibility", "hidden");
     const slot = await box(page, "#hero-cloud");
-    const atTop = await box(page, "body > button[aria-keyshortcuts]");
+    const atTop = await box(page, "button.dock");
     for (const k of ["x", "y", "width", "height"] as const) expect(Math.abs(atTop[k] - slot[k])).toBeLessThan(1);
 
     await scroll(page, 150);
-    const midway = await box(page, "body > button[aria-keyshortcuts]");
+    const midway = await box(page, "button.dock");
     expect(midway.width).toBeLessThan(slot.width);
     expect(midway.width).toBeGreaterThan(92);
 
     await scroll(page, 2000);
-    const docked = await box(page, "body > button[aria-keyshortcuts]");
+    const docked = await box(page, "button.dock");
     expect(docked.width).toBeCloseTo(92, 0);
     expect(docked.right).toBeCloseTo(24, 0);
     expect(docked.bottom).toBeCloseTo(24, 0);
 
     await scroll(page, 0);
-    const back = await box(page, "body > button[aria-keyshortcuts]");
+    const back = await box(page, "button.dock");
     for (const k of ["x", "y", "width"] as const) expect(Math.abs(back[k] - slot[k])).toBeLessThan(1);
   });
 
@@ -134,7 +136,7 @@ test.describe("the docked cloud", () => {
     await expect(dock(page)).toBeVisible();
     expect(await dock(page).evaluate((el) => getComputedStyle(el).transform)).toBe("none");
     const margin = isMobile ? 16 : 24;
-    await expect.poll(() => box(page, "body > button[aria-keyshortcuts]")).toMatchObject({ right: margin, bottom: margin });
+    await expect.poll(() => box(page, "button.dock")).toMatchObject({ right: margin, bottom: margin });
   });
 
   test("is a button the keyboard can reach, and the chat opens above it", async ({ page, isMobile }) => {
@@ -330,7 +332,7 @@ test.describe("ask Agrim", () => {
     await expect(question).toBeFocused();
 
     await page.evaluate(() => window.scrollTo(0, 2000));
-    const launcher = page.locator("body > button[aria-keyshortcuts]");
+    const launcher = page.locator("button.dock");
     await launcher.click();
     await chat.getByRole("button", { name: "Close chat" }).click();
     await expect(chat).toBeHidden();

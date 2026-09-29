@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useState, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { X } from "lucide-react";
 import { Cloud, type Mood } from "@/components/cloud";
 import { usePinned } from "@/lib/pinned-track";
 import { onLenisScroll } from "@/lib/scroll-lock";
+import { useSectionQuestion } from "@/lib/section-questions";
 
 // The cloud reaches its dock once the page has scrolled this share of the
 // hero's height.
@@ -22,16 +24,24 @@ export function Dock({
   open,
   mood,
   onClick,
+  onAsk,
   buttonRef,
 }: {
   heroId?: string;
   open: boolean;
   mood: Mood;
   onClick: () => void;
+  onAsk: (question: string) => void;
   buttonRef: RefObject<HTMLButtonElement | null>;
 }) {
   const travels = usePinned() && Boolean(heroId);
   const [heroGone, setHeroGone] = useState(!heroId);
+  const cornerRef = useRef<HTMLDivElement>(null);
+  const bubbleRef = useRef<HTMLDivElement>(null);
+  const [peek, setPeek] = useState(false);
+  // Section questions start once the hero is gone, and wait while the chat
+  // is open.
+  const { question, fits, see, done } = useSectionQuestion(heroGone && !open, bubbleRef, cornerRef);
 
   useEffect(() => {
     const hero = heroId && document.getElementById(heroId);
@@ -45,16 +55,17 @@ export function Dock({
   // swap with the hero's copy is invisible.
   useLayoutEffect(() => {
     const button = buttonRef.current;
+    const corner = cornerRef.current;
     const hero = heroId ? document.getElementById(heroId) : null;
     const slot = hero?.querySelector<HTMLElement>("#hero-cloud");
     const heroCloud = slot?.querySelector<HTMLElement>(".cloud");
-    if (!travels || !button || !hero || !slot || !heroCloud) return;
+    if (!travels || !button || !corner || !hero || !slot || !heroCloud) return;
 
-    // The button's own centre and width at rest in the corner. Layout
-    // offsets, so neither this transform nor the reveal's nudge counts.
+    // The cloud's centre and width at rest in the corner, from the corner's
+    // layout box, which the cloud's transform never moves.
     let dock = { x: 0, y: 0, width: 1 };
     const measure = () => {
-      const { offsetLeft, offsetTop, offsetWidth, offsetHeight } = button;
+      const { offsetLeft, offsetTop, offsetWidth, offsetHeight } = corner;
       dock = { x: offsetLeft + offsetWidth / 2, y: offsetTop + offsetHeight / 2, width: offsetWidth };
     };
     const place = () => {
@@ -91,33 +102,101 @@ export function Dock({
     };
   }, [travels, heroId, buttonRef]);
 
+  const tooltip = Boolean(question && !fits);
+  const bubbleShown = Boolean(question && (fits || peek));
+
   return (
-    <button
-      ref={buttonRef}
-      type="button"
-      onClick={onClick}
-      aria-label="Ask AI about Agrim"
-      aria-keyshortcuts="Meta+K Control+K"
-      aria-expanded={open}
-      aria-controls="ask-agrim"
-      // Travelling, it swaps in for the hero's copy at once. Otherwise it
-      // rises in; visibility only waits out the fade when hiding, so focus can
-      // return to the button the moment the chat closes.
-      // No transition at all while travelling: the transform follows the
-      // scroll exactly, frame by frame.
-      className={`dock fixed bottom-4 right-4 z-30 block w-[76px] rounded-full md:bottom-6 md:right-6 md:w-[92px] ${
+    <div
+      ref={cornerRef}
+      // The corner holds the cloud and its question. Only they take the
+      // pointer, so while the cloud is up in the hero the empty corner
+      // doesn't. Travelling, the cloud swaps in for the hero's copy at once;
+      // otherwise the corner rises in, and visibility only waits out the fade
+      // when hiding, so focus can return to the cloud the moment the chat
+      // closes.
+      className={`pointer-events-none fixed bottom-4 right-4 z-30 md:bottom-6 md:right-6 ${
         travels
-          ? "visible"
+          ? ""
           : `duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
               heroGone
                 ? "visible opacity-100 transition-[opacity,translate]"
                 : "invisible translate-y-3 opacity-0 transition-[opacity,translate,visibility]"
             }`
       }`}
+      // Hovering or focusing the cloud shows a question that had no room of
+      // its own as a tooltip above it, and it stays while the pointer or focus
+      // moves onto it. Escape puts it away.
+      onPointerEnter={() => {
+        setPeek(true);
+        see();
+      }}
+      onPointerLeave={() => setPeek(false)}
+      onFocus={() => {
+        setPeek(true);
+        see();
+      }}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) setPeek(false);
+      }}
+      onKeyDown={(e) => {
+        if (e.key !== "Escape" || !bubbleShown) return;
+        e.stopPropagation();
+        if (tooltip) setPeek(false);
+        else done();
+      }}
     >
-      <span className="hero-fade block">
-        <Cloud live mood={mood} />
-      </span>
-    </button>
+      {question && (
+        <div
+          ref={bubbleRef}
+          id="dock-question"
+          // Padding, not a margin, under the bubble, so the pointer can cross
+          // from the cloud to the bubble without leaving the corner.
+          className={`absolute bottom-full right-0 w-[200px] pb-2.5 transition-[opacity,translate,visibility] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
+            bubbleShown ? "pointer-events-auto visible opacity-100" : "invisible translate-y-1.5 opacity-0"
+          }`}
+        >
+          <div className="relative rounded-2xl rounded-br-md bg-ink text-paper shadow-[0_18px_40px_rgb(0_0_0/0.45)]">
+            <button
+              id="dock-question-text"
+              type="button"
+              onClick={() => {
+                done();
+                onAsk(question.text);
+              }}
+              className="block w-full rounded-2xl rounded-br-md py-3 pl-3.5 pr-9 text-left text-[13px] font-medium leading-snug"
+            >
+              {question.text}
+            </button>
+            <button
+              type="button"
+              onClick={done}
+              aria-label="Dismiss this question"
+              className="absolute right-1 top-1 flex size-7 items-center justify-center rounded-full text-paper/60 transition-colors hover:text-paper"
+            >
+              <X className="size-3.5" aria-hidden />
+            </button>
+          </div>
+        </div>
+      )}
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={onClick}
+        aria-label="Ask AI about Agrim"
+        aria-keyshortcuts="Meta+K Control+K"
+        aria-expanded={open}
+        aria-controls="ask-agrim"
+        aria-describedby={tooltip ? "dock-question-text" : undefined}
+        className="dock pointer-events-auto relative block w-[76px] rounded-full md:w-[92px]"
+      >
+        <span className="hero-fade block">
+          <Cloud live mood={mood} />
+        </span>
+        {/* A question is waiting that had no room to show. */}
+        {tooltip && !question?.seen && (
+          <span aria-hidden className="absolute right-[10%] top-[8%] size-2 rounded-full bg-accent ring-2 ring-paper" />
+        )}
+      </button>
+    </div>
   );
 }

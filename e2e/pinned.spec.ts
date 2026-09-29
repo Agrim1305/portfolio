@@ -31,7 +31,7 @@ async function pinnedSlide(page: Page, id: string, i: number) {
         slide: box(slide),
         text: [...slide.querySelectorAll("h3, p")].map((el) => ({ text: el.textContent!.slice(0, 40), ...box(el) })),
         lines: lines.map(({ top, bottom, left, right }) => ({ top, bottom, left, right })),
-        pill: box(document.querySelector("body > button[aria-keyshortcuts]")!),
+        pill: box(document.querySelector("button.dock")!),
         viewport: { width: window.innerWidth, height: window.innerHeight },
       };
     },

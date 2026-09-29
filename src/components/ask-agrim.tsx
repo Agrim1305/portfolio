@@ -346,7 +346,7 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
 
   return (
     <>
-      <Dock heroId={heroId} open={open} mood={mood} onClick={show} buttonRef={dockRef} />
+      <Dock heroId={heroId} open={open} mood={mood} onClick={show} onAsk={openAsk} buttonRef={dockRef} />
 
       {/* A small window, not a modal: no backdrop, no scroll lock and no focus
           trap, so the page stays usable behind it. It opens above the docked
