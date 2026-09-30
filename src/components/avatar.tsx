@@ -34,14 +34,16 @@ export function Avatar() {
         aria-label="3D avatar of Agrim"
         className="absolute inset-0 overflow-hidden rounded-full bg-[radial-gradient(circle_at_50%_40%,#26262C,#151518_70%)] shadow-[inset_0_0_0_3px_rgb(255_91_46/0.55),0_40px_90px_rgb(0_0_0/0.5)]"
       >
-        {/* The figure is 560 x 600: full width, dropped slightly so the
-            circle crops the chest, as in the reference. */}
-        <div className="absolute inset-x-0 top-[3.9%] aspect-[560/600]">
+        {/* The render is a 1024px square with room around the figure. Sized
+            and placed so the head keeps the reference's size and place in the
+            circle (41% of its width, the crown 6% down) and the circle crops
+            the chest. */}
+        <div className="absolute left-[-4.7%] top-[1.4%] aspect-square w-[109.3%]">
           <Image
             src={FIGURE}
             alt=""
             fill
-            sizes="(min-width: 1280px) 500px, (min-width: 1024px) 420px, 322px"
+            sizes="(min-width: 1280px) 547px, (min-width: 1024px) 460px, 352px"
             priority
           />
         </div>
@@ -72,7 +74,7 @@ export function Avatar() {
 export function AvatarHead({ className = "" }: { className?: string }) {
   return (
     <span aria-hidden className={`relative block overflow-hidden rounded-full bg-[#26262C] ${className}`}>
-      <span className="absolute left-[-58%] top-[-23%] h-[231%] w-[215%]">
+      <span className="absolute left-[-68%] top-[-28.3%] aspect-square w-[235%]">
         <Image src={FIGURE} alt="" fill sizes="120px" />
       </span>
     </span>
