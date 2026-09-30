@@ -350,6 +350,27 @@ test.describe("ask Agrim", () => {
     await expect(input).toHaveValue("");
   });
 
+  test("a wheel over a long conversation scrolls the conversation, not the page", async ({ page, isMobile }) => {
+    test.skip(isMobile, "no wheel on touch");
+    await page.route("/api/chat", (route) =>
+      route.fulfill({ status: 200, contentType: "text/plain; charset=utf-8", body: Array(30).fill(ANSWER).join("\n\n") }),
+    );
+    await page.goto("/");
+    await page.keyboard.press("ControlOrMeta+k");
+    const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+    await chat.getByRole("textbox", { name: "Ask a question" }).fill("Hi");
+    await chat.getByRole("button", { name: "Send message" }).click();
+    const log = chat.getByRole("log");
+    await expect.poll(() => log.evaluate((el) => el.scrollHeight - el.clientHeight)).toBeGreaterThan(300);
+    await page.waitForTimeout(800);
+    const pageY = await page.evaluate(() => window.scrollY);
+    const before = await log.evaluate((el) => el.scrollTop);
+    await log.hover();
+    await page.mouse.wheel(0, -300);
+    await expect.poll(() => log.evaluate((el) => el.scrollTop)).toBeLessThan(before - 100);
+    expect(await page.evaluate(() => window.scrollY)).toBe(pageY);
+  });
+
   test("with voice on, the answer is read aloud a sentence at a time", async ({ page }) => {
     await page.goto("/");
     await page.keyboard.press("ControlOrMeta+k");
@@ -585,6 +606,22 @@ test.describe("selected work", () => {
     await expect(page).toHaveURL(/\/$/);
     await expect(page.getByText("2 / 8")).toBeVisible();
     await expect(page.getByRole("link", { name: "Open case study for MetaPlay" })).toBeFocused();
+  });
+
+  test("a wheel over an open case study scrolls the panel, not the page behind", async ({ page, isMobile }) => {
+    test.skip(isMobile, "no wheel on touch");
+    await page.goto("/");
+    const open = page.getByRole("link", { name: "Open case study for Pacific Village Explorer" });
+    await open.focus();
+    await page.keyboard.press("Enter");
+    const body = page.locator(".panel-body");
+    await expect(body).toBeVisible();
+    await page.waitForTimeout(800);
+    const pageY = await page.evaluate(() => window.scrollY);
+    await page.mouse.move(720, 600);
+    await page.mouse.wheel(0, 400);
+    await expect.poll(() => body.evaluate((el) => el.scrollTop)).toBeGreaterThan(100);
+    expect(await page.evaluate(() => window.scrollY)).toBe(pageY);
   });
 
   test("Back closes an open case study", async ({ page }) => {

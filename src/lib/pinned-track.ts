@@ -107,6 +107,9 @@ export function usePinnedTrack(count: number) {
       scrollToY(slideY(to));
     };
     const takeWheel = ({ deltaY, event }: { deltaY: number; event: WheelEvent | TouchEvent }) => {
+      // A wheel over something that scrolls itself (an open panel, the chat)
+      // is its own.
+      if ((event.target as Element).closest("[data-lenis-prevent]")) return false;
       const i = at();
       if (event.type !== "wheel" || !deltaY || i === null) return false;
       const now = performance.now();
@@ -137,7 +140,7 @@ export function usePinnedTrack(count: number) {
     // own keys.
     const takeKey = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
-      if ((e.target as Element).closest("input, textarea, select, button, a, [contenteditable], [role='dialog']")) return;
+      if ((e.target as Element).closest("input, textarea, select, button, a, [contenteditable], dialog, [role='dialog']")) return;
       const down = e.key === "ArrowDown" || e.key === "PageDown" || (e.key === " " && !e.shiftKey);
       const up = e.key === "ArrowUp" || e.key === "PageUp" || (e.key === " " && e.shiftKey);
       const i = at();
