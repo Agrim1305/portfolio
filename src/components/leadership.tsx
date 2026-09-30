@@ -29,20 +29,20 @@ export function Leadership() {
     <section id="leadership" tabIndex={-1} className="outline-none wrap py-20 lg:py-28">
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,480px)] lg:items-start lg:gap-14">
         <div>
-          <p className="rise font-mono text-[11px] uppercase tracking-[0.15em] text-accent-soft lg:text-[13px]">
+          <h2 className="rise font-display text-[clamp(3rem,1.2rem+3.8vw,4.75rem)] font-extrabold uppercase leading-[0.9] tracking-[-0.03em] text-ink">
             Leadership
-          </p>
-          <p className="rise mt-3 text-[15px] text-ink-muted lg:text-lg" style={rise(0.04)}>
+          </h2>
+          <p className="rise mt-4 text-[15px] text-ink-muted lg:text-lg" style={rise(0.04)}>
             Adelaide University Tennis Club · President, Jul 2024 to Mar 2026
           </p>
-          <h2
+          <h3
             className="rise mt-6 font-display text-[clamp(2.75rem,1.5rem+3.8vw,4.75rem)] font-extrabold leading-[0.98] tracking-[-0.035em] text-ink"
             style={rise(0.08)}
           >
             A dormant club to{" "}
             <span className="font-serif font-medium italic tracking-normal text-accent">Club of the Year</span> in
             eighteen months.
-          </h2>
+          </h3>
           <p className="rise mt-6 max-w-[620px] text-base leading-relaxed text-ink-soft lg:text-[17px]" style={rise(0.12)}>
             I took over a club that had gone quiet and rebuilt it from scratch. I
             led the merger of two university tennis clubs during the Adelaide and
