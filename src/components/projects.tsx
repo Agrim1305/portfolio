@@ -182,14 +182,21 @@ export function Projects() {
         <SkipLink to="leadership" />
         <div className="wrap">
           <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
-            <h2 className="font-display text-[3.75rem] font-extrabold uppercase leading-[0.9] tracking-[-0.03em] text-ink md:text-[clamp(3rem,1.2rem+3.1vw,4rem)]">
-              <span className="block md:inline">Selected</span>{" "}
-              {/* The reference ghosts this word almost into the page; this is the
-                  faintest grey that still clears 3:1 for large text. */}
-              <span className="block text-[#636167] md:inline">work</span>
-            </h2>
+            {/* From xl up the line sits beside the heading, so the card gets
+                its height. */}
+            <div className="xl:flex xl:items-end xl:gap-6">
+              <h2 className="font-display text-[3.75rem] font-extrabold uppercase leading-[0.9] tracking-[-0.03em] text-ink md:text-[clamp(3rem,1.2rem+3.1vw,4rem)]">
+                <span className="block md:inline">Selected</span>{" "}
+                {/* The reference ghosts this word almost into the page; this is the
+                    faintest grey that still clears 3:1 for large text. */}
+                <span className="block text-[#636167] md:inline">work</span>
+              </h2>
+              <p className="mt-4 text-[15px] text-ink-muted md:mt-1 lg:text-base xl:mt-0 xl:max-w-[15rem] xl:pb-0.5 xl:text-[15px] xl:leading-snug">
+                Problem, approach, and impact. The stack comes second.
+              </p>
+            </div>
             <div className="hidden items-center gap-5 md:flex">
-              <div aria-hidden className="h-[3px] w-[220px] overflow-hidden rounded-full bg-ink/12">
+              <div aria-hidden className="h-[3px] w-[220px] overflow-hidden rounded-full bg-ink/12 xl:w-[140px]">
                 <div
                   className="h-full rounded-full bg-accent transition-[width] duration-500 motion-reduce:transition-none"
                   style={{ width: `${((active + 1) / total) * 100}%` }}
@@ -215,9 +222,6 @@ export function Projects() {
               ))}
             </div>
           </div>
-          <p className="mt-4 text-[15px] text-ink-muted md:mt-1 lg:text-base">
-            Problem, approach, and impact. The stack comes second.
-          </p>
         </div>
 
         <div
