@@ -236,6 +236,66 @@ test.describe("the cloud's moods follow the chat stream", () => {
   }
 });
 
+test.describe("the cloud's faces", () => {
+  const face = (page: import("@playwright/test").Page) => page.locator("button.dock .cloud");
+  const docked = async (page: import("@playwright/test").Page) => {
+    await page.evaluate(() => window.scrollTo({ top: document.getElementById("google")!.offsetTop + 200, behavior: "instant" }));
+    await expect(page.getByRole("button", { name: "Ask AI about Agrim" })).toBeVisible();
+  };
+
+  test("happy as the chat opens, then back to idle", async ({ page }) => {
+    await page.goto("/");
+    await docked(page);
+    await page.waitForTimeout(1800);
+    await page.keyboard.press("ControlOrMeta+k");
+    await expect(face(page)).toHaveAttribute("data-mood", "happy");
+    await expect.poll(() => face(page).locator(".eye-arc").first().evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
+    await expect(face(page)).toHaveAttribute("data-mood", "idle", { timeout: 3000 });
+  });
+
+  test("surprised, for a beat, as a new section's question appears", async ({ page }) => {
+    await page.goto("/");
+    await page.evaluate(() => window.scrollTo({ top: document.getElementById("leadership")!.offsetTop, behavior: "instant" }));
+    await expect(face(page)).toHaveAttribute("data-mood", "surprised");
+    await expect.poll(() => face(page).locator(".eye-round").first().evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
+    await expect(face(page)).toHaveAttribute("data-mood", "idle", { timeout: 3000 });
+  });
+
+  test("a wink at the first hover of a visit, and only the first", async ({ page, isMobile }) => {
+    test.skip(isMobile, "hover needs a pointer");
+    await page.goto("/");
+    await docked(page);
+    await page.waitForTimeout(1800);
+    const cloud = page.getByRole("button", { name: "Ask AI about Agrim" });
+    await cloud.hover();
+    await expect(face(page)).toHaveAttribute("data-mood", "wink");
+    await page.mouse.move(10, 10);
+    await expect(face(page)).toHaveAttribute("data-mood", "idle", { timeout: 3000 });
+    await cloud.hover();
+    await page.waitForTimeout(300);
+    await expect(face(page)).toHaveAttribute("data-mood", "idle");
+  });
+
+  test("sleepy after a minute without input, awake as the pointer moves", async ({ page }) => {
+    await page.clock.install();
+    await page.goto("/");
+    await page.clock.fastForward(61_000);
+    await expect(face(page)).toHaveAttribute("data-mood", "sleepy");
+    await page.mouse.move(200, 200);
+    await expect(face(page)).toHaveAttribute("data-mood", "idle");
+  });
+
+  test("under reduced motion the faces change without blending or squash", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await docked(page);
+    await page.keyboard.press("ControlOrMeta+k");
+    await expect(face(page)).toHaveAttribute("data-mood", "happy");
+    expect(await face(page).locator(".eye-arc").first().evaluate((el) => getComputedStyle(el).transitionDuration)).toBe("0s");
+    expect(await face(page).evaluate((el) => el.getAnimations({ subtree: true }).length)).toBe(0);
+  });
+});
+
 test("the stack strip can be paused", async ({ page }) => {
   await page.goto("/");
   const pause = page.getByRole("button", { name: "Pause the stack strip" });

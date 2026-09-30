@@ -155,14 +155,42 @@ html:has(dialog[open]) {
   animation: fade-in 0.6s var(--ease-draw) 0.5s both;
 }
 
-/* The cloud blinks every few seconds, both eyes at once. Its eyes follow the
-   cursor through --eye-x/--eye-y, shares of the cloud's own box (see
-   cloud.tsx). */
+/* ---- The cloud's face (see cloud.tsx) ----
+   Each eye is a pill, a round eye and a closed arc, drawn in the cloud's own
+   box; a mood shows one or another by scale and opacity, so the face blends
+   from shape to shape. The eyes follow the cursor through --eye-x/--eye-y,
+   shares of the cloud's box, and in idle they blink every few seconds, both
+   at once. Under reduced motion the shapes change without blending and
+   nothing loops. */
+.cloud svg :is(g, rect, circle, path) {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.eye-pill,
+.eye-round {
+  fill: #0e0e0e;
+}
+.eye-arc {
+  fill: none;
+  stroke: #0e0e0e;
+  stroke-width: 13;
+  stroke-linecap: round;
+}
+.eye-pill,
+.eye-round,
+.eye-arc {
+  transition: transform 0.3s var(--ease-out), opacity 0.2s ease;
+}
+.eye-round,
+.eye-arc {
+  opacity: 0;
+  transform: scale(0.4);
+}
 @keyframes cloud-blink {
   0%, 92%, 100% { transform: scaleY(1); }
   95% { transform: scaleY(0.1); }
 }
-.cloud-blink {
+.cloud[data-mood="idle"] .cloud-blink {
   animation: cloud-blink 5.5s ease-in-out infinite;
 }
 .cloud-eyes {
@@ -170,10 +198,33 @@ html:has(dialog[open]) {
   transition: translate 0.25s var(--ease-out);
 }
 
-/* Its moods follow the chat (see ask-agrim.tsx). Thinking, while a question
-   waits for its first word: the eyes glance up and aside. Answering, while
-   the words stream in: a small, gentle bounce, eyes up toward the chat.
-   Under reduced motion only the eye positions change. */
+/* Happy: both eyes close into arcs. Wink: the right one does. */
+.cloud[data-mood="happy"] .eye-pill,
+.cloud[data-mood="wink"] .cloud-eye-right .eye-pill {
+  opacity: 0;
+  transform: scaleY(0.05);
+}
+.cloud[data-mood="happy"] .eye-arc,
+.cloud[data-mood="wink"] .cloud-eye-right .eye-arc {
+  opacity: 1;
+  transform: none;
+}
+/* Surprised: round eyes. */
+.cloud[data-mood="surprised"] .eye-pill {
+  opacity: 0;
+  transform: scale(0.6, 0.3);
+}
+.cloud[data-mood="surprised"] .eye-round {
+  opacity: 1;
+  transform: none;
+}
+/* Sleepy: the eyes flatten into low lines. */
+.cloud[data-mood="sleepy"] .eye-pill {
+  transform: translateY(18px) scaleY(0.14);
+}
+/* Thinking, while a question waits for its first word: the eyes glance up
+   and aside. Answering, while the words stream in: a small, gentle bounce,
+   eyes up toward the chat. */
 @keyframes cloud-bounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-5%); }
@@ -454,12 +505,15 @@ html[data-switch="prev"] {
   .lift:hover,
   .lift:active { transform: none; }
   .chat-window,
-  .cloud-eyes { transition: none; }
+  .cloud-eyes,
+  .eye-pill,
+  .eye-round,
+  .eye-arc { transition: none; }
   /* Sheets only fade. */
   .sheet,
   .sheet[open] { translate: none; }
   .keywords,
-  .cloud-blink,
+  .cloud[data-mood] .cloud-blink,
   .cloud[data-mood],
   .topo-drift,
   .marquee,

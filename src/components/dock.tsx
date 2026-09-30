@@ -11,6 +11,20 @@ import { useSectionQuestion } from "@/lib/section-questions";
 // hero's height.
 const DOCKED_AT = 0.8;
 
+// How long a one-beat face lasts, and how long without input before the
+// cloud gets sleepy.
+const BEAT_MS = 1400;
+const SLEEP_MS = 60_000;
+
+/* Whether the cloud has winked at a hover this visit. */
+function firstWink() {
+  try {
+    if (sessionStorage.getItem("winked")) return false;
+    sessionStorage.setItem("winked", "1");
+  } catch {}
+  return true;
+}
+
 /* The cloud in the bottom-right corner is the chat's button. From md up with
    motion allowed, the page's cloud starts in the hero: this button takes the
    hero cloud's place (the hero's copy hides) and, as the hero scrolls away,
@@ -45,6 +59,47 @@ export function Dock({
   // Section questions start once the hero is gone, and wait while the chat
   // is open.
   const { question, fits, see, done } = useSectionQuestion(heroGone && !open, bubbleRef, cornerRef);
+
+  // The face. The chat's own moods come first; then a one-beat face: happy
+  // as the chat opens, surprised as a new section's question appears, a
+  // wink at the first hover of a visit; then sleepy after a minute without
+  // input, until the pointer moves; otherwise idle.
+  const [beat, setBeat] = useState<Mood | null>(null);
+  const [sleepy, setSleepy] = useState(false);
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) setBeat("happy");
+  }
+  const [lastAsked, setLastAsked] = useState<string | null>(null);
+  if (question && question.id !== lastAsked) {
+    setLastAsked(question.id);
+    setBeat("surprised");
+  }
+  useEffect(() => {
+    if (!beat) return;
+    const t = setTimeout(() => setBeat(null), BEAT_MS);
+    return () => clearTimeout(t);
+  }, [beat]);
+  useEffect(() => {
+    let timer = 0;
+    const rest = () => {
+      clearTimeout(timer);
+      timer = window.setTimeout(() => setSleepy(true), SLEEP_MS);
+    };
+    const wake = () => {
+      setSleepy(false);
+      rest();
+    };
+    const inputs = ["pointermove", "pointerdown", "keydown", "wheel", "touchstart", "scroll"];
+    rest();
+    for (const type of inputs) window.addEventListener(type, wake, { passive: true });
+    return () => {
+      clearTimeout(timer);
+      for (const type of inputs) window.removeEventListener(type, wake);
+    };
+  }, []);
+  const face: Mood = mood !== "idle" ? mood : (beat ?? (sleepy ? "sleepy" : "idle"));
 
   useEffect(() => {
     const hero = heroId && document.getElementById(heroId);
@@ -133,6 +188,7 @@ export function Dock({
         quiet.current = false;
         setPeek(true);
         see();
+        if (heroGone && firstWink()) setBeat("wink");
       }}
       onPointerLeave={() => setPeek(false)}
       onFocus={() => {
@@ -166,7 +222,7 @@ export function Dock({
         className="dock pointer-events-auto relative block w-[76px] rounded-full md:w-[92px]"
       >
         <span className="hero-fade block">
-          <Cloud live mood={mood} />
+          <Cloud live mood={face} />
         </span>
         {/* A question is waiting that had no room to show. */}
         {tooltip && !question?.seen && (
