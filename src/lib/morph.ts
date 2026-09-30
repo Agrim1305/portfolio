@@ -29,3 +29,22 @@ export function morphClose(card: HTMLElement | null | undefined, update: () => v
     card.style.viewTransitionName = "";
   });
 }
+
+/* Moves an open panel to the next or previous project or role: the body
+   slides out one way and the new one slides in, the hero picture crossfades
+   in place, and the frame holds still. `update` should leave the body
+   scrolled to the top. Under reduced motion both simply
+   fade; without view transitions the content just changes. */
+export function morphSwitch(direction: 1 | -1, body: HTMLElement | null, update: () => void) {
+  if (!("startViewTransition" in document)) return update();
+  const root = document.documentElement;
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  root.dataset.switch = reduced ? "fade" : direction > 0 ? "next" : "prev";
+  // The picture only holds its place if it is on screen; scrolled away, it
+  // leaves with the rest of the body.
+  if ((body?.scrollTop ?? 0) < 40) root.dataset.switchHero = "";
+  document.startViewTransition(update).finished.finally(() => {
+    delete root.dataset.switch;
+    delete root.dataset.switchHero;
+  });
+}

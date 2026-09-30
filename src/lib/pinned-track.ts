@@ -146,7 +146,7 @@ export function usePinnedTrack(count: number) {
     trackRef.current?.querySelector(`[data-index="${to}"]`)?.scrollIntoView({
       inline: "start",
       block: "nearest",
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      behavior: immediate || window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
     });
   }
 

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
+import { PanelHero } from "@/components/panel";
 import type { Project } from "@/lib/projects";
 
 // Wraps the first occurrence of each phrase in `className` so a skimming reader
@@ -71,63 +72,79 @@ function Links({ project }: { project: Project }) {
   );
 }
 
-function Media({ project }: { project: Project }) {
+/* The case study's hero picture: the screenshot filling the frame, or for a
+   project without one, its cover and big stack word. */
+function HeroBackground({ project }: { project: Project }) {
   const media = project.media;
   const cover = COVER[project.slug];
   if (!media) {
     return (
-      <div
-        className="flex min-h-44 items-center justify-between gap-6 overflow-hidden rounded-[22px] px-6 lg:min-h-[340px] lg:px-14"
-        style={{ background: cover.bg, color: cover.ink }}
-        aria-hidden
-      >
-        <span className="font-display text-[5rem] font-extrabold leading-none tracking-[-0.04em] lg:text-[12.5rem]">
+      <div aria-hidden className="absolute inset-0" style={{ background: cover.bg }}>
+        <span
+          className="absolute left-5 top-12 font-display text-[7.5rem] font-extrabold leading-none tracking-[-0.04em] lg:left-[90px] lg:top-16 lg:text-[min(16rem,20vw)]"
+          style={{ color: cover.ink }}
+        >
           {project.stack[0]}
         </span>
       </div>
     );
   }
-  if (media.kind === "browser") {
+  return (
+    <Image
+      src={media.src}
+      alt={media.alt}
+      fill
+      sizes="(min-width: 1280px) 1100px, 100vw"
+      className={`object-cover ${media.kind === "browser" || media.position === "top" ? "object-top" : "object-center"}`}
+    />
+  );
+}
+
+/* What sat under the screenshot, now it is the hero: the live address, or
+   a caption. */
+function HeroNote({ project }: { project: Project }) {
+  const media = project.media;
+  if (media?.kind === "browser") {
     return (
-      <figure>
-        <Image
-          src={media.src}
-          alt={media.alt}
-          width={2760}
-          height={1424}
-          sizes="(min-width: 1280px) 1020px, 100vw"
-          className="w-full rounded-[22px] border border-white/12 shadow-[0_40px_80px_rgb(0_0_0/0.45)]"
-        />
-        <figcaption className="mt-3 font-mono text-xs text-ink-faint">
-          <a
-            href={media.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`Open ${media.url}`}
-            className="inline-flex min-h-11 items-center gap-1 hover:text-ink"
-          >
-            {media.url}
-            <ArrowUpRight className="size-3.5" aria-hidden />
-          </a>
-        </figcaption>
-      </figure>
+      <p className="font-mono text-xs text-ink-faint">
+        <a
+          href={media.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Open ${media.url}`}
+          className="inline-flex min-h-11 items-center gap-1 hover:text-ink"
+        >
+          {media.url}
+          <ArrowUpRight className="size-3.5" aria-hidden />
+        </a>
+      </p>
     );
   }
+  if (media?.caption) return <p className="font-mono text-xs text-ink-faint">{media.caption}</p>;
+  return null;
+}
+
+/* The top of a case study: its picture, with the status and title over the
+   gradient at its foot. The panel's hero, and the case study page's. */
+export function CaseStudyHero({
+  project,
+  titleAs: Title = "h1",
+  titleId,
+}: {
+  project: Project;
+  titleAs?: "h1" | "h2";
+  titleId?: string;
+}) {
   return (
-    <figure>
-      <div className={`relative overflow-hidden rounded-[22px] border border-white/12 shadow-[0_40px_80px_rgb(0_0_0/0.45)] ${media.aspect}`}>
-        <Image
-          src={media.src}
-          alt={media.alt}
-          fill
-          sizes="(min-width: 1280px) 1020px, 100vw"
-          className={`object-cover ${media.position === "top" ? "object-top" : "object-center"}`}
-        />
-      </div>
-      {media.caption && (
-        <figcaption className="mt-3 font-mono text-xs text-ink-faint">{media.caption}</figcaption>
-      )}
-    </figure>
+    <PanelHero background={<HeroBackground project={project} />}>
+      <p className={`${label} text-accent`}>{project.status}</p>
+      <Title
+        id={titleId}
+        className="mt-4 max-w-[900px] font-display text-[clamp(2.5rem,1.4rem+4.2vw,5rem)] font-extrabold leading-[0.95] tracking-[-0.035em] text-ink"
+      >
+        {project.title}
+      </Title>
+    </PanelHero>
   );
 }
 
@@ -162,28 +179,15 @@ function GalleryPhoto({ project, index }: { project: Project; index: number }) {
   );
 }
 
-/* The full case study for one project, shared by the /projects/[slug] page and
-   the sheet the home page's cards open into, so the two can never differ. */
-export function CaseStudy({
-  project,
-  titleAs: Title = "h1",
-  titleId,
-}: {
-  project: Project;
-  titleAs?: "h1" | "h2";
-  titleId?: string;
-}) {
+/* The body of the case study for one project, under CaseStudyHero, shared
+   by the /projects/[slug] page and the panel the home page's cards open
+   into, so the two can never differ. */
+export function CaseStudy({ project, titleAs = "h1" }: { project: Project; titleAs?: "h1" | "h2" }) {
   // Section headings sit one level below the title.
-  const Sub = Title === "h1" ? "h2" : "h3";
+  const Sub = titleAs === "h1" ? "h2" : "h3";
   return (
     <>
-      <p className={`${label} text-accent`}>{project.status}</p>
-      <Title
-        id={titleId}
-        className="mt-4 max-w-[900px] font-display text-[clamp(2.5rem,1.4rem+4.2vw,5rem)] font-extrabold leading-[0.95] tracking-[-0.035em] text-ink"
-      >
-        {project.title}
-      </Title>
+      <HeroNote project={project} />
       <p className="mt-5 max-w-[760px] pb-1 font-serif text-[clamp(1.3rem,1rem+1vw,1.75rem)] italic leading-[1.35] text-ink-soft">
         {mark(project.oneLiner, [project.emphasis], "text-ink")}
       </p>
@@ -202,10 +206,6 @@ export function CaseStudy({
           ))}
         </dl>
         <Links project={project} />
-      </div>
-
-      <div className="mt-11">
-        <Media project={project} />
       </div>
 
       <div className="mt-14 grid gap-10 lg:grid-cols-[220px_minmax(0,1fr)]">

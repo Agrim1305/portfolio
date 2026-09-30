@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Nav } from "@/components/nav";
 import { Footer } from "@/components/footer";
 import { AskAgrim } from "@/components/ask-agrim";
-import { CaseStudy } from "@/components/case-study";
+import { CaseStudy, CaseStudyHero } from "@/components/case-study";
 import { adjacentProjects, getProject, projects } from "@/lib/projects";
 
 export const dynamicParams = false;
@@ -61,8 +61,14 @@ export default async function ProjectPage({
           All projects
         </Link>
 
-        <article className="mx-auto mt-8 max-w-[1020px] lg:mt-12">
-          <CaseStudy project={project} />
+        {/* Laid out like the panel a home page card opens into. */}
+        <article className="mx-auto mt-8 max-w-[1100px] lg:mt-12">
+          <div className="overflow-hidden rounded-[28px] border border-white/12">
+            <CaseStudyHero project={project} />
+          </div>
+          <div className="px-1 pt-6 lg:px-[90px] lg:pt-8">
+            <CaseStudy project={project} />
+          </div>
         </article>
 
         <nav

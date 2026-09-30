@@ -328,6 +328,46 @@ test.describe("selected work", () => {
     await expect(page).toHaveURL(/\/$/);
   });
 
+  test("the case study is a large centred panel, and focus stays inside it", async ({ page, isMobile }) => {
+    test.skip(isMobile, "phones get a bottom sheet");
+    await page.goto("/");
+    const open = page.getByRole("link", { name: "Open case study for Pacific Village Explorer" });
+    await open.focus();
+    await page.keyboard.press("Enter");
+    const panel = page.getByRole("dialog", { name: "Pacific Village Explorer" });
+    await expect(panel).toBeVisible();
+    await expect
+      .poll(() => panel.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return [Math.round(r.width), Math.round(r.height), Math.round(r.left - (innerWidth - r.right))];
+      }))
+      .toEqual([1100, 828, 0]);
+    for (let i = 0; i < 25; i++) await page.keyboard.press("Tab");
+    expect(await panel.evaluate((el) => el.contains(document.activeElement))).toBe(true);
+  });
+
+  test("arrow keys slide between projects, the address follows, and closing lands on that card", async ({ page, isMobile }) => {
+    test.skip(isMobile, "arrow keys are a desktop control");
+    await page.goto("/");
+    const open = page.getByRole("link", { name: "Open case study for Pacific Village Explorer" });
+    await open.focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("dialog", { name: "Pacific Village Explorer" })).toBeVisible();
+    await page.keyboard.press("ArrowRight");
+    await expect(page.getByRole("dialog", { name: "MetaPlay" })).toBeVisible();
+    await expect(page).toHaveURL(/\/projects\/metaplay$/);
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.getByRole("dialog", { name: "Pacific Village Explorer" })).toBeVisible();
+    await page.getByRole("dialog").getByRole("button", { name: "Next: MetaPlay" }).first().click();
+    await expect(page.getByRole("dialog", { name: "MetaPlay" })).toBeVisible();
+
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toBeHidden();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByText("2 / 8")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Open case study for MetaPlay" })).toBeFocused();
+  });
+
   test("Back closes an open case study", async ({ page }) => {
     await page.goto("/");
     const link = page.getByRole("link", { name: "Open case study for Pathfinder" });
@@ -414,6 +454,24 @@ test.describe("experience", () => {
     await expect(page).toHaveURL(/#story-president$/);
     await page.getByRole("button", { name: "Previous role" }).click();
     await expect(page.getByRole("dialog", { name: "Software Engineering Intern, Voice AI" })).toBeVisible();
+  });
+
+  test("next role and the arrow keys move between stories, and closing lands on that role", async ({ page }) => {
+    await page.goto("/");
+    const read = page.getByRole("button", { name: "Read the full story" }).filter({ visible: true }).first();
+    await read.scrollIntoViewIfNeeded();
+    await read.click();
+    const story = page.getByRole("dialog", { name: "Software Engineering Intern, Voice AI" });
+    await expect(story).toBeVisible();
+    await page.keyboard.press("ArrowRight");
+    await expect(page.getByRole("dialog", { name: "President" })).toBeVisible();
+    await expect(page).toHaveURL(/#story-president$/);
+    await expect(page.getByRole("dialog")).toContainText("Club of the Year · Adelaide University Sport, 2025");
+    await page.getByRole("dialog").getByRole("button", { name: "Close" }).click();
+    await expect(page.getByRole("dialog")).toBeHidden();
+    const focused = page.locator("[data-expand]").filter({ visible: true }).filter({ hasText: "Read the full story" });
+    await expect(focused).toBeFocused();
+    await expect(focused).toHaveAccessibleDescription(/President|Adelaide University Tennis Club/);
   });
 
   test("a story link opens the page with that story showing", async ({ page }) => {

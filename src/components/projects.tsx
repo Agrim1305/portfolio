@@ -4,10 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Plus, X } from "lucide-react";
-import { CaseStudy, COVER } from "@/components/case-study";
-import { Sheet } from "@/components/sheet";
-import { morphClose, morphOpen } from "@/lib/morph";
+import { ArrowLeft, ArrowRight, Plus } from "lucide-react";
+import { CaseStudy, CaseStudyHero, COVER } from "@/components/case-study";
+import { Panel } from "@/components/panel";
+import { morphClose, morphOpen, morphSwitch } from "@/lib/morph";
 import { SkipLink } from "@/components/skip-link";
 import { usePinnedTrack } from "@/lib/pinned-track";
 import { projects, type Project } from "@/lib/projects";
@@ -116,7 +116,7 @@ function Card({
 
 export function Projects() {
   const total = projects.length;
-  const { sectionRef, trackRef, pinned, active, step, onFocus } = usePinnedTrack(total);
+  const { sectionRef, trackRef, pinned, active, go, step, onFocus } = usePinnedTrack(total);
   const bodyRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState<number | null>(null);
   // Whether the open case study added a history entry that Back should undo.
@@ -126,6 +126,14 @@ export function Projects() {
     openRef.current = open;
   }, [open]);
   const cardAt = (i: number) => trackRef.current?.querySelector<HTMLElement>(`[data-index="${i}"]`);
+  // Shrinks the panel into card `i`, the one in view. Focus goes to that
+  // card's link rather than back to wherever the panel first opened from,
+  // which could send the carousel back to an older card.
+  const shrink = (i: number) =>
+    morphClose(cardAt(i), () => {
+      flushSync(() => setOpen(null));
+      cardAt(i)?.querySelector<HTMLElement>("[data-expand]")?.focus({ preventScroll: true });
+    });
 
   // Back and Forward move between the home page and an open case study. The
   // sheet shrinks back into its card on the way out.
@@ -135,11 +143,11 @@ export function Projects() {
       pushed.current = i >= 0;
       if (i >= 0) return setOpen(i);
       const current = openRef.current;
-      if (current !== null) morphClose(cardAt(current), () => flushSync(() => setOpen(null)));
+      if (current !== null) shrink(current);
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
-    // cardAt only reads a ref.
+    // shrink only reads refs and sets state.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -151,10 +159,16 @@ export function Projects() {
     morphOpen(card, () => flushSync(() => setOpen(i)));
   }
 
+  // The carousel behind moves to the new project too, so closing shrinks
+  // the panel into the card that is now in view.
   function switchCase(i: number) {
+    if (open === null) return;
     window.history.replaceState(null, "", `/projects/${projects[i].slug}`);
-    setOpen(i);
-    bodyRef.current?.scrollTo({ top: 0 });
+    go(i, true);
+    morphSwitch(i > open ? 1 : -1, bodyRef.current, () => {
+      flushSync(() => setOpen(i));
+      bodyRef.current?.scrollTo({ top: 0 });
+    });
   }
 
   function closeCase() {
@@ -162,7 +176,7 @@ export function Projects() {
       pushed.current = false;
       window.history.back(); // the popstate handler closes the sheet
     } else if (open !== null) {
-      morphClose(cardAt(open), () => flushSync(() => setOpen(null)));
+      shrink(open);
     }
   }
 
@@ -262,80 +276,51 @@ export function Projects() {
         </div>
       </div>
 
-      <Sheet
+      <Panel
         open={current !== null}
         onClose={closeCase}
+        closeLabel="Close case study"
         labelledBy="case-study-title"
-        className="morph inset-x-0 bottom-0 top-auto h-[calc(100dvh-3rem)] w-full overflow-hidden rounded-t-[26px] border-t border-white/12 bg-sheet lg:inset-x-[max(2rem,calc(50vw-600px))] lg:top-6 lg:bottom-6 lg:h-auto lg:w-auto lg:rounded-[28px] lg:border"
+        prev={prev === null ? null : { hint: "Previous: ", label: projects[prev].title, onClick: () => switchCase(prev) }}
+        next={next === null ? null : { hint: "Next: ", label: projects[next].title, onClick: () => switchCase(next) }}
+        bodyRef={bodyRef}
+        hero={current && <CaseStudyHero project={current} titleAs="h2" titleId="case-study-title" />}
       >
         {current && (
-          <div ref={bodyRef} className="thin-scroll h-full overflow-y-auto">
-            <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-hairline bg-sheet/90 py-2.5 pl-5 pr-3 backdrop-blur-md lg:h-[72px] lg:py-0 lg:pl-[90px] lg:pr-6">
-              <span aria-hidden className="absolute left-1/2 top-2 h-[5px] w-10 -translate-x-1/2 rounded-full bg-ink/25 lg:hidden" />
-              <span className="flex-1" />
-              {[
-                { i: prev, text: "Previous", Icon: ArrowLeft },
-                { i: next, text: "Next", Icon: ArrowRight },
-              ].map(({ i, text, Icon }) =>
-                i === null ? null : (
-                  <button
-                    key={text}
-                    type="button"
-                    onClick={() => switchCase(i)}
-                    className="hidden h-10 items-center gap-2 rounded-full border border-ink/20 px-4 text-sm text-ink-soft transition-colors hover:text-ink lg:flex"
-                  >
-                    {text === "Previous" && <Icon className="size-4" aria-hidden />}
-                    <span className="sr-only">{text}: </span>
-                    {projects[i].title}
-                    {text === "Next" && <Icon className="size-4" aria-hidden />}
-                  </button>
-                ),
+          <article className="px-5 pb-12 pt-6 lg:px-[90px] lg:pb-20 lg:pt-8">
+            <CaseStudy project={current} titleAs="h2" />
+
+            <nav
+              aria-label="More projects"
+              className="mt-16 flex flex-col gap-3 border-t border-hairline pt-7 sm:flex-row sm:justify-between"
+            >
+              {prev !== null ? (
+                <button
+                  type="button"
+                  onClick={() => switchCase(prev)}
+                  className="glass lift flex min-h-14 items-center gap-2 rounded-full px-6 text-[15px] text-[#E4E1DB]"
+                >
+                  <ArrowLeft className="size-4" aria-hidden />
+                  <span className="sr-only">Previous: </span>
+                  {projects[prev].title}
+                </button>
+              ) : (
+                <span />
               )}
-              <button
-                type="button"
-                onClick={closeCase}
-                aria-label="Close case study"
-                className="mt-2 flex size-11 shrink-0 items-center justify-center rounded-full border border-ink/20 bg-surface-raised text-ink lg:mt-0"
-              >
-                <X className="size-5" aria-hidden />
-              </button>
-            </div>
-
-            <article className="px-5 pb-12 pt-6 lg:px-[90px] lg:pb-20 lg:pt-14">
-              <CaseStudy project={current} titleAs="h2" titleId="case-study-title" />
-
-              <nav
-                aria-label="More projects"
-                className="mt-16 flex flex-col gap-3 border-t border-hairline pt-7 sm:flex-row sm:justify-between"
-              >
-                {prev !== null ? (
-                  <button
-                    type="button"
-                    onClick={() => switchCase(prev)}
-                    className="glass lift flex min-h-14 items-center gap-2 rounded-full px-6 text-[15px] text-[#E4E1DB]"
-                  >
-                    <ArrowLeft className="size-4" aria-hidden />
-                    <span className="sr-only">Previous: </span>
-                    {projects[prev].title}
-                  </button>
-                ) : (
-                  <span />
-                )}
-                {next !== null && (
-                  <button
-                    type="button"
-                    onClick={() => switchCase(next)}
-                    className="lift flex min-h-14 items-center justify-center gap-2 rounded-full bg-accent px-6 text-[15px] font-semibold text-paper hover:bg-accent-soft"
-                  >
-                    Next: {projects[next].title}
-                    <ArrowRight className="size-4" aria-hidden />
-                  </button>
-                )}
-              </nav>
-            </article>
-          </div>
+              {next !== null && (
+                <button
+                  type="button"
+                  onClick={() => switchCase(next)}
+                  className="lift flex min-h-14 items-center justify-center gap-2 rounded-full bg-accent px-6 text-[15px] font-semibold text-paper hover:bg-accent-soft"
+                >
+                  Next: {projects[next].title}
+                  <ArrowRight className="size-4" aria-hidden />
+                </button>
+              )}
+            </nav>
+          </article>
         )}
-      </Sheet>
+      </Panel>
     </section>
   );
 }

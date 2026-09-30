@@ -45,8 +45,9 @@ const easeOut = (t: number) => (t >= 1 ? 1 : 1 - 2 ** (-10 * t));
 
 /* Scrolls the window to a position, through Lenis when it is running so the
    two never fight. `settle` is the slower glide a pinned section uses to come
-   to rest on a slide. */
+   to rest on a slide. An immediate jump goes through even while a sheet has
+   the page locked, so the page behind can follow what the sheet shows. */
 export function scrollToY(y: number, { immediate = false, settle = false } = {}) {
-  if (lenis) lenis.scrollTo(y, settle ? { duration: 0.6, easing: easeOut } : { immediate });
+  if (lenis) lenis.scrollTo(y, settle ? { duration: 0.6, easing: easeOut } : { immediate, force: immediate });
   else window.scrollTo({ top: y, behavior: immediate ? "instant" : "smooth" });
 }
