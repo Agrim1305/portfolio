@@ -26,7 +26,7 @@ export function Avatar() {
             src={FIGURE}
             alt=""
             fill
-            sizes="(min-width: 1024px) 328px, 300px"
+            sizes="(min-width: 1280px) 180px, (min-width: 768px) 120px, 60px"
             priority
           />
         </div>

@@ -23,41 +23,47 @@ export function Hero() {
         </svg>
       </div>
 
-      {/* Phones show the figure first; from lg up it sits beside the text,
-          so the hero fits one screen. The columns' wrapper steps aside on
-          phones (display: contents) so the figure can lead the whole hero. */}
-      <div className="wrap flex flex-col pb-16 pt-2 lg:block lg:pb-24">
+      <div className="wrap pb-16 pt-2 lg:pb-24">
         {/* Non-breaking spaces keep each separator with the word after it, so
             a narrow screen breaks before a dot instead of after one. */}
         <p className="hero-rise font-mono text-xs uppercase tracking-[0.2em] text-ink-faint lg:text-sm">
           Software ·&nbsp;Applied&nbsp;AI ·&nbsp;Adelaide
         </p>
-        {/* One line at every width: the size follows the viewport so the full
-            name always fits. */}
-        <h1 className="hero-name mt-3 whitespace-nowrap py-[0.06em] font-display text-[clamp(2.25rem,11.8vw,10.5rem)] font-extrabold leading-[0.9] tracking-[-0.04em] text-ink">
-          Agrim Sharma
-        </h1>
-        <div className="contents lg:mt-1 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,340px)] lg:items-start lg:gap-x-10 xl:grid-cols-[minmax(0,620px)_minmax(0,1fr)]">
+        {/* The name on two lines, sized to leave the rest of the hero room
+            on one screen: under 13vw, and under what the height allows once
+            the eyebrow, keywords, text and buttons (33rem) are placed. The
+            figure shares the name's font size, so it sits in the space right
+            of "Agrim" (2.824em wide) at any size: as tall as that line, and
+            clear of "Sharma" below. */}
+        <div className="relative mt-3 text-[clamp(3.5rem,min(13vw,calc((100svh-33rem)/1.92)),10.25rem)]">
+          <h1 className="hero-name py-[0.06em] font-display font-extrabold leading-[0.9] tracking-[-0.037em] text-ink">
+            <span className="block">Agrim</span> <span className="block">Sharma</span>
+          </h1>
+          <div className="absolute left-[2.96em] top-[0.07em] size-[0.88em]">
+            <Avatar />
+          </div>
+        </div>
+        {/* Screen readers get the four words once, as plain text; the
+            sliding copy is visual only. */}
+        <div
+          data-keywords
+          className="hero-rise mt-1 h-[1.2em] overflow-hidden font-serif text-[clamp(2.25rem,1rem+4vw,4.75rem)] italic leading-[1.2] text-accent"
+          style={{ animationDelay: "0.6s" }}
+        >
+          <span className="sr-only">Software engineer, problem solver, competitor, coach</span>
+          <div aria-hidden className="keywords flex flex-col whitespace-nowrap">
+            {KEYWORDS.map((word, i) => (
+              <span key={i} className="h-[1.2em]">
+                {word}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div className="mt-6 grid lg:grid-cols-[minmax(0,1fr)_minmax(0,400px)] lg:items-start lg:gap-x-10 xl:grid-cols-[minmax(0,620px)_minmax(0,1fr)]">
           <div>
-            {/* Screen readers get the four words once, as plain text; the
-                sliding copy is visual only. */}
-            <div
-              data-keywords
-              className="hero-rise h-[1.2em] overflow-hidden font-serif text-[clamp(2.25rem,1rem+4vw,4.75rem)] italic leading-[1.2] text-accent"
-              style={{ animationDelay: "0.6s" }}
-            >
-              <span className="sr-only">Software engineer, problem solver, competitor, coach</span>
-              <div aria-hidden className="keywords flex flex-col whitespace-nowrap">
-                {KEYWORDS.map((word, i) => (
-                  <span key={i} className="h-[1.2em]">
-                    {word}
-                  </span>
-                ))}
-              </div>
-            </div>
             <p
               id="hero-intro"
-              className="hero-rise mt-6 max-w-[34rem] text-lg leading-[1.55] text-ink-soft lg:text-xl"
+              className="hero-rise max-w-[34rem] text-lg leading-[1.55] text-ink-soft lg:text-xl"
               style={{ animationDelay: "0.8s" }}
             >
               Final-year Computer Science student at Adelaide University, majoring
@@ -92,16 +98,7 @@ export function Hero() {
             <AskBar className="mt-4 flex lg:hidden" />
           </div>
 
-          {/* The circle takes what height is left under the name, less the
-              Ask bar, between 220 and 300px: it gives way before anything
-              else. 238px is the header, the eyebrow and the gaps; the name's
-              box is 1.08 times its font size. */}
-          <div className="order-first mb-8 flex flex-col items-center lg:order-none lg:mb-0 lg:pt-3">
-            <div className="w-full max-w-[274px] lg:w-[clamp(220px,calc(100svh_-_238px_-_1.08*min(11.8vw,10.5rem)),300px)] lg:max-w-none">
-              <Avatar />
-            </div>
-            <AskBar className="mt-6 hidden lg:flex" />
-          </div>
+          <AskBar className="hidden lg:flex" />
         </div>
       </div>
     </section>
