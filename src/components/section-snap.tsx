@@ -31,8 +31,10 @@ export function SectionSnap() {
 
     const settle = () => {
       if (held || !wide.matches || document.querySelector("dialog[open]")) return;
+      // The first section starts under the sticky header; its place is the
+      // top of the page.
       const nearest = [...document.querySelectorAll("main section[id]")]
-        .map((section) => section.getBoundingClientRect().top)
+        .map((section, i) => (i ? section.getBoundingClientRect().top : -window.scrollY))
         .reduce((best, top) => (Math.abs(top) < Math.abs(best) ? top : best), Infinity);
       if (Math.abs(nearest) < 1 || Math.abs(nearest) > window.innerHeight * ZONE) return;
       if (Math.sign(nearest) !== heading) return;

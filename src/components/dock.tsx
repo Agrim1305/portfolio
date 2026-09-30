@@ -8,8 +8,14 @@ import { onLenisScroll } from "@/lib/scroll-lock";
 import { useSectionQuestion } from "@/lib/section-questions";
 
 // The cloud reaches its dock once the page has scrolled this share of the
-// hero's height.
+// hero's height. The Ask card has folded into it by this share of the way,
+// and under reduced motion the two swap a quarter of the way.
 const DOCKED_AT = 0.8;
+const CARD_GONE_AT = 0.75;
+const SWAP_AT = 0.25;
+
+// Where the cloud and the card swap by fading instead of travelling.
+const STILL_QUERY = "(min-width: 48rem) and (prefers-reduced-motion: reduce)";
 
 // How long a one-beat face lasts, and how long without input before the
 // cloud gets sleepy.
@@ -30,9 +36,12 @@ function firstWink() {
    hero cloud's place (the hero's copy hides) and, as the hero scrolls away,
    shrinks and glides down a gentle curve into the corner, and back up again
    on the way up. It moves with transforms only, from Lenis's scroll event, so
-   it keeps pace with the page. On phones, under reduced motion and on pages
-   without a hero, nothing travels: the button fades in once the hero is out
-   of view, or from the start. */
+   it keeps pace with the page, and the hero's Ask card folds into it on the
+   way: smaller, fainter and rounder, until only the cloud is left. Under
+   reduced motion nothing travels: from md up the card fades out and the
+   button fades in once the page is a little way down. On phones and on pages
+   without a hero, the button fades in once the hero is out of view, or from
+   the start. */
 export function Dock({
   heroId,
   open,
@@ -50,6 +59,7 @@ export function Dock({
 }) {
   const travels = usePinned() && Boolean(heroId);
   const [heroGone, setHeroGone] = useState(!heroId);
+  const [swapped, setSwapped] = useState(false);
   const cornerRef = useRef<HTMLDivElement>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
   const [peek, setPeek] = useState(false);
@@ -109,6 +119,31 @@ export function Dock({
     return () => io.disconnect();
   }, [heroId]);
 
+  useEffect(() => {
+    const hero = heroId ? document.getElementById(heroId) : null;
+    const card = hero?.querySelector<HTMLElement>("#ask-card");
+    if (!hero || !card) return;
+    const still = window.matchMedia(STILL_QUERY);
+    let was = false;
+    const check = () => {
+      const now = still.matches && window.scrollY > hero.offsetHeight * DOCKED_AT * SWAP_AT;
+      if (now === was) return;
+      was = now;
+      setSwapped(now);
+      card.style.opacity = now ? "0" : "";
+      card.style.visibility = now ? "hidden" : "";
+    };
+    check();
+    window.addEventListener("scroll", check, { passive: true });
+    still.addEventListener("change", check);
+    return () => {
+      window.removeEventListener("scroll", check);
+      still.removeEventListener("change", check);
+      card.style.opacity = "";
+      card.style.visibility = "";
+    };
+  }, [heroId]);
+
   // Before paint, so the corner never shows the button untransformed and the
   // swap with the hero's copy is invisible.
   useLayoutEffect(() => {
@@ -117,14 +152,24 @@ export function Dock({
     const hero = heroId ? document.getElementById(heroId) : null;
     const slot = hero?.querySelector<HTMLElement>("#hero-cloud");
     const heroCloud = slot?.querySelector<HTMLElement>(".cloud");
-    if (!travels || !button || !corner || !hero || !slot || !heroCloud) return;
+    const card = hero?.querySelector<HTMLElement>("#ask-card");
+    const cardFace = card?.firstElementChild as HTMLElement | null | undefined;
+    if (!travels || !button || !corner || !hero || !slot || !heroCloud || !card || !cardFace) return;
 
     // The cloud's centre and width at rest in the corner, from the corner's
     // layout box, which the cloud's transform never moves.
     let dock = { x: 0, y: 0, width: 1 };
+    const radius = parseFloat(getComputedStyle(cardFace).borderTopLeftRadius);
+    let round = radius;
     const measure = () => {
       const { offsetLeft, offsetTop, offsetWidth, offsetHeight } = corner;
       dock = { x: offsetLeft + offsetWidth / 2, y: offsetTop + offsetHeight / 2, width: offsetWidth };
+      // The card folds towards the hero cloud's centre, and ends as round as
+      // its height allows.
+      card.style.transformOrigin = `${slot.offsetLeft + slot.offsetWidth / 2 - card.offsetLeft}px ${
+        slot.offsetTop + slot.offsetHeight / 2 - card.offsetTop
+      }px`;
+      round = cardFace.offsetHeight / 2;
     };
     const place = () => {
       const s = slot.getBoundingClientRect();
@@ -138,8 +183,19 @@ export function Dock({
       const along = (a: number, b: number, c: number) => (1 - t) ** 2 * a + 2 * (1 - t) * t * b + t ** 2 * c;
       // Scaled in even steps from the hero's size down to the dock's.
       const scale = (s.width / dock.width) ** (1 - t);
-      button.style.transform = `translate(${along(from.x, via.x, dock.x) - dock.x}px, ${along(from.y, via.y, dock.y) - dock.y}px) scale(${scale})`;
+      const x = along(from.x, via.x, dock.x);
+      const y = along(from.y, via.y, dock.y);
+      button.style.transform = `translate(${x - dock.x}px, ${y - dock.y}px) scale(${scale})`;
       button.style.setProperty("--scale", String(scale));
+
+      // The card follows the cloud, shrinking, fading and rounding off. The
+      // radius is the one property here that repaints; nothing reflows.
+      const fold = Math.min(1, t / CARD_GONE_AT);
+      card.style.transform = fold ? `translate(${x - from.x}px, ${y - from.y}px) scale(${1 - 0.85 * fold})` : "";
+      card.style.opacity = fold ? String(1 - fold) : "";
+      card.style.visibility = fold === 1 ? "hidden" : "";
+      card.style.pointerEvents = fold > 0.5 ? "none" : "";
+      cardFace.style.borderRadius = fold ? `${radius + (round - radius) * fold}px` : "";
     };
     const onResize = () => {
       measure();
@@ -157,6 +213,10 @@ export function Dock({
       button.style.transform = "";
       button.style.removeProperty("--scale");
       heroCloud.style.visibility = "";
+      for (const prop of ["transform", "transform-origin", "opacity", "visibility", "pointer-events"]) {
+        card.style.removeProperty(prop);
+      }
+      cardFace.style.borderRadius = "";
     };
   }, [travels, heroId, buttonRef]);
 
@@ -175,10 +235,10 @@ export function Dock({
       className={`pointer-events-none fixed bottom-4 right-4 z-30 md:bottom-6 md:right-6 ${
         travels
           ? ""
-          : `duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
-              heroGone
+          : `duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              heroGone || swapped
                 ? "visible opacity-100 transition-[opacity,translate]"
-                : "invisible translate-y-3 opacity-0 transition-[opacity,translate,visibility]"
+                : "invisible translate-y-3 opacity-0 transition-[opacity,translate,visibility] motion-reduce:translate-y-0"
             }`
       }`}
       // Hovering or focusing the cloud shows a question that had no room of

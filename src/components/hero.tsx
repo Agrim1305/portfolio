@@ -23,7 +23,7 @@ export function Hero() {
         </svg>
       </div>
 
-      <div className="wrap pb-16 pt-2 lg:pb-24 lg:pt-6">
+      <div className="wrap pb-16 pt-2 lg:pb-24">
         {/* Non-breaking spaces keep each separator with the word after it, so
             a narrow screen breaks before a dot instead of after one. */}
         <p className="hero-rise font-mono text-xs uppercase tracking-[0.2em] text-ink-faint lg:text-sm">
@@ -34,27 +34,30 @@ export function Hero() {
         <h1 className="hero-name mt-3 whitespace-nowrap py-[0.06em] font-display text-[clamp(2.25rem,11.8vw,10.5rem)] font-extrabold leading-[0.9] tracking-[-0.04em] text-ink">
           Agrim Sharma
         </h1>
-        {/* Screen readers get the four words once, as plain text; the
-            sliding copy is visual only. */}
-        <div
-          data-keywords
-          className="hero-rise mt-1 h-[1.2em] overflow-hidden font-serif text-[clamp(2.25rem,1rem+4vw,4.75rem)] italic leading-[1.2] text-accent"
-          style={{ animationDelay: "0.6s" }}
-        >
-          <span className="sr-only">Software engineer, problem solver, competitor, coach</span>
-          <div aria-hidden className="keywords flex flex-col whitespace-nowrap">
-            {KEYWORDS.map((word, i) => (
-              <span key={i} className="h-[1.2em]">
-                {word}
-              </span>
-            ))}
-          </div>
-        </div>
-        <div className="mt-6 grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,620px)_minmax(0,1fr)] lg:items-start lg:gap-x-20">
+        {/* The keywords sit in the left column, so the cloud and the Ask
+            card can rise beside them and the whole card shows before any
+            scroll. */}
+        <div className="mt-1 grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:items-start lg:gap-x-10 xl:grid-cols-[minmax(0,620px)_minmax(0,1fr)]">
           <div>
+            {/* Screen readers get the four words once, as plain text; the
+                sliding copy is visual only. */}
+            <div
+              data-keywords
+              className="hero-rise h-[1.2em] overflow-hidden font-serif text-[clamp(2.25rem,1rem+4vw,4.75rem)] italic leading-[1.2] text-accent"
+              style={{ animationDelay: "0.6s" }}
+            >
+              <span className="sr-only">Software engineer, problem solver, competitor, coach</span>
+              <div aria-hidden className="keywords flex flex-col whitespace-nowrap">
+                {KEYWORDS.map((word, i) => (
+                  <span key={i} className="h-[1.2em]">
+                    {word}
+                  </span>
+                ))}
+              </div>
+            </div>
             <p
               id="hero-intro"
-              className="hero-rise max-w-[34rem] text-lg leading-[1.55] text-ink-soft lg:text-xl"
+              className="hero-rise mt-6 max-w-[34rem] text-lg leading-[1.55] text-ink-soft lg:text-xl"
               style={{ animationDelay: "0.8s" }}
             >
               Final-year Computer Science student at Adelaide University, majoring
@@ -93,16 +96,21 @@ export function Hero() {
               padding above the card is the cloud's other two thirds. It is
               decorative. From md up with motion allowed, the chat's cloud
               button takes its place and flies from here to the corner as the
-              page scrolls (see dock.tsx). */}
-          <div className="relative pt-[80px] md:pt-[115px]">
-            <div id="hero-cloud" className="hero-fade absolute right-6 top-0 z-10 w-[140px] md:right-8 md:w-[200px]">
+              page scrolls, taking the card with it (see dock.tsx). */}
+          <div className="relative pt-[80px] md:pt-[97px]">
+            <div id="hero-cloud" className="hero-fade absolute right-6 top-0 z-10 w-[140px] md:right-8 md:w-[170px]">
               <div
                 aria-hidden
                 className="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[170%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgb(255_140_70/0.16),rgb(255_91_46/0)_65%)]"
               />
               <Cloud live />
             </div>
-            <AskCard />
+            {/* The card folds into the cloud as the cloud leaves for its dock
+                (see dock.tsx). A wrapper, because the card's entrance holds
+                its own transform and opacity. */}
+            <div id="ask-card" className="motion-reduce:transition-[opacity,visibility] motion-reduce:duration-300">
+              <AskCard />
+            </div>
           </div>
         </div>
       </div>

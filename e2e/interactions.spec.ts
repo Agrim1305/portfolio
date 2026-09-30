@@ -135,20 +135,38 @@ test.describe("the docked cloud", () => {
     const atTop = await box(page, "button.dock");
     for (const k of ["x", "y", "width", "height"] as const) expect(Math.abs(atTop[k] - slot[k])).toBeLessThan(1);
 
+    const card = page.locator("#ask-card");
+    const cardAtTop = await box(page, "#ask-card");
+
     await scroll(page, 150);
     const midway = await box(page, "button.dock");
     expect(midway.width).toBeLessThan(slot.width);
     expect(midway.width).toBeGreaterThan(92);
+    // The Ask card folds into the cloud on the way: smaller, fainter, rounder.
+    const folding = await box(page, "#ask-card");
+    expect(folding.width).toBeLessThan(cardAtTop.width);
+    const opacity = Number(await card.evaluate((el) => getComputedStyle(el).opacity));
+    expect(opacity).toBeGreaterThan(0);
+    expect(opacity).toBeLessThan(1);
+    expect(parseFloat(await card.locator("> div").evaluate((el) => getComputedStyle(el).borderTopLeftRadius))).toBeGreaterThan(26);
 
     await scroll(page, 2000);
     const docked = await box(page, "button.dock");
     expect(docked.width).toBeCloseTo(92, 0);
     expect(docked.right).toBeCloseTo(24, 0);
     expect(docked.bottom).toBeCloseTo(24, 0);
+    // By the dock only the cloud is left.
+    await expect(card).toHaveCSS("visibility", "hidden");
 
     await scroll(page, 0);
+    // The cloud moves from Lenis's scroll event, which can land a frame or
+    // two later on a busy machine.
+    await expect.poll(async () => Math.abs((await box(page, "button.dock")).x - slot.x)).toBeLessThan(1);
     const back = await box(page, "button.dock");
     for (const k of ["x", "y", "width"] as const) expect(Math.abs(back[k] - slot[k])).toBeLessThan(1);
+    await expect(card).toHaveCSS("opacity", "1");
+    await expect(card).toHaveCSS("transform", "none");
+    expect(await box(page, "#ask-card")).toEqual(cardAtTop);
   });
 
   test("on phones and under reduced motion nothing travels: the cloud fades in once the hero is gone", async ({ page, isMobile }) => {
@@ -161,6 +179,22 @@ test.describe("the docked cloud", () => {
     expect(await dock(page).evaluate((el) => getComputedStyle(el).transform)).toBe("none");
     const margin = isMobile ? 16 : 24;
     await expect.poll(() => box(page, "button.dock")).toMatchObject({ right: margin, bottom: margin });
+  });
+
+  test("under reduced motion, a little way down the card fades out and the cloud fades in, with no travel", async ({ page, isMobile }) => {
+    test.skip(isMobile, "phones hand over once the hero is gone");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    const card = page.locator("#ask-card");
+    await scroll(page, 300);
+    await expect(dock(page)).toBeVisible();
+    await expect(card).toHaveCSS("opacity", "0");
+    await expect(card).toHaveCSS("visibility", "hidden");
+    expect(await card.evaluate((el) => getComputedStyle(el).transform)).toBe("none");
+    expect(await dock(page).evaluate((el) => getComputedStyle(el.parentElement!).translate)).toBe("none");
+    await scroll(page, 0);
+    await expect(card).toHaveCSS("opacity", "1");
+    await expect(dock(page)).toBeHidden();
   });
 
   test("is a button the keyboard can reach, and the chat opens above it", async ({ page, isMobile }) => {
@@ -279,8 +313,14 @@ test.describe("the cloud's faces", () => {
   test("sleepy after a minute without input, awake as the pointer moves", async ({ page }) => {
     await page.clock.install();
     await page.goto("/");
-    await page.clock.fastForward(61_000);
-    await expect(face(page)).toHaveAttribute("data-mood", "sleepy");
+    // The minute starts once the page has hydrated, which can come after
+    // load on a busy machine; keep the clock moving until it has run out.
+    await expect
+      .poll(async () => {
+        await page.clock.fastForward(61_000);
+        return face(page).getAttribute("data-mood");
+      })
+      .toBe("sleepy");
     await page.mouse.move(200, 200);
     await expect(face(page)).toHaveAttribute("data-mood", "idle");
   });
@@ -532,6 +572,9 @@ test.describe("selected work", () => {
     await page.goto("/");
     const track = page.getByRole("region", { name: "Selected work" });
     await track.scrollIntoViewIfNeeded();
+    // At rest first: a wheel that arrives while the page is still gliding
+    // comes to rest on the slide it reached, by design.
+    await page.waitForTimeout(800);
     const before = await page.evaluate(() => window.scrollY);
     await track.hover();
     await page.mouse.wheel(0, 500);
@@ -915,3 +958,27 @@ test("Ctrl+K inside a text field is left alone", async ({ page }) => {
   });
   expect(prevented).toBe(false);
 });
+
+for (const [width, height] of [
+  [1280, 720],
+  [1440, 800],
+  [1440, 900],
+  [1920, 1080],
+]) {
+  test.describe(`hero at ${width}x${height}`, () => {
+    test.use({ viewport: { width, height } });
+
+    test("the whole Ask card, input included, is on screen before any scroll", async ({ page, isMobile }) => {
+      test.skip(isMobile, "sized for desktop screens");
+      await page.goto("/");
+      const card = page.locator("#ask-card > div");
+      // The card rises in with the hero; measure where it lands.
+      await card.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      const box = (await card.boundingBox())!;
+      expect(await page.evaluate(() => window.scrollY)).toBe(0);
+      expect(box.y).toBeGreaterThanOrEqual(0);
+      expect(box.y + box.height).toBeLessThanOrEqual(height);
+      await expect(card.getByRole("textbox", { name: "Ask a question" })).toBeInViewport({ ratio: 1 });
+    });
+  });
+}

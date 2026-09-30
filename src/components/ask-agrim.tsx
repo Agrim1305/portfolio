@@ -114,22 +114,22 @@ export function AskCard({ className = "" }: { className?: string }) {
   const [text, setText] = useState("");
   return (
     <div
-      className={`hero-rise rounded-[26px] border border-ink/12 bg-[linear-gradient(180deg,#1B1B20,#141417)] p-5 shadow-[0_40px_80px_rgb(0_0_0/0.45)] lg:p-6 ${className}`}
+      className={`hero-rise rounded-[26px] border border-ink/12 bg-[linear-gradient(180deg,#1B1B20,#141417)] p-5 shadow-[0_40px_80px_rgb(0_0_0/0.45)] ${className}`}
       style={{ animationDelay: "1.1s" }}
     >
       <p className="font-display text-[20px] font-bold leading-tight lg:text-[22px]">Ask about Agrim</p>
       {/* From md up the hero's cloud perches on the card's top-right corner;
           the line wraps short of it. */}
-      <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-muted md:pr-[216px] lg:text-xs">
+      <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-muted md:pr-[190px]">
         AI assistant · grounded in his portfolio
       </p>
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-3 flex flex-wrap gap-2">
         {SUGGESTED_QUESTIONS.map((q) => (
           <button
             key={q}
             type="button"
             onClick={() => openAsk(q)}
-            className="min-h-11 rounded-full border border-ink/16 px-4 py-2 text-left text-sm text-[#D6D3CD] transition-colors hover:border-accent hover:text-ink"
+            className="min-h-11 rounded-full border border-ink/16 px-3.5 py-2 text-left text-sm text-[#D6D3CD] transition-colors hover:border-accent hover:text-ink"
           >
             {q}
           </button>
@@ -142,7 +142,7 @@ export function AskCard({ className = "" }: { className?: string }) {
           openAsk(text);
           setText("");
         }}
-        className="mt-4 flex h-14 items-center gap-2.5 rounded-2xl border border-accent/70 pl-5 pr-2 transition-colors focus-within:border-accent"
+        className="mt-3 flex h-12 items-center gap-2.5 rounded-2xl border border-accent/70 pl-4 pr-1.5 transition-colors focus-within:border-accent"
       >
         <input
           value={text}
@@ -156,7 +156,7 @@ export function AskCard({ className = "" }: { className?: string }) {
           type="submit"
           disabled={!text.trim()}
           aria-label="Send message"
-          className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent text-paper transition-opacity disabled:opacity-40"
+          className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-accent text-paper transition-opacity disabled:opacity-40"
         >
           <ArrowUp className="size-5" aria-hidden />
         </button>
