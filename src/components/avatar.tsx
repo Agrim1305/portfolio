@@ -1,27 +1,10 @@
-"use client";
-
 import Image from "next/image";
-import { Play, Square } from "lucide-react";
-import { setMuted, speak, stop, useCanSpeak, useSpeech } from "@/lib/speech";
 
 const FIGURE = "/images/avatar/figure.webp";
 
 /* The 3D figure, completely still, in its ringed circle. The whole piece
    fades in with the name-wipe; nothing else moves. */
 export function Avatar() {
-  const { talking } = useSpeech();
-  const canSpeak = useCanSpeak();
-
-  function hearMe() {
-    if (talking) {
-      stop();
-      return;
-    }
-    setMuted(false);
-    const intro = document.getElementById("hero-intro")?.textContent;
-    if (intro) speak(intro);
-  }
-
   return (
     <div className="hero-fade relative aspect-square w-full">
       <div
@@ -43,29 +26,11 @@ export function Avatar() {
             src={FIGURE}
             alt=""
             fill
-            sizes="(min-width: 1280px) 465px, (min-width: 1024px) 391px, 300px"
+            sizes="(min-width: 1024px) 328px, 300px"
             priority
           />
         </div>
       </div>
-
-      {canSpeak && (
-        <button
-          type="button"
-          onClick={hearMe}
-          aria-pressed={talking}
-          className="glass lift absolute -right-4 top-[68%] z-10 flex h-12 items-center gap-2.5 rounded-full pl-1.5 pr-5 text-[15px] font-semibold text-ink lg:top-[62%] lg:h-[52px] lg:pl-2"
-        >
-          <span className="flex size-9 items-center justify-center rounded-full bg-accent text-paper">
-            {talking ? (
-              <Square className="size-3 fill-current" aria-hidden />
-            ) : (
-              <Play className="size-3.5 translate-x-px fill-current" aria-hidden />
-            )}
-          </span>
-          Hear me
-        </button>
-      )}
     </div>
   );
 }
