@@ -22,15 +22,29 @@ async function pinnedSlide(page: Page, id: string, i: number) {
       const lines: DOMRect[] = [];
       const walker = document.createTreeWalker(section.querySelector(".pin-stage")!, NodeFilter.SHOW_TEXT);
       for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-        if (!node.textContent!.trim() || !node.parentElement!.checkVisibility()) continue;
+        // Visually hidden text still has a layout box; it covers nothing.
+        if (!node.textContent!.trim() || !node.parentElement!.checkVisibility() || node.parentElement!.closest(".sr-only")) continue;
         const range = document.createRange();
         range.selectNodeContents(node);
         lines.push(...[...range.getClientRects()].filter((r) => r.right > 0 && r.left < window.innerWidth && r.width > 0));
       }
-      const shot = slide.querySelector("img");
+      // The picture as painted: under object-fit: contain it can be smaller
+      // than its box, centred in it.
+      const img = slide.querySelector("img");
+      let shot = null;
+      if (img) {
+        await img.decode().catch(() => {});
+        const b = img.getBoundingClientRect();
+        const scale = Math.min(b.width / img.naturalWidth, b.height / img.naturalHeight);
+        const w = img.naturalWidth * scale;
+        const h = img.naturalHeight * scale;
+        const left = b.left + (b.width - w) / 2;
+        const top = b.top + (b.height - h) / 2;
+        shot = { top, bottom: top + h, left, right: left + w };
+      }
       return {
         slide: box(slide),
-        shot: shot && box(shot),
+        shot,
         text: [...slide.querySelectorAll("h3, p")].map((el) => ({ text: el.textContent!.slice(0, 40), ...box(el) })),
         lines: lines.map(({ top, bottom, left, right }) => ({ top, bottom, left, right })),
         pill: box(document.querySelector("button.dock")!),
@@ -218,10 +232,8 @@ for (const [width, height] of [
           expect(inside(slide, screen), `slide ${i + 1} wholly on screen`).toBe(true);
           if (shot && id === "projects") {
             expect(lines.filter((line) => overlaps(line, shot)), `slide ${i + 1}: text over the screenshot`).toEqual([]);
-            // The screenshot is the bulk of the card where there is room.
-            if (height >= 900) {
-              expect((shot.right - shot.left) / (slide.right - slide.left), `slide ${i + 1} screenshot share`).toBeGreaterThanOrEqual(0.6);
-            }
+            // Beside the text, the painted picture fills most of the card's height.
+            expect((shot.bottom - shot.top) / (slide.bottom - slide.top), `slide ${i + 1} screenshot height share`).toBeGreaterThanOrEqual(0.8);
           }
           for (const line of text) {
             expect(inside(line, slide) && inside(line, screen), `slide ${i + 1}: "${line.text}"`).toBe(true);
