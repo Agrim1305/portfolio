@@ -39,61 +39,66 @@ function Card({
         if (!(e.target as Element).closest("a")) onOpen(e.currentTarget);
       }}
       // From md up one card takes the section: the content width less a 4%
-      // peek of the next card, and pinned, all the height the heading leaves.
-      className="group relative flex min-h-[460px] w-[calc(100vw-4.625rem)] max-w-[520px] shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-3xl pin:h-full pin:min-h-[20rem] md:w-[calc(min(1200px,100vw-4rem)*0.96-1.5rem)] md:max-w-none md:rounded-[28px] md:motion-reduce:h-[min(40rem,calc(100svh-12rem))] md:motion-reduce:min-h-[24rem]"
-      style={{ background: cover.bg }}
+      // peek of the next card. Pinned, below lg it takes all the height the
+      // heading leaves; from lg up the cover sets its height (see
+      // .cover-side) and the text may make it taller, never shorter.
+      className="group relative flex min-h-[460px] w-[calc(100vw-4.625rem)] max-w-[520px] shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-3xl pin:h-full pin:min-h-[20rem] md:w-[calc(min(1200px,100vw-4rem)*0.96-1.5rem)] md:max-w-none md:rounded-[28px] md:motion-reduce:h-[min(40rem,calc(100svh-12rem))] md:motion-reduce:min-h-[24rem] lg:flex-row lg:bg-surface lg:bg-none lg:pin:h-auto lg:pin:min-h-0 [background:var(--cover)]"
+      style={{ "--cover": cover.bg } as React.CSSProperties}
     >
-      {/* The cover takes the height the text doesn't need, so when the card
-          is short the screenshot gives way, never the text. */}
+      {/* Stacked, the cover takes the height the text doesn't need, so when
+          the card is short the screenshot gives way, never the text. Side by
+          side it takes 68% of the width and the stage's height, less the
+          heading (--cap). */}
       <ProjectCover
         project={project}
-        sizes="(min-width: 1280px) 920px, (min-width: 768px) 75vw, 90vw"
-        className="aspect-[16/11] shrink-0 md:aspect-auto md:min-h-0 md:flex-1"
+        sizes="(min-width: 1280px) 750px, (min-width: 1024px) 68vw, (min-width: 768px) 75vw, 90vw"
+        className="cover-side aspect-[16/11] shrink-0 [--cap:calc(100svh-var(--nav-height)-var(--corner-clear)-5.5rem)] [--w:calc(min(1200px,100vw-4rem)*0.96-1.5rem)] md:aspect-auto md:min-h-0 md:flex-1 lg:w-[68%] lg:flex-none"
       />
 
-      {/* A slim band on a fade over the cover, below the screenshot, never
-          on it. Its padding gives way on short screens before the cover
-          does. */}
-      <div className="flex shrink-0 flex-col gap-2 bg-[linear-gradient(180deg,rgb(23_23_27/0),rgb(23_23_27/0.96)_1rem)] px-[22px] pb-[22px] pt-8 lg:flex-row lg:items-end lg:justify-between lg:gap-6 lg:px-9 lg:pb-[clamp(0.875rem,2.2svh,1.25rem)] lg:pt-[clamp(1rem,2.7svh,1.5rem)]">
-        <div className="flex max-w-[760px] flex-col gap-2 lg:gap-1.5">
+      {/* Stacked, a slim band on a fade over the cover, below the
+          screenshot, never on it; its padding gives way on short screens
+          before the cover does. Side by side, a column on the card's solid
+          dark side with Open case study at its foot. */}
+      <div className="flex shrink-0 flex-col gap-2 bg-[linear-gradient(180deg,rgb(23_23_27/0),rgb(23_23_27/0.96)_1rem)] px-[22px] pb-[22px] pt-8 lg:w-[32%] lg:gap-0 lg:bg-surface lg:bg-none lg:p-7">
+        <div className="flex max-w-[760px] flex-col gap-2">
           <p className="font-mono text-[11px] text-accent-soft lg:text-xs">{project.status}</p>
-          <h3 className="font-display text-[28px] font-extrabold leading-[1.05] tracking-[-0.015em] text-ink lg:text-4xl lg:leading-none">
+          <h3 className="font-display text-[28px] font-extrabold leading-[1.05] tracking-[-0.015em] text-ink lg:text-[clamp(1.75rem,0.9rem+1.3vw,2.25rem)] lg:leading-none">
             {project.title}
           </h3>
-          <p className="text-[15px] leading-[1.45] text-ink-soft lg:text-base lg:leading-normal">
+          <p className="text-[15px] leading-[1.45] text-ink-soft lg:text-[15px] xl:text-base xl:leading-normal">
             {project.summary}
           </p>
         </div>
-        <div className="flex min-h-10 items-center justify-between gap-4 lg:block lg:shrink-0 lg:text-right">
-          {stat && (
-            <p className="flex items-baseline gap-2 lg:flex-col lg:items-end lg:gap-1">
-              <span className="font-display text-2xl font-extrabold leading-none text-ink lg:text-3xl">
-                {stat.value}
-              </span>
-              <span className="text-xs text-ink-muted lg:text-[13px]">{stat.label}</span>
-            </p>
-          )}
-        </div>
-      </div>
+        {stat && (
+          <p className="flex items-baseline gap-2 lg:mt-5 lg:flex-col lg:gap-1">
+            <span className="font-display text-2xl font-extrabold leading-none text-ink lg:text-3xl">
+              {stat.value}
+            </span>
+            <span className="text-xs text-ink-muted lg:text-[13px]">{stat.label}</span>
+          </p>
+        )}
 
-      <Link
-        href={`/projects/${project.slug}`}
-        // The card opens the case study in place; the route itself is only
-        // for new tabs and shared links, so there is nothing to prefetch.
-        prefetch={false}
-        data-expand
-        onClick={(e) => {
-          // Let new-tab and new-window clicks through to the real page.
-          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-          e.preventDefault();
-          onOpen(e.currentTarget.closest("article")!);
-        }}
-        className="glass absolute right-3 top-3 z-10 flex h-11 items-center gap-2 rounded-full pl-4 pr-3.5 text-sm font-medium text-ink lg:right-5 lg:h-[38px]"
-      >
-        Open case study
-        <span className="sr-only"> for {project.title}</span>
-        <Plus className="size-[18px] text-accent" aria-hidden />
-      </Link>
+        <Link
+          href={`/projects/${project.slug}`}
+          // The card opens the case study in place; the route itself is only
+          // for new tabs and shared links, so there is nothing to prefetch.
+          prefetch={false}
+          data-expand
+          onClick={(e) => {
+            // Let new-tab and new-window clicks through to the real page.
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            e.preventDefault();
+            onOpen(e.currentTarget.closest("article")!);
+          }}
+          // Stacked, in the card's top-right corner; side by side, at the
+          // foot of the text.
+          className="glass absolute right-3 top-3 z-10 flex h-11 items-center gap-2 rounded-full pl-4 pr-3.5 text-sm font-medium text-ink md:right-5 lg:static lg:mt-auto lg:h-[38px] lg:self-start"
+        >
+          Open case study
+          <span className="sr-only"> for {project.title}</span>
+          <Plus className="size-[18px] text-accent" aria-hidden />
+        </Link>
+      </div>
     </article>
   );
 }
@@ -234,11 +239,11 @@ export function Projects() {
             else return;
             e.preventDefault();
           }}
-          className="mt-10 pin:mt-[clamp(0.5rem,1.8svh,1rem)] pin:min-h-0 pin:flex-1"
+          className="mt-10 pin:mt-[clamp(0.5rem,1.8svh,1rem)] pin:min-h-0 pin:flex-1 lg:pin:flex-none"
         >
           <div
             ref={trackRef}
-            className="pin-track flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-5 [scroll-padding-inline:1.25rem] [scrollbar-width:none] motion-reduce:scroll-auto pin:h-full sm:px-8 sm:[scroll-padding-inline:2rem] md:gap-6 lg:px-[max(2rem,calc(50vw-600px))] lg:[scroll-padding-inline:max(2rem,calc(50vw-600px))] [&::-webkit-scrollbar]:hidden"
+            className="pin-track flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-5 [scroll-padding-inline:1.25rem] [scrollbar-width:none] motion-reduce:scroll-auto pin:h-full sm:px-8 lg:pin:h-auto sm:[scroll-padding-inline:2rem] md:gap-6 lg:px-[max(2rem,calc(50vw-600px))] lg:[scroll-padding-inline:max(2rem,calc(50vw-600px))] [&::-webkit-scrollbar]:hidden"
           >
             {projects.map((project, i) => (
               <Card

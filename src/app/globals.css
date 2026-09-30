@@ -359,6 +359,17 @@ html[data-switch="prev"] {
   }
 }
 
+/* From lg up a project's cover sits beside its text and takes 68% of the
+   width (--w, the card's or the panel's). It is as tall as a 1.94:1
+   screenshot, the widest there is, needs to fill that width inside its
+   1.75rem insets and 1.375rem browser bar, so the picture fills most of the
+   height; --cap keeps a card inside the pinned stage. */
+@media (width >= 64rem) {
+  .cover-side {
+    min-height: min((var(--w) * 0.68 - 3.5rem) / 1.94 + 4.875rem, var(--cap, 100vh));
+  }
+}
+
 /* Thin accent scrollbar for scrolling panels inside sheets. */
 .thin-scroll {
   scrollbar-width: thin;
