@@ -2,7 +2,7 @@
 
 import { useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from "react";
 import { ArrowUp, Sparkles, Volume2, VolumeX, X } from "lucide-react";
-import { AvatarHead } from "@/components/avatar";
+import Image from "next/image";
 import {
   setMuted,
   speak,
@@ -366,7 +366,16 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
         <div className="flex h-full flex-col">
           <span aria-hidden className="mx-auto mt-2.5 h-[5px] w-10 shrink-0 rounded-full bg-ink/25 md:hidden" />
           <div className="flex items-center gap-2.5 border-b border-hairline px-4 py-3 md:py-3.5">
-            <AvatarHead className="size-10 shrink-0 md:size-9" />
+            {/* The cloud is the assistant on both designs: here it sits still,
+                with the same eyes as on the other branch, in the cloud's own
+                395 x 340 box. */}
+            <span aria-hidden className="relative block aspect-[395/340] w-11 shrink-0 md:w-10">
+              <Image src="/images/cloud.svg" alt="" fill />
+              <svg viewBox="0 0 395 340" className="absolute inset-0 size-full fill-[#0e0e0e]">
+                <rect x={125.2} y={156.8} width={34} height={77.4} rx={17} />
+                <rect x={227.9} y={156.8} width={34} height={77.4} rx={17} />
+              </svg>
+            </span>
             <div className="min-w-0 flex-1">
               <p id="ask-agrim-title" className="font-display text-[17px] font-bold leading-tight">
                 Ask about Agrim

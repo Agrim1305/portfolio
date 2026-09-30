@@ -43,7 +43,7 @@ export function Avatar() {
             src={FIGURE}
             alt=""
             fill
-            sizes="(min-width: 1280px) 547px, (min-width: 1024px) 460px, 352px"
+            sizes="(min-width: 1280px) 465px, (min-width: 1024px) 391px, 300px"
             priority
           />
         </div>
@@ -70,13 +70,3 @@ export function Avatar() {
   );
 }
 
-/* The figure's face, cropped into a circle for the chat header. */
-export function AvatarHead({ className = "" }: { className?: string }) {
-  return (
-    <span aria-hidden className={`relative block overflow-hidden rounded-full bg-[#26262C] ${className}`}>
-      <span className="absolute left-[-68%] top-[-28.3%] aspect-square w-[235%]">
-        <Image src={FIGURE} alt="" fill sizes="120px" />
-      </span>
-    </span>
-  );
-}

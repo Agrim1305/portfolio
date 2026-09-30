@@ -23,7 +23,7 @@ export function Hero() {
         </svg>
       </div>
 
-      <div className="wrap grid gap-y-6 pb-16 pt-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:items-center lg:gap-x-12 lg:pb-24 lg:pt-6 xl:grid-cols-[minmax(0,1fr)_500px]">
+      <div className="wrap grid gap-y-6 pb-16 pt-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,357px)] lg:gap-x-12 lg:pb-24 xl:grid-cols-[minmax(0,1fr)_425px]">
         <div>
           {/* Non-breaking spaces keep each separator with the word after it, so
               a narrow screen breaks before a dot instead of after one. */}
@@ -88,7 +88,7 @@ export function Hero() {
 
         {/* After the text in the DOM so the name is read first; shown first on
             small screens. */}
-        <div className="order-first mx-auto w-full max-w-[322px] lg:order-none lg:max-w-none">
+        <div className="order-first mx-auto w-full max-w-[274px] lg:order-none lg:mt-10 lg:max-w-none">
           <Avatar />
           <AskBar className="mt-6 hidden lg:flex" />
         </div>

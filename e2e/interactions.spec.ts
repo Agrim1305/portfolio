@@ -237,6 +237,28 @@ test.describe("ask Agrim", () => {
   });
 });
 
+for (const [width, height] of [
+  [1280, 720],
+  [1440, 800],
+  [1440, 900],
+  [1920, 1080],
+]) {
+  test.describe(`hero at ${width}x${height}`, () => {
+    test.use({ viewport: { width, height } });
+
+    test("the whole Ask bar is on screen before any scroll", async ({ page, isMobile }) => {
+      test.skip(isMobile, "sized for desktop screens");
+      await page.goto("/");
+      const bar = page.locator("#top").getByRole("button", { name: "Ask AI about Agrim" }).filter({ visible: true });
+      // The bar rises in with the hero; measure where it lands.
+      await bar.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+      const box = (await bar.boundingBox())!;
+      expect(await page.evaluate(() => window.scrollY)).toBe(0);
+      expect(box.y + box.height).toBeLessThanOrEqual(height);
+    });
+  });
+}
+
 test.describe("selected work", () => {
   test("next and previous move the carousel", async ({ page, isMobile }) => {
     test.skip(isMobile, "the arrows are desktop controls; mobile swipes");
