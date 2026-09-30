@@ -6,8 +6,9 @@ import { Sheet } from "@/components/sheet";
 
 type Step = { label: string; hint?: string; onClick: () => void } | null;
 
-/* The top of a panel, and of a case study page: a picture or a cover filling
-   the frame, with the title set over a dark gradient at its foot. Only the
+/* The top of a role's story panel: a photo filling the frame, with the
+   title set over a dark gradient at its foot (case studies have their own,
+   laid out like their cards; see CaseStudyHero). Only the
    background carries `panel-hero`, so switching crossfades the picture while
    the title slides with the rest (see morphSwitch). */
 export function PanelHero({ background, children }: { background: React.ReactNode; children: React.ReactNode }) {
