@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
-import { PanelHero } from "@/components/panel";
 import type { Project } from "@/lib/projects";
 
 // Wraps the first occurrence of each phrase in `className` so a skimming reader
@@ -72,31 +71,52 @@ function Links({ project }: { project: Project }) {
   );
 }
 
-/* The case study's hero picture: the screenshot filling the frame, or for a
-   project without one, its cover and big stack word. */
-function HeroBackground({ project }: { project: Project }) {
+/* A project's cover, for its card and its case study alike, so a card grows
+   into its case study without the picture jumping: the screenshot whole in a
+   browser-style frame, top-aligned and as large as the space allows, or
+   without one, the big stack word. The space is a size container, so the
+   frame can fit both its width and its height (see .cover-frame); from md up
+   it keeps clear of the Open case study pill in the top-right corner. The
+   caller sets the size and puts the cover background behind it. */
+export function ProjectCover({
+  project,
+  sizes,
+  className = "",
+}: {
+  project: Project;
+  sizes: string;
+  className?: string;
+}) {
   const media = project.media;
   const cover = COVER[project.slug];
-  if (!media) {
-    return (
-      <div aria-hidden className="absolute inset-0" style={{ background: cover.bg }}>
+  return (
+    <div
+      className={`relative overflow-hidden px-5 pb-5 pt-16 [--clear:0px] [--inset:0px] [container-type:size] md:px-0 md:pb-2 md:pt-7 md:[--clear:12.5rem] md:[--inset:2rem] ${className}`}
+    >
+      {media ? (
+        <div
+          className="cover-frame w-full origin-top overflow-hidden rounded-xl border border-white/14 bg-paper shadow-[0_24px_48px_rgb(0_0_0/0.45)] transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.02] motion-reduce:transition-none"
+          style={{ "--ratio": media.width / media.height } as React.CSSProperties}
+        >
+          <div aria-hidden className="flex h-[1.375rem] items-center gap-1.5 border-b border-white/10 px-2.5">
+            <span className="size-1.5 rounded-full bg-ink/25" />
+            <span className="size-1.5 rounded-full bg-ink/25" />
+            <span className="size-1.5 rounded-full bg-ink/25" />
+          </div>
+          <div className="relative" style={{ aspectRatio: `${media.width} / ${media.height}` }}>
+            <Image src={media.src} alt={media.alt} fill sizes={sizes} className="object-contain" />
+          </div>
+        </div>
+      ) : (
         <span
-          className="absolute left-5 top-12 font-display text-[7.5rem] font-extrabold leading-none tracking-[-0.04em] lg:left-[90px] lg:top-16 lg:text-[min(16rem,20vw)]"
+          aria-hidden
+          className="absolute left-5 top-1/2 -translate-y-1/2 font-display text-[min(7.5rem,70cqh)] font-extrabold leading-none tracking-[-0.04em] transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03] motion-reduce:transition-none lg:left-[60px] lg:text-[min(18.75rem,19vw,70cqh)]"
           style={{ color: cover.ink }}
         >
           {project.stack[0]}
         </span>
-      </div>
-    );
-  }
-  return (
-    <Image
-      src={media.src}
-      alt={media.alt}
-      fill
-      sizes="(min-width: 1280px) 1100px, 100vw"
-      className={`object-cover ${media.kind === "browser" || media.position === "top" ? "object-top" : "object-center"}`}
-    />
+      )}
+    </div>
   );
 }
 
@@ -124,8 +144,13 @@ function HeroNote({ project }: { project: Project }) {
   return null;
 }
 
-/* The top of a case study: its picture, with the status and title over the
-   gradient at its foot. The panel's hero, and the case study page's. */
+/* The top of a case study, laid out like its card: the cover with the
+   framed screenshot, then the status and title on a band beneath it. From md
+   up the cover takes about the height the card's cover has in the pinned
+   stage, so the card's picture lands where it was as the card grows into
+   the panel. The cover carries `panel-hero`, so switching crossfades it
+   while the title slides with the rest (see morphSwitch). The panel's hero,
+   and the case study page's. */
 export function CaseStudyHero({
   project,
   titleAs: Title = "h1",
@@ -136,15 +161,22 @@ export function CaseStudyHero({
   titleId?: string;
 }) {
   return (
-    <PanelHero background={<HeroBackground project={project} />}>
-      <p className={`${label} text-accent`}>{project.status}</p>
-      <Title
-        id={titleId}
-        className="mt-4 max-w-[900px] font-display text-[clamp(2.5rem,1.4rem+4.2vw,5rem)] font-extrabold leading-[0.95] tracking-[-0.035em] text-ink"
-      >
-        {project.title}
-      </Title>
-    </PanelHero>
+    <header className="relative flex flex-col overflow-hidden" style={{ background: COVER[project.slug].bg }}>
+      <ProjectCover
+        project={project}
+        sizes="(min-width: 1280px) 900px, 100vw"
+        className="panel-hero aspect-[16/11] shrink-0 md:aspect-auto md:h-[calc((100svh-var(--nav-height)-var(--corner-clear)-15.875rem)*0.975)] md:min-h-64"
+      />
+      <div className="relative bg-[linear-gradient(180deg,rgb(20_20_23/0),rgb(20_20_23/0.97)_1.5rem)] px-5 pb-7 pt-8 lg:px-[90px] lg:pb-10">
+        <p className={`${label} text-accent`}>{project.status}</p>
+        <Title
+          id={titleId}
+          className="mt-4 max-w-[900px] font-display text-[clamp(2.5rem,1.4rem+4.2vw,5rem)] font-extrabold leading-[0.95] tracking-[-0.035em] text-ink"
+        >
+          {project.title}
+        </Title>
+      </div>
+    </header>
   );
 }
 
