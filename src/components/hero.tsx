@@ -23,47 +23,44 @@ export function Hero() {
         </svg>
       </div>
 
-      <div className="wrap pb-16 pt-2 lg:pb-24">
-        {/* Non-breaking spaces keep each separator with the word after it, so
-            a narrow screen breaks before a dot instead of after one. */}
-        <p className="hero-rise font-mono text-xs uppercase tracking-[0.2em] text-ink-faint lg:text-sm">
-          Software ·&nbsp;Applied&nbsp;AI ·&nbsp;Adelaide
-        </p>
-        {/* The name on two lines, sized to leave the rest of the hero room
-            on one screen: under 13vw, and under what the height allows once
-            the eyebrow, keywords, text and buttons (33rem) are placed. The
-            figure shares the name's font size, so it sits in the space right
-            of "Agrim" (2.824em wide) at any size: as tall as that line, and
-            clear of "Sharma" below. */}
-        <div className="relative mt-3 text-[clamp(3.5rem,min(13vw,calc((100svh-33rem)/1.92)),10.25rem)]">
-          <h1 className="hero-name py-[0.06em] font-display font-extrabold leading-[0.9] tracking-[-0.037em] text-ink">
+      {/* Two columns from lg up: the text on the left, the figure and the
+          Ask bar on the right, flush with the page's right edge. On phones
+          the column wrappers step aside (display: contents) so the figure
+          can sit between the name and the rest. */}
+      <div className="wrap flex flex-col pb-16 pt-2 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,378px)] lg:items-start lg:gap-x-12 lg:pb-24 xl:grid-cols-[minmax(0,1fr)_450px]">
+        <div className="contents lg:block">
+          {/* Non-breaking spaces keep each separator with the word after it, so
+              a narrow screen breaks before a dot instead of after one. */}
+          <p className="hero-rise font-mono text-xs uppercase tracking-[0.2em] text-ink-faint lg:text-sm">
+            Software ·&nbsp;Applied&nbsp;AI ·&nbsp;Adelaide
+          </p>
+          {/* As large as the width allows, and no larger than leaves the
+              rest of the left column (31rem with the eyebrow and header) on
+              one screen. The gaps under it give way first: they are back to
+              full size from 50rem of height. */}
+          <h1 className="hero-name mt-3 py-[0.06em] font-display text-[clamp(4.5rem,min(1.2rem+10.4vw,calc((100svh-31rem)/1.92)),10.25rem)] font-extrabold leading-[0.9] tracking-[-0.037em] text-ink">
             <span className="block">Agrim</span> <span className="block">Sharma</span>
           </h1>
-          <div className="absolute left-[2.96em] top-[0.07em] size-[0.88em]">
-            <Avatar />
-          </div>
-        </div>
-        {/* Screen readers get the four words once, as plain text; the
-            sliding copy is visual only. */}
-        <div
-          data-keywords
-          className="hero-rise mt-1 h-[1.2em] overflow-hidden font-serif text-[clamp(2.25rem,1rem+4vw,4.75rem)] italic leading-[1.2] text-accent"
-          style={{ animationDelay: "0.6s" }}
-        >
-          <span className="sr-only">Software engineer, problem solver, competitor, coach</span>
-          <div aria-hidden className="keywords flex flex-col whitespace-nowrap">
-            {KEYWORDS.map((word, i) => (
-              <span key={i} className="h-[1.2em]">
-                {word}
-              </span>
-            ))}
-          </div>
-        </div>
-        <div className="mt-6 grid lg:grid-cols-[minmax(0,1fr)_minmax(0,400px)] lg:items-start lg:gap-x-10 xl:grid-cols-[minmax(0,620px)_minmax(0,1fr)]">
-          <div>
+          <div className="order-2 lg:order-none">
+            {/* Screen readers get the four words once, as plain text; the
+                sliding copy is visual only. */}
+            <div
+              data-keywords
+              className="hero-rise mt-1 h-[1.2em] overflow-hidden font-serif text-[clamp(2.25rem,1rem+4vw,4.75rem)] italic leading-[1.2] text-accent"
+              style={{ animationDelay: "0.6s" }}
+            >
+              <span className="sr-only">Software engineer, problem solver, competitor, coach</span>
+              <div aria-hidden className="keywords flex flex-col whitespace-nowrap">
+                {KEYWORDS.map((word, i) => (
+                  <span key={i} className="h-[1.2em]">
+                    {word}
+                  </span>
+                ))}
+              </div>
+            </div>
             <p
               id="hero-intro"
-              className="hero-rise max-w-[34rem] text-lg leading-[1.55] text-ink-soft lg:text-xl"
+              className="hero-rise mt-4 max-w-[34rem] text-lg leading-[1.55] text-ink-soft lg:mt-[clamp(0.75rem,100svh-50rem,1.5rem)] lg:text-xl"
               style={{ animationDelay: "0.8s" }}
             >
               Final-year Computer Science student at Adelaide University, majoring
@@ -74,7 +71,7 @@ export function Hero() {
               .
             </p>
             <p
-              className="hero-rise mt-5 flex items-start gap-2.5 font-mono text-[13px] leading-relaxed text-ink-muted"
+              className="hero-rise mt-4 flex items-start gap-2.5 font-mono text-[13px] leading-relaxed text-ink-muted lg:mt-[clamp(0.75rem,100svh-50rem,1.25rem)]"
               style={{ animationDelay: "0.9s" }}
             >
               <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-accent" />
@@ -97,8 +94,14 @@ export function Hero() {
             </div>
             <AskBar className="mt-4 flex lg:hidden" />
           </div>
+        </div>
 
-          <AskBar className="hidden lg:flex" />
+        {/* After the text in the DOM so the name is read first. On phones it
+            sits under the name, smaller; from lg up its top meets the top of
+            "Agrim". */}
+        <div className="order-1 mx-auto my-6 w-full max-w-[240px] lg:order-none lg:mx-0 lg:my-0 lg:max-w-none lg:pt-12">
+          <Avatar />
+          <AskBar className="mt-6 hidden lg:flex" />
         </div>
       </div>
     </section>

@@ -193,10 +193,10 @@ for (const [width, height] of [
         expect(box.y, name).toBeGreaterThanOrEqual(0);
         expect(box.y + box.height, name).toBeLessThanOrEqual(height);
       }
-      // The figure sits beside "Agrim", clear of the "Sharma" line below.
+      // The figure lines up with the page's right edge, as the Resume button does.
       const circle = (await page.getByRole("img", { name: "3D avatar of Agrim" }).boundingBox())!;
-      const sharma = (await hero.getByRole("heading", { level: 1 }).locator("span").nth(1).boundingBox())!;
-      expect(circle.y + circle.height).toBeLessThanOrEqual(sharma.y);
+      const resume = (await page.locator("header").getByRole("link", { name: "Resume" }).boundingBox())!;
+      expect(Math.abs(circle.x + circle.width - (resume.x + resume.width))).toBeLessThanOrEqual(4);
     });
   });
 }
