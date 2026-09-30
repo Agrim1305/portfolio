@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { ExperienceRoles } from "@/components/experience-roles";
 
@@ -6,7 +7,26 @@ type Certification = {
   issuer: string;
   year: string;
   credentialUrl: string;
+  /** The badge or issuer logo, as published, never altered. `tile` sets a
+      dark-coloured logo on a light tile so it reads on the card. */
+  mark: { src: string; alt: string; width: number; height: number; tile?: boolean };
 };
+
+// Official marks, unmodified:
+// - The Microsoft Certified: Fundamentals badge, as earned and shown on the
+//   Microsoft Learn profile.
+// - Deloitte's reversed logo, for dark backgrounds, from deloitte.com:
+//   https://www.deloitte.com/content/dam/assets-shared/logos/svg/a-d/deloitte.svg
+// - Datacom's primary logo, from the datacom.com header:
+//   https://assets.datacom.com/is/content/datacom/Datacom-Primary-Logo-RGB
+const MICROSOFT_BADGE = {
+  src: "/images/credentials/microsoft-certified-fundamentals-badge.svg",
+  alt: "Microsoft Certified: Fundamentals badge",
+  width: 56,
+  height: 56,
+};
+const DELOITTE = { src: "/images/credentials/deloitte.svg", alt: "Deloitte Australia", width: 128, height: 24 };
+const DATACOM = { src: "/images/credentials/datacom.svg", alt: "Datacom", width: 128, height: 24, tile: true };
 
 const certifications: Certification[] = [
   {
@@ -15,6 +35,7 @@ const certifications: Certification[] = [
     year: "2026",
     credentialUrl:
       "https://www.linkedin.com/in/agrim-sharma-821788302/details/certifications/",
+    mark: MICROSOFT_BADGE,
   },
   {
     name: "Technology Job Simulation",
@@ -22,6 +43,7 @@ const certifications: Certification[] = [
     year: "2026",
     credentialUrl:
       "https://www.linkedin.com/in/agrim-sharma-821788302/details/certifications/",
+    mark: DELOITTE,
   },
   {
     name: "Data Analytics Job Simulation",
@@ -29,6 +51,7 @@ const certifications: Certification[] = [
     year: "2026",
     credentialUrl:
       "https://www.linkedin.com/in/agrim-sharma-821788302/details/certifications/",
+    mark: DELOITTE,
   },
   {
     name: "Partnering with AI in the Workplace",
@@ -36,6 +59,7 @@ const certifications: Certification[] = [
     year: "2026",
     credentialUrl:
       "https://www.linkedin.com/in/agrim-sharma-821788302/details/certifications/",
+    mark: DATACOM,
   },
 ];
 
@@ -78,28 +102,29 @@ export function Experience() {
         <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-accent-soft">
           Certifications
         </p>
-        {/* Credential badges: the issuer where its mark would sit, the
-            credential, the year and a link to verify it. AZ-900 leads with
-            the accent glow, and from lg up it is half as wide again. */}
-        <ul className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-[1.5fr_repeat(3,minmax(0,1fr))]">
-          {certifications.map((c, i) => (
+        {/* Credential cards, all alike: the badge or issuer logo in a slot
+            of fixed height so the names line up, the credential, and the
+            year with a link to verify it. */}
+        <ul className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {certifications.map((c) => (
             <li
               key={c.name}
-              className="relative flex flex-col gap-4 overflow-hidden rounded-[22px] border border-hairline bg-surface px-5 pb-3 pt-5 transition-[translate,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:border-ink/20 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+              className="flex flex-col gap-4 rounded-[22px] border border-hairline bg-surface px-5 pb-3 pt-5 transition-[translate,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:border-ink/20 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
             >
-              {i === 0 && (
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute -right-20 -top-20 size-52 rounded-full bg-[radial-gradient(circle,rgb(255_91_46/0.26),transparent_65%)]"
-                />
-              )}
-              <p className="relative flex h-7 items-center font-display text-[15px] font-bold tracking-[-0.01em] text-ink">
-                {c.issuer}
-              </p>
-              <p className={`relative flex-1 leading-snug ${i === 0 ? "text-lg font-medium text-ink" : "text-[15px] text-ink-soft"}`}>
-                {c.name}
-              </p>
-              <p className="relative flex items-center justify-between gap-3">
+              <div className="flex h-14 items-center">
+                <span className={c.mark.tile ? "rounded-md bg-ink px-2.5 py-2" : ""}>
+                  <Image
+                    src={c.mark.src}
+                    alt={c.mark.alt}
+                    width={c.mark.width}
+                    height={c.mark.height}
+                    className="block"
+                    style={{ height: c.mark.height, width: "auto" }}
+                  />
+                </span>
+              </div>
+              <p className="flex-1 text-[15px] leading-snug text-ink">{c.name}</p>
+              <p className="flex items-center justify-between gap-3">
                 <span className="font-mono text-xs text-ink-faint">{c.year}</span>
                 <a href={c.credentialUrl} target="_blank" rel="noopener noreferrer" className={credentialLink}>
                   Verify
