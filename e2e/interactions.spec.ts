@@ -174,15 +174,25 @@ for (const [width, height] of [
   test.describe(`hero at ${width}x${height}`, () => {
     test.use({ viewport: { width, height } });
 
-    test("the whole Ask bar is on screen before any scroll", async ({ page, isMobile }) => {
+    test("the email, GitHub and LinkedIn buttons and the whole Ask bar are on screen before any scroll", async ({ page, isMobile }) => {
       test.skip(isMobile, "sized for desktop screens");
       await page.goto("/");
-      const bar = page.locator("#top").getByRole("button", { name: "Ask AI about Agrim" }).filter({ visible: true });
-      // The bar rises in with the hero; measure where it lands.
-      await bar.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
-      const box = (await bar.boundingBox())!;
+      const hero = page.locator("#top");
+      const targets = [
+        hero.getByRole("link", { name: "agrimsh22@gmail.com" }),
+        hero.getByRole("link", { name: "GitHub" }),
+        hero.getByRole("link", { name: "LinkedIn" }),
+        hero.getByRole("button", { name: "Ask AI about Agrim" }).filter({ visible: true }),
+      ];
+      // They rise in with the hero; measure where they land.
+      await page.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.effect?.getTiming().iterations !== Infinity).map((a) => a.finished)));
       expect(await page.evaluate(() => window.scrollY)).toBe(0);
-      expect(box.y + box.height).toBeLessThanOrEqual(height);
+      for (const target of targets) {
+        const box = (await target.boundingBox())!;
+        const name = String(await target.getAttribute("aria-label") ?? await target.textContent());
+        expect(box.y, name).toBeGreaterThanOrEqual(0);
+        expect(box.y + box.height, name).toBeLessThanOrEqual(height);
+      }
     });
   });
 }
