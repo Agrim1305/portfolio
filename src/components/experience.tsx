@@ -78,27 +78,34 @@ export function Experience() {
         <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-accent-soft">
           Certifications
         </p>
-        <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-          {certifications.map((c) => (
+        {/* Credential badges: the issuer where its mark would sit, the
+            credential, the year and a link to verify it. AZ-900 leads with
+            the accent glow, and from lg up it is half as wide again. */}
+        <ul className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-[1.5fr_repeat(3,minmax(0,1fr))]">
+          {certifications.map((c, i) => (
             <li
               key={c.name}
-              className="flex flex-col justify-between gap-3 rounded-[22px] border border-hairline bg-surface px-5 pb-3 pt-5"
+              className="relative flex flex-col gap-4 overflow-hidden rounded-[22px] border border-hairline bg-surface px-5 pb-3 pt-5 transition-[translate,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:border-ink/20 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
             >
-              <p className="text-base leading-snug text-ink">
-                {c.name}
-                <span className="text-ink-muted"> · {c.issuer}</span>
+              {i === 0 && (
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute -right-20 -top-20 size-52 rounded-full bg-[radial-gradient(circle,rgb(255_91_46/0.26),transparent_65%)]"
+                />
+              )}
+              <p className="relative flex h-7 items-center font-display text-[15px] font-bold tracking-[-0.01em] text-ink">
+                {c.issuer}
               </p>
-              <p className="flex items-center justify-between gap-4">
-                <a
-                  href={c.credentialUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={credentialLink}
-                >
-                  Credential
+              <p className={`relative flex-1 leading-snug ${i === 0 ? "text-lg font-medium text-ink" : "text-[15px] text-ink-soft"}`}>
+                {c.name}
+              </p>
+              <p className="relative flex items-center justify-between gap-3">
+                <span className="font-mono text-xs text-ink-faint">{c.year}</span>
+                <a href={c.credentialUrl} target="_blank" rel="noopener noreferrer" className={credentialLink}>
+                  Verify
+                  <span className="sr-only"> {c.name}</span>
                   <ArrowUpRight className="size-3.5" aria-hidden />
                 </a>
-                <span className="font-mono text-xs text-ink-faint">{c.year}</span>
               </p>
             </li>
           ))}
