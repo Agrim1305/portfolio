@@ -23,6 +23,18 @@ type Role = {
   beats?: typeof mergerStory;
 };
 
+// The coaching photo shows children. It stays off, and its file stays out of
+// git (see .gitignore), until consent to publish it is confirmed.
+const COACHING_PHOTO_CONSENT = false;
+const coachingPhoto: Photo = {
+  src: "/images/experience/13-coaching-kids.webp",
+  alt: "Agrim with a group of young players holding racquets",
+  caption: "Coaching a junior group",
+  width: 2000,
+  height: 1500,
+  position: "50% 55%",
+};
+
 const roles: Role[] = [
   {
     id: "aurivox",
@@ -55,7 +67,7 @@ const roles: Role[] = [
       "I coach 10+ sessions a week at Tea Tree Gully Tennis Club for more than fifty clients, from juniors to adults, one-on-one and in groups. I run junior and performance squads of up to thirty players in a two-hour block, setting the drill plan and directing assistant coaches across four courts. It has made me good at explaining the same idea a few different ways until it clicks, and at keeping a big group moving on one plan.",
     now: true,
     stat: { value: "50+", label: "clients" },
-    photos: [],
+    photos: COACHING_PHOTO_CONSENT ? [coachingPhoto] : [],
   },
   {
     id: "retail",
@@ -306,8 +318,15 @@ export function ExperienceRoles() {
             className="role-panel relative flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-[radial-gradient(120%_90%_at_100%_0%,rgb(255_91_46/0.22),rgb(255_91_46/0)_55%),var(--surface)] px-6 pb-6 pt-[26px] shadow-[0_40px_80px_rgb(0_0_0/0.45)] lg:min-h-[520px] lg:rounded-[28px] lg:px-11 lg:py-10"
           >
             {photo && (
-              <div className="relative mb-6 aspect-[4/3] w-40 rotate-[4deg] overflow-hidden rounded-[22px] border-4 border-paper bg-[#E6E1D9] shadow-[0_20px_40px_rgb(0_0_0/0.5)] lg:absolute lg:right-9 lg:top-9 lg:mb-0 lg:size-[150px]">
-                <Image src={photo.src} alt={photo.alt} fill sizes="160px" className="object-cover" />
+              <div className="relative mb-6 aspect-[4/3] w-40 rotate-[4deg] overflow-hidden rounded-[22px] border-4 border-paper bg-[#E6E1D9] shadow-[0_20px_40px_rgb(0_0_0/0.5)] lg:absolute lg:right-9 lg:top-9 lg:mb-0">
+                <Image
+                  src={photo.src}
+                  alt={photo.alt}
+                  fill
+                  sizes="160px"
+                  className="object-cover"
+                  style={{ objectPosition: photo.position }}
+                />
               </div>
             )}
             <div className="flex items-center gap-3.5">
@@ -381,7 +400,8 @@ export function ExperienceRoles() {
                     alt={current.photos[0].alt}
                     fill
                     sizes="(min-width: 1280px) 1100px, 100vw"
-                    className="object-cover object-[50%_35%]"
+                    className="object-cover"
+                    style={{ objectPosition: current.photos[0].position ?? "50% 35%" }}
                   />
                 ) : (
                   // No photo yet: the warm cover, with the org's monogram

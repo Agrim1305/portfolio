@@ -298,6 +298,28 @@ export function CaseStudy({ project, titleAs = "h1" }: { project: Project; title
           <GalleryPhoto project={project} index={2} />
         </div>
       )}
+
+      {/* The rest of the photos, under the story, each whole: two columns
+          of their own heights, so no shape is cropped to fit. */}
+      {project.gallery && project.gallery.length > 3 && (
+        <div className="mt-14 gap-6 sm:columns-2">
+          {project.gallery.slice(3).map((photo) => (
+            <figure key={photo.src} className="mb-8 break-inside-avoid">
+              <Image
+                src={photo.src}
+                alt={photo.alt}
+                width={photo.width}
+                height={photo.height}
+                sizes="(min-width: 1280px) 520px, (min-width: 640px) 45vw, 100vw"
+                className="h-auto w-full rounded-[18px] shadow-[0_30px_60px_rgb(0_0_0/0.45)]"
+              />
+              {photo.caption && (
+                <figcaption className="mt-3.5 font-mono text-xs text-ink-faint">{photo.caption}</figcaption>
+              )}
+            </figure>
+          ))}
+        </div>
+      )}
     </>
   );
 }

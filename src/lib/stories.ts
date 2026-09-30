@@ -2,12 +2,16 @@
    shape every gallery renders, the award photo, the merger story's three
    beats, and the event that opens a role's full story from anywhere. */
 
-export type Photo = { src: string; alt: string; caption: string };
+/* A photo with its real size in pixels. `position` is its object-position
+   wherever a frame crops it, chosen so no face is cut. */
+export type Photo = { src: string; alt: string; caption: string; width: number; height: number; position?: string };
 
 export const awardPhoto: Photo = {
   src: "/award.jpg",
   alt: "Adelaide University Sport Club of the Year cheque presentation",
   caption: "Club of the Year · Adelaide University Sport, 2025",
+  width: 900,
+  height: 675,
 };
 
 export const mergerStory = [

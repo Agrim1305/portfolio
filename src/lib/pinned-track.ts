@@ -38,8 +38,8 @@ export function usePinned() {
    nearest the middle and `go` moves to one: pinned, by gliding the window to
    that slide's position. `step` moves one slide on from wherever the track
    is already heading, so quick presses queue up. */
-export function usePinnedTrack(count: number) {
-  const sectionRef = useRef<HTMLElement>(null);
+export function usePinnedTrack<T extends HTMLElement = HTMLElement>(count: number) {
+  const sectionRef = useRef<T>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const pinned = usePinned();
   const [active, setActive] = useState(0);

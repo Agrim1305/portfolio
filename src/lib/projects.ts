@@ -55,6 +55,7 @@ export type Project = {
   /** Shown instead of links when there is no public source. */
   privateNote?: string;
   media?: ProjectMedia;
+  /** The first three sit in the story; any more follow it as a gallery. */
   gallery?: Extract<ProjectMedia, { kind: "photo" }>[];
 };
 
@@ -141,6 +142,38 @@ export const projects: Project[] = [
         width: 1600,
         height: 904,
         position: "center",
+      },
+      {
+        kind: "photo",
+        src: "/images/projects/08-hackathon-awards-team.webp",
+        alt: "Agrim and teammates holding finalist certificates",
+        caption: "Finalists at the 2026 Humanitarian Innovation Hackathon awards",
+        width: 1500,
+        height: 2000,
+      },
+      {
+        kind: "photo",
+        src: "/images/projects/10-hackathon-sofa-organiser.webp",
+        alt: "Agrim, a teammate and an organiser on a sofa",
+        caption: "With the team and an organiser",
+        width: 2000,
+        height: 1499,
+      },
+      {
+        kind: "photo",
+        src: "/images/projects/16-hackathon-group.webp",
+        alt: "Agrim with other hackathon participants",
+        caption: "At the awards night",
+        width: 750,
+        height: 500,
+      },
+      {
+        kind: "photo",
+        src: "/images/projects/17-hackathon-all-teams.webp",
+        alt: "Group photo of all hackathon participants",
+        caption: "All teams at the awards ceremony",
+        width: 1000,
+        height: 500,
       },
     ],
   },

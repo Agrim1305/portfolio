@@ -7,10 +7,12 @@ type Box = { top: number; bottom: number; left: number; right: number };
 async function pinnedSlide(page: Page, id: string, i: number) {
   return page.evaluate(
     async ({ id, i }) => {
+      // The pinned box: the section itself, or inside it when more follows.
       const section = document.getElementById(id)!;
+      const pinned = section.matches(".pin-section") ? section : section.querySelector<HTMLElement>(".pin-section")!;
       const slides = section.querySelectorAll<HTMLElement>("[aria-roledescription='slide']");
-      const top = section.getBoundingClientRect().top + window.scrollY;
-      const travel = section.offsetHeight - window.innerHeight;
+      const top = pinned.getBoundingClientRect().top + window.scrollY;
+      const travel = pinned.offsetHeight - window.innerHeight;
       window.scrollTo({ top: top + (i / (slides.length - 1)) * travel, behavior: "instant" });
       await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
       const box = (el: Element) => {
@@ -49,7 +51,17 @@ async function pinnedSlide(page: Page, id: string, i: number) {
         shot,
         text: [...slide.querySelectorAll("h3, p")].map((el) => ({ text: el.textContent!.slice(0, 40), ...box(el) })),
         lines: lines.map(({ top, bottom, left, right }) => ({ top, bottom, left, right })),
-        pill: box(document.querySelector("button.dock")!),
+        // The docked cloud and the Ask Aris pill beside it.
+        pill: (() => {
+          const cloud = box(document.querySelector("button.dock")!);
+          const tag = box(document.querySelector("#dock-pill")!);
+          return {
+            top: Math.min(cloud.top, tag.top),
+            bottom: Math.max(cloud.bottom, tag.bottom),
+            left: Math.min(cloud.left, tag.left),
+            right: Math.max(cloud.right, tag.right),
+          };
+        })(),
         viewport: { width: window.innerWidth, height: window.innerHeight },
       };
     },

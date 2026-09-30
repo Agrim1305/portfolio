@@ -40,6 +40,9 @@ Nepal. He now plays Premier League, the top grade in Tennis South
 Australia, and is Assistant Head Coach at Adelaide Rising Stars Tennis
 Academy, based at Tea Tree Gully Tennis Club.
 
+At the Rafa Nadal Academy he met Toni Nadal, and at Adelaide University he
+plays in the UTL team.
+
 ---
 
 ## Projects
@@ -114,7 +117,8 @@ the same time. Skills: Customer Service, Teamwork.
 - Partnering with AI in the Workplace, Datacom, 2026 (Applied AI,
   Workflow Design)
 - Career Access Mentoring Program, Adelaide University, 2025 (Industry
-  Mentoring, Professional Skills)
+  Mentoring, Professional Skills). His mentor, Bart, is an APT Analyst at
+  Google Threat Intelligence; they met in person at Google Sydney.
 - Microsoft Certified: Azure Fundamentals (AZ-900), Microsoft, August 2026
   (Cloud Concepts, Azure Services, Governance)
 
@@ -128,6 +132,9 @@ the same time. Skills: Customer Service, Teamwork.
   merger with UniSA's tennis club.
 - Intervarsity Certificate of Merit, UniSport Australia, 2025.
   Recognition for representing Adelaide University at UniSport Nationals.
+- State team, Punjab: 3rd at the nationals.
+- SA Challenge Intervarsity 2024, 1st place, men's tennis.
+- Certificate of merit from the Vice-Chancellor, in his first year.
 - Top 90, AITA U18 National Ranking, All India Tennis Association, 2022.
   Trained at the Rafa Nadal Academy in Spain, competed in junior ITF
   tournaments across India and Nepal.

@@ -4,17 +4,29 @@ import type { Photo } from "@/lib/stories";
 
 const CREDENTIAL_URL = "https://www.linkedin.com/feed/update/urn:li:activity:7376092779933835264/";
 
-// The first photo leads; the rest stack beside it above the certificate.
+// The first photo leads, with the certificate under it; the rest stack
+// beside them.
 const photos: Photo[] = [
   {
     src: "/google-sydney-1.jpg",
     alt: "Agrim Sharma beside the Google logo sculpture in the Google Sydney office",
     caption: "Visiting my mentor at Google Sydney",
+    width: 1400,
+    height: 787,
   },
   {
     src: "/google-sydney-2.jpg",
     alt: "Agrim Sharma beside the neon Google sign in the Google Sydney office",
     caption: "Google Sydney office",
+    width: 1400,
+    height: 787,
+  },
+  {
+    src: "/images/google/09-with-bart.webp",
+    alt: "Agrim and his mentor Bart at the Google office",
+    caption: "With Bart at Google Sydney",
+    width: 2000,
+    height: 1125,
   },
 ];
 
@@ -60,11 +72,8 @@ export function Google() {
         className="rise mt-10 grid gap-8 lg:mt-14 lg:grid-cols-[minmax(0,700fr)_minmax(0,470fr)] lg:gap-[30px]"
         style={rise(0.16)}
       >
-        <Shot photo={lead} sizes="(min-width: 1024px) 700px, 100vw" />
         <div className="flex flex-col gap-8 lg:gap-6">
-          {rest.map((photo) => (
-            <Shot key={photo.src} photo={photo} sizes="(min-width: 1024px) 470px, 100vw" />
-          ))}
+          <Shot photo={lead} sizes="(min-width: 1024px) 700px, 100vw" />
           <div className="flex items-center gap-4 rounded-2xl border border-hairline bg-surface px-[18px] py-3">
             <div className="relative h-14 w-10 shrink-0 overflow-hidden rounded">
               <Image
@@ -86,6 +95,11 @@ export function Google() {
               <ArrowUpRight className="size-3.5" aria-hidden />
             </a>
           </div>
+        </div>
+        <div className="flex flex-col gap-8 lg:gap-6">
+          {rest.map((photo) => (
+            <Shot key={photo.src} photo={photo} sizes="(min-width: 1024px) 470px, 100vw" />
+          ))}
         </div>
       </div>
 
