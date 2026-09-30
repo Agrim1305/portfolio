@@ -8,8 +8,7 @@ const SECTIONS = ["projects", "leadership", "experience", "google", "court", "ab
 async function restOn(page: Page, id: string) {
   await page.evaluate((id) => {
     const el = document.getElementById(id)!;
-    const pinned = el.classList.contains("pin-section");
-    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - (pinned ? 0 : 80), behavior: "instant" });
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY, behavior: "instant" });
   }, id);
   await page.waitForTimeout(1100);
 }
@@ -69,8 +68,8 @@ for (const [width, height] of [
           await expect(dot(page), `${id}: no room, so a dot`).toBeVisible();
         }
       }
-      // Contact's corner is clear at both sizes, so the unprompted bubble is
-      // exercised every run.
+      // Some section's corner is clear at each size, so the unprompted bubble
+      // is exercised every run.
       expect(bubbles).toBeGreaterThan(0);
 
       // Back through every section: each was seen, as a bubble or not at all
@@ -94,7 +93,9 @@ for (const [width, height] of [
 }
 
 test.describe("section questions", () => {
-  test.use({ viewport: { width: 1440, height: 900 } });
+  // At this size Contact's corner is clear, so its question shows as a
+  // bubble, and Experience's is a dot.
+  test.use({ viewport: { width: 1280, height: 720 } });
   test.skip(({ isMobile }) => isMobile, "the wide-screen layout");
 
   test.beforeEach(async ({ page }) => {

@@ -658,6 +658,69 @@ test("certifications are badges: AZ-900 leads, half as wide again on desktop, ea
   }
 });
 
+test.describe("section tops settle into place", () => {
+  const topOf = (page: import("@playwright/test").Page, id: string) =>
+    page.locator(`#${id}`).evaluate((el) => Math.round(el.getBoundingClientRect().top) || 0);
+  const stopAt = (page: import("@playwright/test").Page, id: string, offset: number) =>
+    page.locator(`#${id}`).evaluate((el, offset) => {
+      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY + offset, behavior: "instant" });
+    }, offset);
+
+  test("scrolling down, a top just below comes up; scrolling up, a top just above comes down", async ({ page, isMobile }) => {
+    test.skip(isMobile, "phones keep native scroll");
+    await page.goto("/");
+    // Down from further up, stopping with the top 150px below.
+    await stopAt(page, "leadership", -600);
+    await page.waitForTimeout(300);
+    await stopAt(page, "leadership", -150);
+    await expect.poll(() => topOf(page, "leadership")).toBe(0);
+    // Up from further down, stopping with the top 150px above.
+    await stopAt(page, "leadership", 600);
+    await page.waitForTimeout(300);
+    await stopAt(page, "leadership", 150);
+    await expect.poll(() => topOf(page, "leadership")).toBe(0);
+  });
+
+  test("it never pulls back against the way the page was going", async ({ page, isMobile }) => {
+    test.skip(isMobile, "phones keep native scroll");
+    await page.goto("/");
+    // Scrolled 150px into Experience on the way down: stay there.
+    await stopAt(page, "experience", -300);
+    await page.waitForTimeout(300);
+    await stopAt(page, "experience", 150);
+    await page.waitForTimeout(1000);
+    expect(await topOf(page, "experience")).toBe(-150);
+  });
+
+  test("deep inside a section taller than the screen nothing moves", async ({ page, isMobile }) => {
+    test.skip(isMobile, "phones keep native scroll");
+    await page.goto("/");
+    expect(await page.locator("#experience").evaluate((el) => el.getBoundingClientRect().height)).toBeGreaterThan(900);
+    await stopAt(page, "experience", 400);
+    await page.waitForTimeout(1000);
+    expect(await topOf(page, "experience")).toBe(-400);
+  });
+
+  test("phones keep their native scroll", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "the phone layout");
+    await page.goto("/");
+    await stopAt(page, "leadership", 100);
+    await page.waitForTimeout(800);
+    expect(await topOf(page, "leadership")).toBe(-100);
+  });
+
+  test("under reduced motion it jumps instead of gliding", async ({ page, isMobile }) => {
+    test.skip(isMobile, "phones keep native scroll");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await stopAt(page, "leadership", -600);
+    await page.waitForTimeout(300);
+    await stopAt(page, "leadership", -150);
+    await page.waitForTimeout(400);
+    expect(await topOf(page, "leadership")).toBe(0);
+  });
+});
+
 test.describe("built on court", () => {
   const current = (page: import("@playwright/test").Page) =>
     page.locator("#court [aria-roledescription='slide']:not([inert])");

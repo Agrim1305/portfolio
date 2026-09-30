@@ -11,6 +11,7 @@ import { Contact } from "@/components/contact";
 import { AskAgrim } from "@/components/ask-agrim";
 import { Reveal } from "@/components/reveal";
 import { Footer } from "@/components/footer";
+import { SectionSnap } from "@/components/section-snap";
 
 export default function Home() {
   return (
@@ -41,6 +42,7 @@ export default function Home() {
       </main>
       <Footer />
       <AskAgrim heroId="top" />
+      <SectionSnap />
     </>
   );
 }
