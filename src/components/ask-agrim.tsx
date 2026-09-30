@@ -118,7 +118,9 @@ export function AskCard({ className = "" }: { className?: string }) {
       style={{ animationDelay: "1.1s" }}
     >
       <p className="font-display text-[20px] font-bold leading-tight lg:text-[22px]">Ask about Agrim</p>
-      <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-muted lg:text-xs">
+      {/* From md up the hero's cloud perches on the card's top-right corner;
+          the line wraps short of it. */}
+      <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-muted md:pr-[216px] lg:text-xs">
         AI assistant · grounded in his portfolio
       </p>
       <div className="mt-4 flex flex-wrap gap-2">

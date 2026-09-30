@@ -67,6 +67,30 @@ test("the sliding keywords read as one label and hold still under reduced motion
   await expect(words.getByText("problem solver.")).not.toBeInViewport();
 });
 
+test("the name runs on one line, and the cloud perches on the Ask card", async ({ page }) => {
+  await page.goto("/");
+  const h1 = page.getByRole("heading", { level: 1 });
+  const lineHeight = await h1.evaluate((el) => parseFloat(getComputedStyle(el).fontSize) * 0.9);
+  expect((await h1.boundingBox())!.height).toBeLessThan(lineHeight * 1.5);
+  const heading = page.locator("#top").getByText("Ask about Agrim");
+  const [cloud, card, titleEnd] = await Promise.all([
+    page.locator("#hero-cloud").boundingBox(),
+    heading.locator("..").boundingBox(),
+    heading.evaluate((el) => {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      return range.getBoundingClientRect().right;
+    }),
+  ]);
+  // Its lower third over the card's top edge, clear of the card's heading.
+  expect((cloud!.y + cloud!.height - card!.y) / cloud!.height).toBeCloseTo(1 / 3, 1);
+  expect(cloud!.x).toBeGreaterThan(titleEnd);
+  // And on the narrowest phones the whole name still fits.
+  await page.setViewportSize({ width: 320, height: 640 });
+  const narrow = (await h1.boundingBox())!;
+  expect(narrow.x + narrow.width).toBeLessThanOrEqual(320 - 16);
+});
+
 test("the cloud is decorative, and holds still under reduced motion", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
