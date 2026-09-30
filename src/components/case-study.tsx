@@ -165,7 +165,7 @@ export function CaseStudyHero({
       <ProjectCover
         project={project}
         sizes="(min-width: 1280px) 900px, 100vw"
-        className="panel-hero aspect-[16/11] shrink-0 md:aspect-auto md:h-[calc((100svh-var(--nav-height)-var(--corner-clear)-15.875rem)*0.975)] md:min-h-64"
+        className="panel-hero aspect-[16/11] shrink-0 md:aspect-auto md:h-[calc((100svh-var(--nav-height)-var(--corner-clear)-14.125rem)*0.975)] md:min-h-64"
       />
       <div className="relative bg-[linear-gradient(180deg,rgb(20_20_23/0),rgb(20_20_23/0.97)_1.5rem)] px-5 pb-7 pt-8 lg:px-[90px] lg:pb-10">
         <p className={`${label} text-accent`}>{project.status}</p>
