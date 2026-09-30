@@ -34,8 +34,11 @@ export async function generateMetadata({
       siteName: "Agrim Sharma",
       locale: "en_AU",
       type: "article",
+      // The site's image until each project has its own; a page's openGraph
+      // replaces the root's, image and all.
+      images: "/opengraph-image",
     },
-    twitter: { card: "summary_large_image", title, description: project.oneLiner },
+    twitter: { card: "summary_large_image", title, description: project.oneLiner, images: "/twitter-image" },
   };
 }
 
