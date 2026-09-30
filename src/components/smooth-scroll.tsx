@@ -2,12 +2,13 @@
 
 import { useEffect } from "react";
 import Lenis from "lenis";
-import { registerLenis } from "@/lib/scroll-lock";
+import { leaveGesture, registerLenis } from "@/lib/scroll-lock";
 
 function start() {
   // Lenis reads `scroll-padding-top` itself, so anchors clear the sticky
-  // header without an extra offset.
-  const lenis = new Lenis({ duration: 0.8, anchors: true });
+  // header without an extra offset. A pinned section can take a gesture
+  // before Lenis scrolls with it.
+  const lenis = new Lenis({ duration: 0.8, anchors: true, virtualScroll: leaveGesture });
   document.documentElement.classList.add("smooth-scroll");
   registerLenis(lenis);
 

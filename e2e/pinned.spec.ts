@@ -47,72 +47,111 @@ const inside = (inner: Box, outer: Box) =>
   inner.left >= outer.left - 0.5 &&
   inner.right <= outer.right + 0.5;
 
-// A trackpad flick over the cards: a burst of small wheel deltas, one a frame,
-// decaying like momentum. Records scrollY every frame, and when the last wheel
-// event arrived, relative to the section's top.
-async function flick(page: Page, first: number) {
+const CARD = 720; // 80svh of scroll per card at 1440 x 900
+
+// Puts the page on card `card` of Selected work and starts recording scrollY
+// every frame, relative to the section's top.
+async function restOnCard(page: Page, card: number) {
   const top = await page.locator("#projects").evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
-  await page.evaluate((y) => window.scrollTo({ top: y, behavior: "instant" }), top);
+  await page.evaluate((y) => window.scrollTo({ top: y, behavior: "instant" }), top + card * CARD);
   await page.waitForTimeout(400);
-  await page.evaluate(() => {
-    const w = window as unknown as { frames: [number, number][]; wheels: number[] };
+  await page.evaluate((top) => {
+    const w = window as unknown as { frames: [number, number][] };
     w.frames = [];
-    w.wheels = [];
-    addEventListener("wheel", () => w.wheels.push(performance.now()), { passive: true });
     requestAnimationFrame(function tick(t) {
-      w.frames.push([t, window.scrollY]);
+      w.frames.push([t, window.scrollY - top]);
       requestAnimationFrame(tick);
     });
-  });
+  }, top);
   await page.mouse.move(700, 500);
-  for (let delta = first; delta >= 1; delta *= 0.88) {
+}
+
+// A trackpad flick: a burst of wheel deltas, one a frame, decaying like
+// momentum. Negative `first` flicks up.
+async function flick(page: Page, first: number) {
+  for (let delta = first; Math.abs(delta) >= 1; delta *= 0.88) {
     await page.mouse.wheel(0, delta);
     await page.waitForTimeout(16);
   }
-  await page.waitForTimeout(2500);
-  const { frames, wheels } = await page.evaluate(() => {
-    const w = window as unknown as { frames: [number, number][]; wheels: number[] };
-    return { frames: w.frames, wheels: w.wheels };
-  });
-  return { frames: frames.map(([t, y]) => [t, y - top] as const), lastWheel: wheels.at(-1)! };
 }
 
-// Splits a recording at the first moment the page held still for `still` ms:
-// the gesture and its momentum before, the settle after.
-function splitAtRest(frames: (readonly [number, number])[], still = 140) {
-  for (let i = 1; i < frames.length; i++) {
-    let j = i;
-    while (j + 1 < frames.length && frames[j + 1][1] === frames[i][1]) j++;
-    if (frames[j][0] - frames[i][0] >= still) return { gesture: frames.slice(0, i + 1), restAt: frames[i][0], after: frames.slice(j) };
-  }
-  throw new Error("the page never came to rest");
-}
+const frames = (page: Page) =>
+  page.evaluate(() => (window as unknown as { frames: [number, number][] }).frames);
+const scrolled = async (page: Page) => (await frames(page)).at(-1)![1];
 
 test.describe("pinned travel", () => {
   test.use({ viewport: { width: 1440, height: 900 } });
-  const CARD = 720; // 80svh of scroll per card
+  test.skip(({ isMobile }) => isMobile, "pinned travel is for wide screens");
 
-  for (const [name, first, expected] of [
-    ["forward to the next card", 50, CARD],
-    ["back to the card it left", 22, 0],
-  ] as const) {
-    test(`a trackpad flick glides without reversing, then settles ${name} only once still`, async ({ page, isMobile }) => {
-      test.skip(isMobile, "pinned travel is for wide screens");
-      await page.goto("/");
-      const { frames, lastWheel } = await flick(page, first);
-      const { gesture, restAt, after } = splitAtRest(frames);
+  test("one flick moves exactly one card, however big, and never backs up", async ({ page }) => {
+    await page.goto("/");
+    await restOnCard(page, 0);
+    await flick(page, 160);
+    await page.waitForTimeout(1200);
+    const recorded = await frames(page);
+    for (let i = 1; i < recorded.length; i++) expect(recorded[i][1]).toBeGreaterThanOrEqual(recorded[i - 1][1] - 0.5);
+    expect(Math.abs(recorded.at(-1)![1] - CARD)).toBeLessThanOrEqual(1);
+  });
 
-      for (let i = 1; i < gesture.length; i++) {
-        expect(gesture[i][1], "the page only moves the way the gesture went").toBeGreaterThanOrEqual(gesture[i - 1][1]);
-      }
-      const settleStart = after.find(([, y]) => y !== after[0][1]);
-      if (settleStart) {
-        expect(settleStart[0] - lastWheel, "settles only after 150ms without input").toBeGreaterThanOrEqual(150);
-        expect(settleStart[0] - restAt, "settles only after the page held still").toBeGreaterThanOrEqual(140);
-      }
-      expect(Math.abs(frames.at(-1)![1] - expected)).toBeLessThanOrEqual(1);
-    });
-  }
+  test("a flick that carries the page into the section stops on the first card", async ({ page }) => {
+    await page.goto("/");
+    await restOnCard(page, 0);
+    await page.evaluate(() => window.scrollBy({ top: -300, behavior: "instant" }));
+    await page.waitForTimeout(400);
+    await flick(page, 160);
+    await page.waitForTimeout(1500);
+    expect(Math.abs(await scrolled(page))).toBeLessThanOrEqual(1);
+  });
+
+  test("a nudge under the threshold moves nothing", async ({ page }) => {
+    await page.goto("/");
+    await restOnCard(page, 2);
+    await page.mouse.wheel(0, 20);
+    await page.waitForTimeout(1000);
+    expect(Math.abs((await scrolled(page)) - 2 * CARD)).toBeLessThanOrEqual(1);
+  });
+
+  test("a flick's momentum is spent: input counts again only once it goes quiet", async ({ page }) => {
+    await page.goto("/");
+    await restOnCard(page, 0);
+    await flick(page, 60);
+    // Straight on, with no pause: still the same gesture.
+    await flick(page, 60);
+    await page.waitForTimeout(1200);
+    expect(Math.abs((await scrolled(page)) - CARD)).toBeLessThanOrEqual(1);
+    // After a pause, the next flick moves on, and back works the same way.
+    await flick(page, 60);
+    await page.waitForTimeout(1200);
+    expect(Math.abs((await scrolled(page)) - 2 * CARD)).toBeLessThanOrEqual(1);
+    await flick(page, -60);
+    await page.waitForTimeout(1200);
+    expect(Math.abs((await scrolled(page)) - CARD)).toBeLessThanOrEqual(1);
+  });
+
+  test("at the first and last card a flick outward lets the page scroll on", async ({ page }) => {
+    await page.goto("/");
+    await restOnCard(page, 0);
+    await flick(page, -60);
+    await page.waitForTimeout(1200);
+    expect(await scrolled(page)).toBeLessThan(-50);
+
+    await restOnCard(page, 7);
+    await flick(page, 60);
+    await page.waitForTimeout(1200);
+    expect(await scrolled(page)).toBeGreaterThan(7 * CARD + 50);
+  });
+
+  test("the page keys step too, one card a press, queued", async ({ page }) => {
+    await page.goto("/");
+    await restOnCard(page, 0);
+    await page.locator("body").press("PageDown");
+    await page.locator("body").press("PageDown");
+    await page.waitForTimeout(1400);
+    expect(Math.abs((await scrolled(page)) - 2 * CARD)).toBeLessThanOrEqual(1);
+    await page.locator("body").press("Shift+Space");
+    await page.waitForTimeout(1200);
+    expect(Math.abs((await scrolled(page)) - CARD)).toBeLessThanOrEqual(1);
+  });
 
   test("travel keeps to the frame budget", async ({ page, isMobile }, info) => {
     test.skip(isMobile, "pinned travel is for wide screens");
@@ -129,15 +168,18 @@ test.describe("pinned travel", () => {
       });
     });
     const before = await metric();
-    const { frames } = await flick(page, 50);
+    await restOnCard(page, 0);
+    await flick(page, 50);
+    await page.waitForTimeout(1500);
+    const recorded = await frames(page);
     const after = await metric();
 
     // Every frame drawn from the first movement to the last, settle included.
-    const moved = frames.map((f, i) => i > 0 && f[1] !== frames[i - 1][1]);
-    const travel = frames.slice(moved.indexOf(true) - 1, moved.lastIndexOf(true) + 1);
+    const moved = recorded.map((f, i) => i > 0 && f[1] !== recorded[i - 1][1]);
+    const travel = recorded.slice(moved.indexOf(true) - 1, moved.lastIndexOf(true) + 1);
     const gaps = travel.slice(1).map((f, i) => f[0] - travel[i][0]).sort((a, b) => a - b);
     // Main-thread time over the whole run, spread across the frames it drew.
-    const busy = ((after.TaskDuration - before.TaskDuration) * 1000) / frames.length;
+    const busy = ((after.TaskDuration - before.TaskDuration) * 1000) / recorded.length;
     const longFrames = await page.evaluate(() => (window as unknown as { longFrames: number[] }).longFrames);
     const report = {
       travelFrames: travel.length,
