@@ -255,9 +255,9 @@ html:has(dialog[open]) {
   }
 }
 .sheet::backdrop {
-  background: rgb(10 10 12 / 0.78);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgb(10 10 12 / 0.62);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   opacity: 0;
   transition: opacity 0.3s ease, overlay 0.3s allow-discrete, display 0.3s allow-discrete;
 }
@@ -280,7 +280,7 @@ html:has(dialog[open]) {
 .sheet.morph[open] {
   view-transition-name: morph;
 }
-@media (width >= 64rem) {
+@media (width >= 64rem) and (prefers-reduced-motion: no-preference) {
   .sheet.morph {
     transition: none;
   }
@@ -309,6 +309,52 @@ html:has(dialog[open]) {
 }
 @keyframes vt-in {
   from { opacity: 0; }
+}
+
+/* ---- Switching inside a panel (see morphSwitch in lib/morph.ts) ----
+   For the moment of the switch the panel's scrolling body and, if it is on
+   screen, its hero picture get names of their own: the body slides out one
+   way and in from the other, clipped to the panel, the picture crossfades in
+   place, and the frame's morph steps aside so the panel holds still. */
+html[data-switch] .panel-body {
+  view-transition-name: panel-body;
+}
+html[data-switch-hero] .panel-hero {
+  view-transition-name: panel-hero;
+}
+html[data-switch]::view-transition-group(morph),
+html[data-switch]::view-transition-old(morph),
+html[data-switch]::view-transition-new(morph) {
+  animation: none;
+}
+::view-transition-group(panel-body) {
+  overflow: clip;
+}
+::view-transition-group(panel-body),
+::view-transition-group(panel-hero),
+::view-transition-old(panel-hero),
+::view-transition-new(panel-hero) {
+  animation-duration: 0.45s;
+}
+/* Which way the body travels; unset under reduced motion, which leaves
+   only the fade. */
+html[data-switch="next"] {
+  --panel-shift: 14%;
+}
+html[data-switch="prev"] {
+  --panel-shift: -14%;
+}
+::view-transition-old(panel-body) {
+  animation: panel-out 0.45s var(--ease-out) both;
+}
+::view-transition-new(panel-body) {
+  animation: panel-in 0.45s var(--ease-out) both;
+}
+@keyframes panel-out {
+  to { opacity: 0; transform: translateX(calc(-1 * var(--panel-shift))); }
+}
+@keyframes panel-in {
+  from { opacity: 0; transform: translateX(var(--panel-shift)); }
 }
 
 /* ---- Pinned sideways travel (Selected work, Built on court) ----
@@ -407,10 +453,11 @@ html:has(dialog[open]) {
   .lift { transition: none; }
   .lift:hover,
   .lift:active { transform: none; }
-  .sheet,
-  .sheet::backdrop,
   .chat-window,
   .cloud-eyes { transition: none; }
+  /* Sheets only fade. */
+  .sheet,
+  .sheet[open] { translate: none; }
   .keywords,
   .cloud-blink,
   .cloud[data-mood],

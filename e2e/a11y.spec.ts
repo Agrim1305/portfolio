@@ -7,6 +7,15 @@ const WCAG_AA = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
 test.use({ reducedMotion: "reduce" });
 
 async function violations(page: Page) {
+  // Sheets still fade under reduced motion; let every finite animation end.
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((a) => a.effect?.getComputedTiming().endTime !== Infinity)
+        .map((a) => a.finished.catch(() => {})),
+    ),
+  );
   const { violations } = await new AxeBuilder({ page }).withTags(WCAG_AA).analyze();
   return violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`);
 }
