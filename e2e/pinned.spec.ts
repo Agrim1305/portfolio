@@ -27,8 +27,10 @@ async function pinnedSlide(page: Page, id: string, i: number) {
         range.selectNodeContents(node);
         lines.push(...[...range.getClientRects()].filter((r) => r.right > 0 && r.left < window.innerWidth && r.width > 0));
       }
+      const shot = slide.querySelector("img");
       return {
         slide: box(slide),
+        shot: shot && box(shot),
         text: [...slide.querySelectorAll("h3, p")].map((el) => ({ text: el.textContent!.slice(0, 40), ...box(el) })),
         lines: lines.map(({ top, bottom, left, right }) => ({ top, bottom, left, right })),
         pill: box(document.querySelector("body > button[aria-keyshortcuts]")!),
@@ -165,13 +167,20 @@ for (const [width, height] of [
     test.use({ viewport: { width, height } });
 
     for (const id of ["projects", "court"]) {
-      test(`every ${id} slide and its text fit on screen, clear of the Ask pill`, async ({ page, isMobile }) => {
+      test(`every ${id} slide is wholly on screen, its text clear of the Ask pill and the screenshot`, async ({ page, isMobile }) => {
         test.skip(isMobile, "pinned travel is for wide screens");
         await page.goto("/");
         for (let i = 0; i < 8; i++) {
-          const { slide, text, lines, pill, viewport } = await pinnedSlide(page, id, i);
+          const { slide, shot, text, lines, pill, viewport } = await pinnedSlide(page, id, i);
           const screen = { top: 0, left: 0, bottom: viewport.height, right: viewport.width };
-          expect(slide.bottom, `slide ${i + 1} bottom`).toBeLessThanOrEqual(viewport.height);
+          expect(inside(slide, screen), `slide ${i + 1} wholly on screen`).toBe(true);
+          if (shot && id === "projects") {
+            expect(lines.filter((line) => overlaps(line, shot)), `slide ${i + 1}: text over the screenshot`).toEqual([]);
+            // The screenshot is the bulk of the card where there is room.
+            if (height >= 900) {
+              expect((shot.right - shot.left) / (slide.right - slide.left), `slide ${i + 1} screenshot share`).toBeGreaterThanOrEqual(0.6);
+            }
+          }
           for (const line of text) {
             expect(inside(line, slide) && inside(line, screen), `slide ${i + 1}: "${line.text}"`).toBe(true);
           }

@@ -346,6 +346,19 @@ html[data-switch="prev"] {
   }
 }
 
+/* ---- A project's framed screenshot (see ProjectCover in case-study.tsx) ----
+   The frame takes the smaller of the width and the height its space allows
+   (the browser bar is 1.375rem), less --inset at the sides and --clear, the
+   Open case study pill's corner. It is centred, unless that would run under
+   the pill. Without container units the frame is simply full width. */
+@supports (width: 1cqw) {
+  .cover-frame {
+    --fw: min(100cqw - var(--clear) - var(--inset), (100cqh - 1.375rem) * var(--ratio));
+    width: var(--fw);
+    margin-left: min((100cqw - var(--fw)) / 2, 100cqw - var(--clear) - var(--fw));
+  }
+}
+
 /* Thin accent scrollbar for scrolling panels inside sheets. */
 .thin-scroll {
   scrollbar-width: thin;
