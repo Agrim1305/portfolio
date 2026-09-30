@@ -55,8 +55,10 @@ function Card({
         style={{ background: cover.bg }}
       >
         {media ? (
+          // Full width where container units are unknown: the screenshot
+          // may crop then, but never collapses out of sight.
           <div
-            className="overflow-hidden rounded-xl border border-white/14 bg-paper shadow-[0_24px_48px_rgb(0_0_0/0.45)] transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.02] motion-reduce:transition-none"
+            className="w-full overflow-hidden rounded-xl border border-white/14 bg-paper shadow-[0_24px_48px_rgb(0_0_0/0.45)] transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.02] motion-reduce:transition-none"
             style={{ width: `min(100cqw, calc((100cqh - 1.375rem) * ${media.width / media.height}))` }}
           >
             <div aria-hidden className="flex h-[1.375rem] items-center gap-1.5 border-b border-white/10 px-2.5">
