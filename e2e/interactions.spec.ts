@@ -125,6 +125,27 @@ test.describe("ask Agrim", () => {
     await expect(chat).toBeHidden();
   });
 
+  test("a wheel over a long conversation scrolls the conversation, not the page", async ({ page, isMobile }) => {
+    test.skip(isMobile, "no wheel on touch");
+    await page.route("/api/chat", (route) =>
+      route.fulfill({ status: 200, contentType: "text/plain; charset=utf-8", body: Array(30).fill(ANSWER).join("\n\n") }),
+    );
+    await page.goto("/");
+    await page.keyboard.press("ControlOrMeta+k");
+    const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+    await chat.getByRole("textbox", { name: "Ask a question" }).fill("Hi");
+    await chat.getByRole("button", { name: "Send message" }).click();
+    const log = chat.getByRole("log");
+    await expect.poll(() => log.evaluate((el) => el.scrollHeight - el.clientHeight)).toBeGreaterThan(300);
+    await page.waitForTimeout(800);
+    const pageY = await page.evaluate(() => window.scrollY);
+    const before = await log.evaluate((el) => el.scrollTop);
+    await log.hover();
+    await page.mouse.wheel(0, -300);
+    await expect.poll(() => log.evaluate((el) => el.scrollTop)).toBeLessThan(before - 100);
+    expect(await page.evaluate(() => window.scrollY)).toBe(pageY);
+  });
+
   test("with voice on, the answer is read aloud a sentence at a time", async ({ page }) => {
     await page.goto("/");
     await page.keyboard.press("ControlOrMeta+k");
