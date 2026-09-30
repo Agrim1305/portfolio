@@ -884,16 +884,25 @@ for (const [width, height] of [
   test.describe(`hero at ${width}x${height}`, () => {
     test.use({ viewport: { width, height } });
 
-    test("the whole Ask card, input included, is on screen before any scroll", async ({ page, isMobile }) => {
+    test("the email, GitHub and LinkedIn buttons and the whole Ask card, input included, are on screen before any scroll", async ({ page, isMobile }) => {
       test.skip(isMobile, "sized for desktop screens");
       await page.goto("/");
+      const hero = page.locator("#top");
       const card = page.locator("#ask-card > div");
-      // The card rises in with the hero; measure where it lands.
-      await card.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
-      const box = (await card.boundingBox())!;
+      const targets = [
+        hero.getByRole("link", { name: "agrimsh22@gmail.com" }),
+        hero.getByRole("link", { name: "GitHub" }),
+        hero.getByRole("link", { name: "LinkedIn" }),
+        card,
+      ];
+      // They rise in with the hero; measure where they land.
+      await page.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.effect?.getTiming().iterations !== Infinity).map((a) => a.finished)));
       expect(await page.evaluate(() => window.scrollY)).toBe(0);
-      expect(box.y).toBeGreaterThanOrEqual(0);
-      expect(box.y + box.height).toBeLessThanOrEqual(height);
+      for (const [i, target] of targets.entries()) {
+        const box = (await target.boundingBox())!;
+        expect(box.y, `target ${i}`).toBeGreaterThanOrEqual(0);
+        expect(box.y + box.height, `target ${i}`).toBeLessThanOrEqual(height);
+      }
       await expect(card.getByRole("textbox", { name: "Ask a question" })).toBeInViewport({ ratio: 1 });
     });
   });
