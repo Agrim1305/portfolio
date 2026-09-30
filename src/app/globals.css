@@ -223,9 +223,9 @@ html:has(dialog[open]) {
   transform: translateY(18px) scaleY(0.14);
 }
 /* Thinking, while a question waits for its first word: the eyes glance up
-   and aside. Answering, while the words stream in: a small, gentle bounce,
+   and aside. Answering, while the words stream in: a small, gentle bob,
    eyes up toward the chat. */
-@keyframes cloud-bounce {
+@keyframes cloud-bob {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-5%); }
 }
@@ -236,7 +236,7 @@ html:has(dialog[open]) {
   translate: -2% -3%;
 }
 .cloud[data-mood="answering"] {
-  animation: cloud-bounce 0.7s ease-in-out infinite;
+  animation: cloud-bob 0.7s ease-in-out infinite;
 }
 
 /* The docked cloud is scaled up while it sits in the hero (see dock.tsx);

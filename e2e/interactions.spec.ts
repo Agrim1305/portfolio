@@ -1,5 +1,12 @@
 import { expect, test } from "@playwright/test";
 
+// Aris says hello the first time the cloud docks, and the bubble can sit over
+// what a test clicks. It has its own tests (aris.spec.ts); here it has
+// already been seen this visit.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem("hello", "1"));
+});
+
 test.describe("mobile menu", () => {
   test.skip(({ isMobile }) => !isMobile, "the menu sheet only exists below lg");
 
@@ -41,7 +48,7 @@ test("the name runs on one line, and the cloud perches on the Ask card", async (
   const h1 = page.getByRole("heading", { level: 1 });
   const lineHeight = await h1.evaluate((el) => parseFloat(getComputedStyle(el).fontSize) * 0.9);
   expect((await h1.boundingBox())!.height).toBeLessThan(lineHeight * 1.5);
-  const heading = page.locator("#top").getByText("Ask about Agrim");
+  const heading = page.locator("#top").getByText("Ask Aris");
   const [cloud, card, titleEnd] = await Promise.all([
     page.locator("#hero-cloud").boundingBox(),
     heading.locator("..").boundingBox(),
@@ -82,7 +89,7 @@ test("the cloud's eyes follow the cursor, a small share of the cloud at most", a
 });
 
 test.describe("the docked cloud", () => {
-  const dock = (page: import("@playwright/test").Page) => page.getByRole("button", { name: "Ask AI about Agrim" });
+  const dock = (page: import("@playwright/test").Page) => page.getByRole("button", { name: "Ask Aris, Agrim's AI assistant" });
   const box = async (page: import("@playwright/test").Page, selector: string) =>
     page.locator(selector).evaluate((el) => {
       const r = el.getBoundingClientRect();
@@ -159,7 +166,8 @@ test.describe("the docked cloud", () => {
     await expect(card).toHaveCSS("opacity", "0");
     await expect(card).toHaveCSS("visibility", "hidden");
     expect(await card.evaluate((el) => getComputedStyle(el).transform)).toBe("none");
-    expect(await dock(page).evaluate((el) => getComputedStyle(el.parentElement!).translate)).toBe("none");
+    // Read once the corner's fade has settled; under load it can still be running.
+    await expect.poll(() => dock(page).evaluate((el) => getComputedStyle(el.parentElement!).translate)).toBe("none");
     await scroll(page, 0);
     await expect(card).toHaveCSS("opacity", "1");
     await expect(dock(page)).toBeHidden();
@@ -171,7 +179,7 @@ test.describe("the docked cloud", () => {
     await dock(page).focus();
     await expect(dock(page)).toBeFocused();
     await page.keyboard.press("Enter");
-    const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+    const chat = page.getByRole("dialog", { name: "Aris" });
     await expect(chat).toBeVisible();
     await expect(dock(page)).toHaveAttribute("aria-expanded", "true");
     if (!isMobile) {
@@ -208,32 +216,32 @@ test.describe("the cloud's moods follow the chat stream", () => {
       if (reduced) await page.emulateMedia({ reducedMotion: "reduce" });
       await page.goto("/");
       await page.evaluate(() => window.scrollTo({ top: 2000, behavior: "instant" }));
-      const cloud = page.getByRole("button", { name: "Ask AI about Agrim" }).locator(".cloud");
+      const cloud = page.getByRole("button", { name: "Ask Aris, Agrim's AI assistant" }).locator(".cloud");
       const eyes = cloud.locator(".cloud-eyes");
-      const bounce = () => cloud.evaluate((el) => getComputedStyle(el).animationName);
+      const bob = () => cloud.evaluate((el) => getComputedStyle(el).animationName);
       await expect(cloud).toHaveAttribute("data-mood", "idle");
 
       await page.keyboard.press("ControlOrMeta+k");
-      const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+      const chat = page.getByRole("dialog", { name: "Aris" });
       await chat.getByRole("textbox", { name: "Ask a question" }).fill("Hi");
       await chat.getByRole("button", { name: "Send message" }).click();
       // Sent, nothing back yet: the eyes glance up and aside.
       await expect(cloud).toHaveAttribute("data-mood", "thinking");
       await expect.poll(() => eyes.evaluate((el) => getComputedStyle(el).translate)).toBe("3% -6%");
-      expect(await bounce()).toBe("none");
+      expect(await bob()).toBe("none");
 
-      // The first words arrive: a small bounce, eyes toward the chat.
+      // The first words arrive: a small bob, eyes toward the chat.
       await page.evaluate(() => (window as unknown as { chunk: (t: string) => void }).chunk("Agrim is "));
       await expect(cloud).toHaveAttribute("data-mood", "answering");
       await expect.poll(() => eyes.evaluate((el) => getComputedStyle(el).translate)).toBe("-2% -3%");
-      expect(await bounce()).toBe(reduced ? "none" : "cloud-bounce");
+      expect(await bob()).toBe(reduced ? "none" : "cloud-bob");
 
       // The stream ends: back to idle.
       await page.evaluate(() => (window as unknown as { chunk: (t: string) => void; end: () => void }).chunk("in Adelaide."));
       await page.evaluate(() => (window as unknown as { end: () => void }).end());
       await expect(chat.getByRole("log")).toContainText("Agrim is in Adelaide.");
       await expect(cloud).toHaveAttribute("data-mood", "idle");
-      expect(await bounce()).toBe("none");
+      expect(await bob()).toBe("none");
     });
   }
 });
@@ -242,7 +250,7 @@ test.describe("the cloud's faces", () => {
   const face = (page: import("@playwright/test").Page) => page.locator("button.dock .cloud");
   const docked = async (page: import("@playwright/test").Page) => {
     await page.evaluate(() => window.scrollTo({ top: document.getElementById("google")!.offsetTop + 200, behavior: "instant" }));
-    await expect(page.getByRole("button", { name: "Ask AI about Agrim" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Ask Aris, Agrim's AI assistant" })).toBeVisible();
   };
 
   test("happy as the chat opens, then back to idle", async ({ page }) => {
@@ -268,7 +276,7 @@ test.describe("the cloud's faces", () => {
     await page.goto("/");
     await docked(page);
     await page.waitForTimeout(1800);
-    const cloud = page.getByRole("button", { name: "Ask AI about Agrim" });
+    const cloud = page.getByRole("button", { name: "Ask Aris, Agrim's AI assistant" });
     await cloud.hover();
     await expect(face(page)).toHaveAttribute("data-mood", "wink");
     await page.mouse.move(10, 10);
@@ -326,7 +334,7 @@ test.describe("ask Agrim", () => {
   test("a question on the hero card opens the chat with its answer", async ({ page }) => {
     await page.goto("/");
     await page.locator("#top").getByRole("button", { name: "What's Agrim's strongest project?" }).click();
-    const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+    const chat = page.getByRole("dialog", { name: "Aris" });
     await expect(chat).toBeVisible();
     await expect(chat.getByRole("log")).toContainText("What's Agrim's strongest project?");
     await expect(chat.getByRole("log")).toContainText(ANSWER);
@@ -341,7 +349,7 @@ test.describe("ask Agrim", () => {
     const input = page.locator("#top").getByRole("textbox", { name: "Ask a question" });
     await input.fill("Where is he based?");
     await input.press("Enter");
-    const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+    const chat = page.getByRole("dialog", { name: "Aris" });
     await expect(chat.getByRole("log")).toContainText("Where is he based?");
     await expect(chat.getByRole("log")).toContainText(ANSWER);
     await expect(input).toHaveValue("");
@@ -354,7 +362,7 @@ test.describe("ask Agrim", () => {
     );
     await page.goto("/");
     await page.keyboard.press("ControlOrMeta+k");
-    const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+    const chat = page.getByRole("dialog", { name: "Aris" });
     await chat.getByRole("textbox", { name: "Ask a question" }).fill("Hi");
     await chat.getByRole("button", { name: "Send message" }).click();
     const log = chat.getByRole("log");
@@ -374,7 +382,7 @@ test.describe("ask Agrim", () => {
     );
     await page.goto("/");
     await page.keyboard.press("ControlOrMeta+k");
-    const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+    const chat = page.getByRole("dialog", { name: "Aris" });
     await chat.getByRole("textbox", { name: "Ask a question" }).fill("Hello?");
     await chat.getByRole("button", { name: "Send message" }).click();
     await expect(chat.getByRole("alert")).toHaveText("Too many messages. Please wait a moment and try again.");
@@ -384,7 +392,7 @@ test.describe("ask Agrim", () => {
   test("the chat is a small window: the page behind stays scrollable and clickable", async ({ page, isMobile }) => {
     await page.goto("/");
     await page.keyboard.press("ControlOrMeta+k");
-    const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+    const chat = page.getByRole("dialog", { name: "Aris" });
     await expect(chat).toBeVisible();
     await expect(chat).toHaveAttribute("aria-modal", "false");
 
@@ -411,7 +419,7 @@ test.describe("ask Agrim", () => {
     await page.goto("/");
     const question = page.locator("#top").getByRole("button", { name: "Is he eligible to work in Australia?" });
     await question.click();
-    const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+    const chat = page.getByRole("dialog", { name: "Aris" });
     await expect(chat.getByRole("log")).toContainText(ANSWER);
     await page.keyboard.press("Escape");
     await expect(chat).toBeHidden();
@@ -427,7 +435,7 @@ test.describe("ask Agrim", () => {
 
   test("Cmd+K toggles the window, even from its own input", async ({ page }) => {
     await page.goto("/");
-    const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+    const chat = page.getByRole("dialog", { name: "Aris" });
     await page.keyboard.press("ControlOrMeta+k");
     await expect(chat).toBeVisible();
     await expect(chat.getByRole("textbox", { name: "Ask a question" })).toBeFocused();
@@ -864,7 +872,7 @@ test.describe("built on court", () => {
 test("Ctrl+K inside a text field is left alone", async ({ page }) => {
   await page.goto("/");
   await page.keyboard.press("ControlOrMeta+k");
-  const input = page.getByRole("dialog", { name: "Ask about Agrim" }).getByRole("textbox", { name: "Ask a question" });
+  const input = page.getByRole("dialog", { name: "Aris" }).getByRole("textbox", { name: "Ask a question" });
   await input.fill("hello world");
   await input.press("Home");
   const prevented = await input.evaluate((el) => {

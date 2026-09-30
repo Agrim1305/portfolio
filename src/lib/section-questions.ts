@@ -14,9 +14,11 @@ const QUESTIONS: Record<string, (card: number) => string> = {
   contact: () => "Is he eligible to work in Australia?",
 };
 
-// How long the page must be still before a question comes up.
+// How long the page must be still before a question comes up, and how many
+// different questions a visit sees at most.
 const REST_MS = 250;
 const STORE = "asked";
+const MAX_PER_VISIT = 3;
 
 export type Question = { id: string; text: string; seen: boolean };
 
@@ -85,7 +87,8 @@ function coversContent(box: DOMRect, ignore: Element) {
 /* Which section's question to offer, and whether it can show unprompted.
    Nothing is offered while the page moves; once it has been still for a
    moment, the section in view is checked: a question dismissed, sent, or
-   already shown on an earlier stay in that section waits for the next visit.
+   already shown on an earlier stay in that section waits for the next visit,
+   and once three have been seen no new one is offered.
    `bubble` is the bubble element: the question renders into it first,
    invisibly, so its real box can be checked against the page, and it `fits`
    only if nothing readable is under it. Seeing it, as a bubble or a tooltip,
@@ -105,6 +108,9 @@ export function useSectionQuestion(active: boolean, bubble: RefObject<HTMLElemen
       // A question seen on an earlier stay in this section is done.
       if (id !== stay.current.id) stay.current = { id, seen: false, done: id ? asked().has(id) : false };
       if (!id || stay.current.done) return;
+      // Past the visit's share, only a question already seen can come back.
+      const seen = asked();
+      if (seen.size >= MAX_PER_VISIT && !seen.has(id)) return;
       const card = Number(document.getElementById("projects")?.dataset.active ?? 0);
       flushSync(() => setQuestion({ id, text: QUESTIONS[id](card), seen: stay.current.seen }));
       const box = bubble.current?.getBoundingClientRect();

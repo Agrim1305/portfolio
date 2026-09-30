@@ -16,5 +16,7 @@
   "Azure Fundamentals (AZ-900) · Microsoft Credential 2026": "relabelled at the owner's request",
   "Technology Job Simulation · Deloitte Australia Credential 2026": "relabelled at the owner's request",
   "Data Analytics Job Simulation · Deloitte Australia Credential 2026": "relabelled at the owner's request",
-  "Partnering with AI in the Workplace · Datacom Credential 2026": "relabelled at the owner's request"
+  "Partnering with AI in the Workplace · Datacom Credential 2026": "relabelled at the owner's request",
+  "Ask about Agrim": "The assistant is named Aris (round nine, item 0): the chat's header is now Aris and the hero card's is Ask Aris",
+  "Hi, I'm an AI assistant trained only on Agrim's portfolio content. Ask me anything about his projects, experience, or background, and I'll answer from what's actually here rather than guessing.": "The greeting now introduces Aris by name (round nine, item 0); the rest of it is unchanged"
 }

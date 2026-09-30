@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
-import { X } from "lucide-react";
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type RefObject } from "react";
+import { Sparkle, X } from "lucide-react";
 import { Cloud, type Mood } from "@/components/cloud";
 import { usePinned } from "@/lib/pinned-track";
 import { onLenisScroll } from "@/lib/scroll-lock";
@@ -13,6 +13,8 @@ import { useSectionQuestion } from "@/lib/section-questions";
 const DOCKED_AT = 0.8;
 const CARD_GONE_AT = 0.75;
 const SWAP_AT = 0.25;
+// The pill beside the docked cloud fades in from this share of the way.
+const PILL_FROM = 0.85;
 
 // Where the cloud and the card swap by fading instead of travelling.
 const STILL_QUERY = "(min-width: 48rem) and (prefers-reduced-motion: reduce)";
@@ -22,14 +24,36 @@ const STILL_QUERY = "(min-width: 48rem) and (prefers-reduced-motion: reduce)";
 const BEAT_MS = 1400;
 const SLEEP_MS = 60_000;
 
-/* Whether the cloud has winked at a hover this visit. */
-function firstWink() {
+// The hello bubble puts itself away after this long, unless the pointer or
+// focus is on it.
+const HELLO_MS = 8000;
+
+// While docked, the eyes glance toward the middle of the page every 20 to
+// 30 seconds, for about a second.
+const GLANCE_EVERY_MS = 20_000;
+const GLANCE_SPREAD_MS = 10_000;
+const GLANCE_MS = 1000;
+
+/* True the first time it is called with `key` this visit. Without
+   sessionStorage (blocked storage) every call is a first. */
+function once(key: string) {
   try {
-    if (sessionStorage.getItem("winked")) return false;
-    sessionStorage.setItem("winked", "1");
+    if (sessionStorage.getItem(key)) return false;
+    sessionStorage.setItem(key, "1");
   } catch {}
   return true;
 }
+
+/* Whether the chat has been opened this visit. Read on every render, and on
+   the server as opened, so the phone's dot only ever appears on the client. */
+function chattedThisVisit() {
+  try {
+    return Boolean(sessionStorage.getItem("chatted"));
+  } catch {
+    return true;
+  }
+}
+const subscribeToNothing = () => () => {};
 
 /* The cloud in the bottom-right corner is the chat's button. From md up with
    motion allowed, the page's cloud starts in the hero: this button takes the
@@ -41,7 +65,9 @@ function firstWink() {
    reduced motion nothing travels: from md up the card fades out and the
    button fades in once the page is a little way down. On phones and on pages
    without a hero, the button fades in once the hero is out of view, or from
-   the start. */
+   the start. From md up a pill beside the cloud names it, and fades in as
+   the cloud lands; on phones a dot marks it until the chat has been opened.
+   The first time the cloud docks in a visit it says hello in a bubble. */
 export function Dock({
   heroId,
   open,
@@ -60,6 +86,14 @@ export function Dock({
   const travels = usePinned() && Boolean(heroId);
   const [heroGone, setHeroGone] = useState(!heroId);
   const [swapped, setSwapped] = useState(false);
+  // Travelling, whether the cloud has reached the corner.
+  const [landed, setLanded] = useState(false);
+  const docked = travels ? landed : heroGone || swapped;
+  const [hello, setHello] = useState(false);
+  // Only while the cloud is in the corner: scrolled back up, it is the hero's.
+  const greeting = hello && docked;
+  const chatted = useSyncExternalStore(subscribeToNothing, chattedThisVisit, () => true);
+  const pillRef = useRef<HTMLSpanElement>(null);
   const cornerRef = useRef<HTMLDivElement>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
   const [peek, setPeek] = useState(false);
@@ -67,8 +101,8 @@ export function Dock({
   // pointer or focus leaves the corner.
   const quiet = useRef(false);
   // Section questions start once the hero is gone, and wait while the chat
-  // is open.
-  const { question, fits, see, done } = useSectionQuestion(heroGone && !open, bubbleRef, cornerRef);
+  // is open or the hello bubble is up.
+  const { question, fits, see, done } = useSectionQuestion(heroGone && !open && !hello, bubbleRef, cornerRef);
 
   // The face. The chat's own moods come first; then a one-beat face: happy
   // as the chat opens, surprised as a new section's question appears, a
@@ -79,7 +113,10 @@ export function Dock({
   const [wasOpen, setWasOpen] = useState(open);
   if (open !== wasOpen) {
     setWasOpen(open);
-    if (open) setBeat("happy");
+    if (open) {
+      setBeat("happy");
+      setHello(false);
+    }
   }
   const [lastAsked, setLastAsked] = useState<string | null>(null);
   if (question && question.id !== lastAsked) {
@@ -110,6 +147,66 @@ export function Dock({
     };
   }, []);
   const face: Mood = mood !== "idle" ? mood : (beat ?? (sleepy ? "sleepy" : "idle"));
+
+  useEffect(() => {
+    if (!open) return;
+    try {
+      sessionStorage.setItem("chatted", "1");
+    } catch {}
+  }, [open]);
+
+  // Hello, once a visit, the first time the cloud docks, unless the chat has
+  // already been opened.
+  useEffect(() => {
+    if (!docked || open || chatted) return;
+    const t = setTimeout(() => once("hello") && setHello(true));
+    return () => clearTimeout(t);
+  }, [docked, open, chatted]);
+  useEffect(() => {
+    if (!hello || peek) return;
+    const t = setTimeout(() => setHello(false), HELLO_MS);
+    return () => clearTimeout(t);
+  }, [hello, peek]);
+
+  // Now and then, while docked and idle, the eyes glance toward the middle of
+  // the page and back. Never under reduced motion.
+  useEffect(() => {
+    const eyes = buttonRef.current?.querySelector<HTMLElement>(".cloud-eyes");
+    if (!docked || open || !eyes || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let timer = 0;
+    let back: (() => void) | null = null;
+    const wait = () => {
+      timer = window.setTimeout(glance, GLANCE_EVERY_MS + Math.random() * GLANCE_SPREAD_MS);
+    };
+    const glance = () => {
+      if (eyes.closest<HTMLElement>(".cloud")?.dataset.mood !== "idle") return wait();
+      const r = eyes.getBoundingClientRect();
+      const dx = window.innerWidth / 2 - (r.left + r.width / 2);
+      const dy = window.innerHeight / 2 - (r.top + r.height * 0.575);
+      const d = Math.hypot(dx, dy) || 1;
+      // The same reach as following the cursor (see cloud.tsx).
+      const to = { x: `${((dx / d) * 2.2).toFixed(2)}%`, y: `${((dy / d) * 2).toFixed(2)}%` };
+      const from = { x: eyes.style.getPropertyValue("--eye-x"), y: eyes.style.getPropertyValue("--eye-y") };
+      eyes.style.setProperty("--eye-x", to.x);
+      eyes.style.setProperty("--eye-y", to.y);
+      // Back to where they were, unless the cursor has moved them since.
+      back = () => {
+        back = null;
+        if (eyes.style.getPropertyValue("--eye-x") !== to.x) return;
+        eyes.style.setProperty("--eye-x", from.x);
+        eyes.style.setProperty("--eye-y", from.y);
+      };
+      timer = window.setTimeout(() => {
+        back?.();
+        wait();
+      }, GLANCE_MS);
+    };
+    wait();
+    return () => {
+      clearTimeout(timer);
+      back?.();
+    };
+  }, [docked, open, buttonRef]);
 
   useEffect(() => {
     const hero = heroId && document.getElementById(heroId);
@@ -154,7 +251,8 @@ export function Dock({
     const heroCloud = slot?.querySelector<HTMLElement>(".cloud");
     const card = hero?.querySelector<HTMLElement>("#ask-card");
     const cardFace = card?.firstElementChild as HTMLElement | null | undefined;
-    if (!travels || !button || !corner || !hero || !slot || !heroCloud || !card || !cardFace) return;
+    const pill = pillRef.current;
+    if (!travels || !button || !corner || !hero || !slot || !heroCloud || !card || !cardFace || !pill) return;
 
     // The cloud's centre and width at rest in the corner, from the corner's
     // layout box, which the cloud's transform never moves.
@@ -187,6 +285,11 @@ export function Dock({
       const y = along(from.y, via.y, dock.y);
       button.style.transform = `translate(${x - dock.x}px, ${y - dock.y}px) scale(${scale})`;
       button.style.setProperty("--scale", String(scale));
+      // The pill fades in over the last stretch, as the cloud lands.
+      const shown = Math.min(1, Math.max(0, (p - PILL_FROM) / (1 - PILL_FROM)));
+      pill.style.opacity = String(shown);
+      pill.style.visibility = shown ? "" : "hidden";
+      setLanded(p === 1);
 
       // The card follows the cloud, shrinking, fading and rounding off. The
       // radius is the one property here that repaints; nothing reflows.
@@ -212,6 +315,8 @@ export function Dock({
       window.removeEventListener("resize", onResize);
       button.style.transform = "";
       button.style.removeProperty("--scale");
+      pill.style.opacity = "";
+      pill.style.visibility = "";
       heroCloud.style.visibility = "";
       for (const prop of ["transform", "transform-origin", "opacity", "visibility", "pointer-events"]) {
         card.style.removeProperty(prop);
@@ -222,6 +327,17 @@ export function Dock({
 
   const tooltip = Boolean(question && !fits);
   const bubbleShown = Boolean(question && (fits || peek));
+  // The dot: a question waiting that had no room to show, or on phones, a
+  // chat not yet opened this visit.
+  const questionDot = tooltip && !question?.seen;
+  const phoneDot = !chatted && !open;
+
+  // Opening the chat from a bubble: the bubble is about to go, so focus moves
+  // to the cloud first, and the chat hands it back there when it closes.
+  const fromBubble = (then: () => void) => {
+    buttonRef.current?.focus();
+    then();
+  };
 
   return (
     <div
@@ -248,7 +364,7 @@ export function Dock({
         quiet.current = false;
         setPeek(true);
         see();
-        if (heroGone && firstWink()) setBeat("wink");
+        if (heroGone && once("winked")) setBeat("wink");
       }}
       onPointerLeave={() => setPeek(false)}
       onFocus={() => {
@@ -262,10 +378,11 @@ export function Dock({
         setPeek(false);
       }}
       onKeyDown={(e) => {
-        if (e.key !== "Escape" || !bubbleShown) return;
+        if (e.key !== "Escape" || !(bubbleShown || greeting)) return;
         e.stopPropagation();
         quiet.current = true;
-        if (tooltip) setPeek(false);
+        if (greeting) setHello(false);
+        else if (tooltip) setPeek(false);
         else done();
         buttonRef.current?.focus();
       }}
@@ -274,22 +391,62 @@ export function Dock({
         ref={buttonRef}
         type="button"
         onClick={onClick}
-        aria-label="Ask AI about Agrim"
+        aria-label="Ask Aris, Agrim's AI assistant"
         aria-keyshortcuts="Meta+K Control+K"
         aria-expanded={open}
         aria-controls="ask-agrim"
         aria-describedby={tooltip ? "dock-question-text" : undefined}
         className="dock pointer-events-auto relative block w-[76px] rounded-full md:w-[92px]"
       >
-        <span className="hero-fade block">
+        {/* Outside the button's box, so the cloud's travel, which measures
+            the corner, is unchanged; the cloud sits over its right end. A
+            near-solid fill rather than glass, so the label stays legible over
+            a bright photo. */}
+        <span
+          id="dock-pill"
+          ref={pillRef}
+          className="absolute right-[calc(100%-12px)] top-[56%] hidden h-10 -translate-y-1/2 items-center gap-1.5 whitespace-nowrap rounded-full border border-white/12 bg-surface-raised/92 pl-3.5 pr-5 text-sm font-semibold text-ink shadow-[inset_0_1px_0_rgb(255_255_255/0.12),0_20px_50px_rgb(0_0_0/0.45)] backdrop-blur-xl md:flex"
+        >
+          <Sparkle aria-hidden className="size-4 fill-accent text-accent" />
+          Ask Aris
+        </span>
+        <span className="hero-fade relative block">
           <Cloud live mood={face} />
         </span>
-        {/* A question is waiting that had no room to show. */}
-        {tooltip && !question?.seen && (
-          <span aria-hidden className="absolute right-[10%] top-[8%] size-2 rounded-full bg-accent ring-2 ring-paper" />
+        {(questionDot || phoneDot) && (
+          <span
+            aria-hidden
+            className={`absolute right-[10%] top-[8%] size-2 rounded-full bg-accent ring-2 ring-paper ${questionDot ? "" : "md:hidden"}`}
+          />
         )}
       </button>
-      {/* After the cloud, so Tab goes from the cloud to its question. */}
+      {/* After the cloud, so Tab goes from the cloud to its bubble. */}
+      {greeting && (
+        <div id="dock-hello" className="pointer-events-auto absolute bottom-full right-0 w-[228px] pb-2.5">
+          <div className="dock-hello relative rounded-2xl rounded-br-md bg-ink text-paper shadow-[0_18px_40px_rgb(0_0_0/0.45)]">
+            <button
+              type="button"
+              onClick={() =>
+                fromBubble(() => {
+                  setHello(false);
+                  onClick();
+                })
+              }
+              className="block w-full rounded-2xl rounded-br-md py-3 pl-3.5 pr-9 text-left text-[13px] font-medium leading-snug"
+            >
+              Hi, I&apos;m Aris. Ask me anything about Agrim&apos;s work.
+            </button>
+            <button
+              type="button"
+              onClick={() => fromBubble(() => setHello(false))}
+              aria-label="Dismiss"
+              className="absolute right-1 top-1 flex size-7 items-center justify-center rounded-full text-paper/60 transition-colors hover:text-paper"
+            >
+              <X className="size-3.5" aria-hidden />
+            </button>
+          </div>
+        </div>
+      )}
       {question && (
         <div
           ref={bubbleRef}
@@ -304,23 +461,19 @@ export function Dock({
             <button
               id="dock-question-text"
               type="button"
-              onClick={() => {
-                // The question is about to go, so the chat hands focus back
-                // to the cloud when it closes.
-                buttonRef.current?.focus();
-                done();
-                onAsk(question.text);
-              }}
+              onClick={() =>
+                fromBubble(() => {
+                  done();
+                  onAsk(question.text);
+                })
+              }
               className="block w-full rounded-2xl rounded-br-md py-3 pl-3.5 pr-9 text-left text-[13px] font-medium leading-snug"
             >
               {question.text}
             </button>
             <button
               type="button"
-              onClick={() => {
-                buttonRef.current?.focus();
-                done();
-              }}
+              onClick={() => fromBubble(done)}
               aria-label="Dismiss this question"
               className="absolute right-1 top-1 flex size-7 items-center justify-center rounded-full text-paper/60 transition-colors hover:text-paper"
             >

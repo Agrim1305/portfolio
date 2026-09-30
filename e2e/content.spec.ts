@@ -3,6 +3,13 @@ import path from "path";
 import { expect, test, type Page } from "@playwright/test";
 import { projects } from "../src/lib/projects";
 
+// Aris says hello the first time the cloud docks, and the bubble can sit over
+// what a test clicks. It has its own tests (aris.spec.ts); here it has
+// already been seen this visit.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem("hello", "1"));
+});
+
 /* Content lock. The redesign may move copy around but must not change it.
    `CAPTURE_BASELINE=1` records every string, image alt and link on the site
    (run once, against the pre-redesign build). The normal run checks that each

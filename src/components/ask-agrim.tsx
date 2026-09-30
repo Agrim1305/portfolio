@@ -87,7 +87,7 @@ const SUGGESTED_QUESTIONS = [
 const INTRO_MESSAGE: Message = {
   role: "assistant",
   content:
-    "Hi, I'm an AI assistant trained only on Agrim's portfolio content. Ask me anything about his projects, experience, or background, and I'll answer from what's actually here rather than guessing.",
+    "Hi, I'm Aris, an AI assistant trained only on Agrim's portfolio content. Ask me anything about his projects, experience, or background, and I'll answer from what's actually here rather than guessing.",
 };
 
 const OPEN_EVENT = "ask:open";
@@ -108,7 +108,7 @@ export function AskCard({ className = "" }: { className?: string }) {
       className={`hero-rise rounded-[26px] border border-ink/12 bg-[linear-gradient(180deg,#1B1B20,#141417)] p-5 shadow-[0_40px_80px_rgb(0_0_0/0.45)] ${className}`}
       style={{ animationDelay: "1.1s" }}
     >
-      <p className="font-display text-[20px] font-bold leading-tight lg:text-[22px]">Ask about Agrim</p>
+      <p className="font-display text-[20px] font-bold leading-tight lg:text-[22px]">Ask Aris</p>
       {/* From md up the hero's cloud perches on the card's top-right corner;
           the line wraps short of it. */}
       <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-muted md:pr-[190px]">
@@ -349,10 +349,10 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
             <Cloud className="w-11 shrink-0 md:w-10" />
             <div className="min-w-0 flex-1">
               <p id="ask-agrim-title" className="font-display text-[17px] font-bold leading-tight">
-                Ask about Agrim
+                Aris
               </p>
               <p className="font-mono text-[10px] uppercase leading-snug tracking-[0.06em] text-ink-muted">
-                AI assistant · grounded in his portfolio
+                Agrim&apos;s AI assistant · grounded in his portfolio
               </p>
             </div>
             <button

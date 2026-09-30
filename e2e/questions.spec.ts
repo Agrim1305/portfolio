@@ -14,8 +14,9 @@ async function restOn(page: Page, id: string) {
 }
 
 const bubble = (page: Page) => page.locator("#dock-question");
-const dot = (page: Page) => page.locator("button.dock span.bg-accent");
-const cloud = (page: Page) => page.getByRole("button", { name: "Ask AI about Agrim" });
+// On phones the same dot marks a chat not yet opened; from md up it is hidden.
+const dot = (page: Page) => page.locator("button.dock span.bg-accent").filter({ visible: true });
+const cloud = (page: Page) => page.getByRole("button", { name: "Ask Aris, Agrim's AI assistant" });
 
 // Every line of text, image and control on screen outside the assistant's
 // corner, measured independently of the page's own check.
@@ -43,6 +44,12 @@ async function contentBoxes(page: Page) {
 const overlaps = (a: DOMRect, b: { top: number; bottom: number; left: number; right: number }) =>
   a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
 
+// The hello bubble holds the questions back while it shows; it has its own
+// tests (aris.spec.ts), so here it has already been seen this visit.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem("hello", "1"));
+});
+
 for (const [width, height] of [
   [1280, 720],
   [1440, 900],
@@ -50,42 +57,40 @@ for (const [width, height] of [
   test.describe(`section questions at ${width}x${height}`, () => {
     test.use({ viewport: { width, height } });
 
-    test("each section offers its question once: a bubble only where nothing is under it, otherwise a dot", async ({ page, isMobile }) => {
+    test("each section offers its question once, a bubble only where nothing is under it, otherwise a dot, and three a visit at most", async ({ page, isMobile }) => {
       test.skip(isMobile, "the wide-screen layout");
       await page.goto("/");
-      let bubbles = 0;
+      let seen = 0;
       for (const id of SECTIONS) {
         await restOn(page, id);
+        if (seen === 3) {
+          await expect(bubble(page), `${id}: past the three a visit`).toHaveCount(0);
+          await expect(dot(page)).toHaveCount(0);
+          continue;
+        }
         await expect(bubble(page)).toBeAttached();
         const shown = await bubble(page).evaluate((el) => getComputedStyle(el).visibility === "visible");
         if (shown) {
-          bubbles++;
           const box = await bubble(page).locator("> div").evaluate((el) => el.getBoundingClientRect().toJSON());
           const covered = (await contentBoxes(page)).filter((b) => overlaps(box, b));
           expect(covered, `${id}: the bubble covers content`).toEqual([]);
           await expect(dot(page)).toHaveCount(0);
         } else {
+          // No room: a dot, and the question shows on hover, which sees it.
           await expect(dot(page), `${id}: no room, so a dot`).toBeVisible();
-        }
-      }
-      // Some section's corner is clear at each size, so the unprompted bubble
-      // is exercised every run.
-      expect(bubbles).toBeGreaterThan(0);
-
-      // Back through every section: each was seen, as a bubble or not at all
-      // yet. Bubbles never come back; dots remain until their question is seen.
-      for (const id of SECTIONS) {
-        await restOn(page, id);
-        if (await dot(page).isVisible()) {
           await cloud(page).hover();
           await expect(bubble(page)).toBeVisible();
           await expect(dot(page)).toHaveCount(0);
           await page.mouse.move(10, 10);
         }
+        seen++;
       }
+
+      // Back through every section: seen questions never come back, and the
+      // rest wait for the next visit.
       for (const id of SECTIONS) {
         await restOn(page, id);
-        await expect(bubble(page), `${id} asked twice`).toHaveCount(0);
+        await expect(bubble(page), `${id} asked again`).toHaveCount(0);
         await expect(dot(page)).toHaveCount(0);
       }
     });
@@ -108,7 +113,7 @@ test.describe("section questions", () => {
     await page.goto("/");
     await restOn(page, "contact");
     await bubble(page).getByRole("button", { name: "Is he eligible to work in Australia?" }).click();
-    const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
+    const chat = page.getByRole("dialog", { name: "Aris" });
     await expect(chat.getByRole("log")).toContainText("Is he eligible to work in Australia?");
     await expect(chat.getByRole("log")).toContainText("Yes, from December 2026.");
     await expect(bubble(page)).toHaveCount(0);
@@ -135,7 +140,7 @@ test.describe("section questions", () => {
 
     await cloud(page).hover();
     await bubble(page).getByRole("button", { name: "What does Agrim do at Aurivox?" }).click();
-    await expect(page.getByRole("dialog", { name: "Ask about Agrim" }).getByRole("log")).toContainText(
+    await expect(page.getByRole("dialog", { name: "Aris" }).getByRole("log")).toContainText(
       "What does Agrim do at Aurivox?",
     );
   });
