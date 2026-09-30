@@ -21,12 +21,16 @@ function subscribe(onChange: () => void) {
    than step. Once scrolling stops inside the section, the page settles on the
    nearest slide. Unpinned, the track scrolls sideways itself. Either way
    `active` is the slide nearest the middle and `go` moves to one: pinned, by
-   scrolling the window to that slide's position. */
+   scrolling the window to that slide's position. `step` moves one slide on
+   from wherever the track is already heading, so quick presses queue up. */
 export function usePinnedTrack(count: number) {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const pinned = useSyncExternalStore(subscribe, () => window.matchMedia(PIN_QUERY).matches, () => false);
   const [active, setActive] = useState(0);
+  // The slide a press sent the track to, until it gets there or the visitor
+  // takes over.
+  const pending = useRef<number | null>(null);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -38,13 +42,21 @@ export function usePinnedTrack(count: number) {
       const io = new IntersectionObserver(
         (entries) => {
           for (const e of entries) {
-            if (e.isIntersecting) setActive(Number((e.target as HTMLElement).dataset.index));
+            if (!e.isIntersecting) continue;
+            const i = Number((e.target as HTMLElement).dataset.index);
+            setActive(i);
+            if (i === pending.current) pending.current = null;
           }
         },
         { root: track, threshold: 0.6 },
       );
       slides.forEach((el) => io.observe(el));
-      return () => io.disconnect();
+      const takeOver = () => (pending.current = null);
+      track.addEventListener("pointerdown", takeOver);
+      return () => {
+        io.disconnect();
+        track.removeEventListener("pointerdown", takeOver);
+      };
     }
 
     const gaps = Math.max(1, count - 1);
@@ -61,6 +73,7 @@ export function usePinnedTrack(count: number) {
     let held = false;
     let idle = 0;
     const settle = () => {
+      pending.current = null;
       const p = progress();
       if (held || p <= 0 || p >= 1) return;
       const y = section.getBoundingClientRect().top + window.scrollY + (Math.round(p * gaps) / gaps) * travel;
@@ -123,6 +136,7 @@ export function usePinnedTrack(count: number) {
     const to = Math.max(0, Math.min(count - 1, i));
     const section = sectionRef.current;
     if (!section) return;
+    pending.current = to;
     if (pinned) {
       const top = section.getBoundingClientRect().top + window.scrollY;
       const travel = section.offsetHeight - window.innerHeight;
@@ -136,6 +150,8 @@ export function usePinnedTrack(count: number) {
     });
   }
 
+  const step = (by: number) => go((pending.current ?? active) + by);
+
   // Keyboard focus landing on a slide that is off to the side brings it into
   // view. Pointer clicks don't, so a click never nudges the page.
   function onFocus(e: React.FocusEvent) {
@@ -144,5 +160,5 @@ export function usePinnedTrack(count: number) {
     if (slide) go(Number(slide.dataset.index), true);
   }
 
-  return { sectionRef, trackRef, pinned, active, go, onFocus };
+  return { sectionRef, trackRef, pinned, active, go, step, onFocus };
 }

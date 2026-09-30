@@ -86,7 +86,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
    them; the live region says which stop is showing. */
 export function Court() {
   const last = stops.length - 1;
-  const { sectionRef, trackRef, active: current, go, onFocus } = usePinnedTrack(stops.length);
+  const { sectionRef, trackRef, active: current, go, step, onFocus } = usePinnedTrack(stops.length);
 
   const arrow =
     "flex size-12 items-center justify-center rounded-full border border-ink/20 text-ink transition-[opacity,background-color,color,border-color] duration-300 hover:border-accent hover:bg-accent hover:text-paper disabled:pointer-events-none disabled:opacity-30";
@@ -112,10 +112,10 @@ export function Court() {
               <span aria-hidden className="min-w-16 text-right text-[15px] text-ink-faint">
                 <span className="font-semibold text-ink">{pad(current + 1)}</span> / {pad(stops.length)}
               </span>
-              <button type="button" aria-label="Previous stop" disabled={current === 0} onClick={() => go(current - 1)} className={arrow}>
+              <button type="button" aria-label="Previous stop" disabled={current === 0} onClick={() => step(-1)} className={arrow}>
                 <ArrowLeft className="size-[18px]" aria-hidden />
               </button>
-              <button type="button" aria-label="Next stop" disabled={current === last} onClick={() => go(current + 1)} className={arrow}>
+              <button type="button" aria-label="Next stop" disabled={current === last} onClick={() => step(1)} className={arrow}>
                 <ArrowRight className="size-[18px]" aria-hidden />
               </button>
             </div>
@@ -135,8 +135,8 @@ export function Court() {
               tabIndex={0}
               onFocus={onFocus}
               onKeyDown={(e) => {
-                if (e.key === "ArrowRight") go(current + 1);
-                else if (e.key === "ArrowLeft") go(current - 1);
+                if (e.key === "ArrowRight") step(1);
+                else if (e.key === "ArrowLeft") step(-1);
                 else return;
                 e.preventDefault();
               }}
@@ -199,7 +199,7 @@ export function Court() {
 
           {/* Timeline: a rail that fills up to the current stop, one dot per stop. */}
           <div className="rise mt-6 flex items-center gap-3 lg:mb-6 lg:mt-8 lg:block lg:px-[60px]">
-            <button type="button" aria-label="Previous stop" disabled={current === 0} onClick={() => go(current - 1)} className={`${arrow} shrink-0 lg:hidden`}>
+            <button type="button" aria-label="Previous stop" disabled={current === 0} onClick={() => step(-1)} className={`${arrow} shrink-0 lg:hidden`}>
               <ArrowLeft className="size-[18px]" aria-hidden />
             </button>
             <div className="flex flex-1 flex-col items-center gap-2.5">
@@ -240,7 +240,7 @@ export function Court() {
                 <span className="font-semibold text-ink">{pad(current + 1)}</span> / {pad(stops.length)} · {stops[current].dot}
               </p>
             </div>
-            <button type="button" aria-label="Next stop" disabled={current === last} onClick={() => go(current + 1)} className={`${arrow} shrink-0 border-0 bg-accent text-paper lg:hidden`}>
+            <button type="button" aria-label="Next stop" disabled={current === last} onClick={() => step(1)} className={`${arrow} shrink-0 border-0 bg-accent text-paper lg:hidden`}>
               <ArrowRight className="size-[18px]" aria-hidden />
             </button>
           </div>
