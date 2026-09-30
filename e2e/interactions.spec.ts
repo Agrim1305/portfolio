@@ -506,17 +506,23 @@ test.describe("experience", () => {
   });
 });
 
-test("certifications are badges: AZ-900 leads, half as wide again on desktop, each with a Verify link", async ({ page, isMobile }) => {
+test("certifications are four matching cards: the badge or logo in a fixed slot, the name, then Verify", async ({ page, isMobile }) => {
   await page.goto("/");
-  const badges = page.locator("#experience ul").last().locator("> li");
-  await expect(badges).toHaveCount(4);
-  await expect(badges.first()).toContainText("Azure Fundamentals (AZ-900)");
-  for (const badge of await badges.all()) {
-    await expect(badge.getByRole("link", { name: /^Verify / })).toHaveAttribute("href", /linkedin\.com/);
+  const cards = page.locator("#experience ul").last().locator("> li");
+  await expect(cards).toHaveCount(4);
+  await expect(cards.first().getByRole("img", { name: "Microsoft Certified: Fundamentals badge" })).toBeVisible();
+  const boxes = await cards.evaluateAll((els) =>
+    els.map((el) => ({ width: el.getBoundingClientRect().width, nameTop: el.querySelector("p")!.getBoundingClientRect().top })),
+  );
+  // The names line up across a row, whatever mark sits above them.
+  const rows = isMobile ? [[0, 1], [2, 3]] : [[0, 1, 2, 3]];
+  for (const row of rows) {
+    for (const i of row) expect(boxes[i].nameTop).toBeCloseTo(boxes[row[0]].nameTop, 0);
+    for (const i of row) expect(boxes[i].width).toBeCloseTo(boxes[row[0]].width, 0);
   }
-  if (!isMobile) {
-    const [first, second] = await Promise.all([badges.nth(0).boundingBox(), badges.nth(1).boundingBox()]);
-    expect(first!.width / second!.width).toBeCloseTo(1.5, 1);
+  for (const card of await cards.all()) {
+    await expect(card.getByRole("img")).toBeVisible();
+    await expect(card.getByRole("link", { name: /^Verify / })).toHaveAttribute("href", /linkedin\.com/);
   }
 });
 
