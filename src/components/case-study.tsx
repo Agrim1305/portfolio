@@ -147,8 +147,9 @@ function HeroNote({ project }: { project: Project }) {
 /* The top of a case study, laid out like its card: the cover with the
    framed screenshot, then the status and title on a band beneath it. From md
    up the cover takes about the height the card's cover has in the pinned
-   stage, so the card's picture lands where it was as the card grows into
-   the panel. The cover carries `panel-hero`, so switching crossfades it
+   stage (the stage less 14.125rem for the heading and the card's band,
+   scaled by the panel's width over the card's), so the card's picture
+   lands where it was as the card grows into the panel. The cover carries `panel-hero`, so switching crossfades it
    while the title slides with the rest (see morphSwitch). The panel's hero,
    and the case study page's. */
 export function CaseStudyHero({
