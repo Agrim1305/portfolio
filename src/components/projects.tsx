@@ -40,22 +40,23 @@ function Card({
       onClick={(e) => {
         if (!(e.target as Element).closest("a")) onOpen(e.currentTarget);
       }}
-      // On wide screens the card keeps the reference's 1110 x 650 shape. Pinned,
-      // it takes the height the heading leaves, and the screenshot gives way
-      // before the text does; the width never drops below what the text needs.
-      className="group relative flex min-h-[460px] w-[calc(100vw-4.625rem)] max-w-[520px] shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-3xl pin:h-[clamp(20rem,100%,40.625rem)] pin:min-h-0 lg:aspect-[1110/650] lg:w-auto lg:min-w-[min(46rem,calc(100vw-10rem))] lg:max-w-[calc(min(1200px,100vw-4rem)-90px)] lg:rounded-[28px] lg:motion-reduce:h-[min(650px,calc(100svh-25rem))] lg:motion-reduce:min-h-[380px]"
+      // From md up one card takes the section: the content width less a 6%
+      // peek of the next card, and pinned, all the height the heading leaves.
+      className="group relative flex min-h-[460px] w-[calc(100vw-4.625rem)] max-w-[520px] shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-3xl pin:h-full pin:min-h-[20rem] md:w-[calc(min(1200px,100vw-4rem)*0.94-1.5rem)] md:max-w-none md:rounded-[28px] md:motion-reduce:h-[min(40rem,calc(100svh-12rem))] md:motion-reduce:min-h-[24rem]"
       style={{ background: cover.bg }}
     >
       {media ? (
-        // In the card's flow, so a long summary pushes the card taller (phones)
-        // or the screenshot shorter (a fixed-height card), and never runs over
-        // it. On wide screens the text overlaps its foot under the gradient.
-        <div className="relative mx-5 mt-16 aspect-[276/200] shrink-0 overflow-hidden rounded-xl border border-white/14 shadow-[0_24px_48px_rgb(0_0_0/0.5)] pin:aspect-auto pin:min-h-0 pin:flex-1 lg:mx-[6.3%] lg:mt-14 lg:-mb-12 lg:aspect-auto lg:min-h-0 lg:flex-1 lg:rounded-2xl lg:shadow-[0_40px_80px_rgb(0_0_0/0.5)]">
+        // On phones a framed screenshot in the card's flow, so a long summary
+        // pushes the card taller instead of running over it. From md up the
+        // screenshot is the card's whole background, under the text's
+        // gradient, with a scrim along the top so the Open pill stays
+        // legible over a busy screen.
+        <div className="relative mx-5 mt-16 aspect-[276/200] shrink-0 overflow-hidden rounded-xl border border-white/14 shadow-[0_24px_48px_rgb(0_0_0/0.5)] md:absolute md:inset-0 md:m-0 md:aspect-auto md:rounded-none md:border-0 md:shadow-none md:after:absolute md:after:inset-x-0 md:after:top-0 md:after:h-32 md:after:bg-[linear-gradient(rgb(15_15_17/0.9),rgb(15_15_17/0.6)_45%,rgb(15_15_17/0))]">
           <Image
             src={media.src}
             alt={media.alt}
             fill
-            sizes="(min-width: 1024px) 970px, 90vw"
+            sizes="(min-width: 1280px) 1104px, 90vw"
             className="object-cover object-left-top transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03] motion-reduce:transition-none"
           />
         </div>
@@ -69,7 +70,7 @@ function Card({
         </span>
       )}
 
-      <div className="relative mt-auto flex flex-col gap-2 bg-[linear-gradient(180deg,rgb(15_15_17/0),rgb(15_15_17/0.92)_35%)] p-[22px] pt-10 lg:flex-row lg:items-end lg:justify-between lg:gap-6 lg:px-9 lg:py-8 lg:pt-16">
+      <div className="relative mt-auto flex flex-col gap-2 bg-[linear-gradient(180deg,rgb(15_15_17/0),rgb(15_15_17/0.92)_35%)] p-[22px] pt-10 md:bg-[linear-gradient(180deg,rgb(15_15_17/0),rgb(15_15_17/0.88)_40%,rgb(15_15_17/0.96)_70%)] md:pt-28 lg:flex-row lg:items-end lg:justify-between lg:gap-6 lg:px-9 lg:py-8 lg:pt-32">
         <div className="flex max-w-[720px] flex-col gap-2">
           <p className="font-mono text-[11px] text-accent-soft lg:text-xs">{project.status}</p>
           <h3 className="font-display text-[28px] font-extrabold leading-[1.05] tracking-[-0.015em] text-ink lg:text-4xl lg:leading-none">
@@ -234,11 +235,11 @@ export function Projects() {
             else return;
             e.preventDefault();
           }}
-          className="mt-10 pin:mt-6 pin:min-h-0 pin:max-h-[40.625rem] pin:flex-1"
+          className="mt-10 pin:mt-6 pin:min-h-0 pin:flex-1"
         >
           <div
             ref={trackRef}
-            className="pin-track flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-5 [scroll-padding-inline:1.25rem] [scrollbar-width:none] motion-reduce:scroll-auto pin:h-full sm:px-8 sm:[scroll-padding-inline:2rem] lg:gap-6 lg:px-[max(2rem,calc(50vw-600px))] lg:[scroll-padding-inline:max(2rem,calc(50vw-600px))] [&::-webkit-scrollbar]:hidden"
+            className="pin-track flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-5 [scroll-padding-inline:1.25rem] [scrollbar-width:none] motion-reduce:scroll-auto pin:h-full sm:px-8 sm:[scroll-padding-inline:2rem] md:gap-6 lg:px-[max(2rem,calc(50vw-600px))] lg:[scroll-padding-inline:max(2rem,calc(50vw-600px))] [&::-webkit-scrollbar]:hidden"
           >
             {projects.map((project, i) => (
               <Card
