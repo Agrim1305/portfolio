@@ -30,6 +30,8 @@ export function morphClose(card: HTMLElement | null | undefined, update: () => v
   });
 }
 
+let latestSwitch: ViewTransition | null = null;
+
 /* Moves an open panel to the next or previous project or role: the body
    slides out one way and the new one slides in, the hero picture crossfades
    in place, and the frame holds still. `update` should leave the body
@@ -43,8 +45,14 @@ export function morphSwitch(direction: 1 | -1, body: HTMLElement | null, update:
   // The picture only holds its place if it is on screen; scrolled away, it
   // leaves with the rest of the body.
   if ((body?.scrollTop ?? 0) < 40) root.dataset.switchHero = "";
-  document.startViewTransition(update).finished.finally(() => {
+  const transition = document.startViewTransition(update);
+  latestSwitch = transition;
+  // A quick second switch cuts this one short; only the latest cleans up,
+  // or the one still running would lose its names halfway.
+  transition.finished.finally(() => {
+    if (latestSwitch !== transition) return;
     delete root.dataset.switch;
     delete root.dataset.switchHero;
   });
 }
+
