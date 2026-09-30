@@ -485,6 +485,20 @@ test.describe("experience", () => {
   });
 });
 
+test("certifications are badges: AZ-900 leads, half as wide again on desktop, each with a Verify link", async ({ page, isMobile }) => {
+  await page.goto("/");
+  const badges = page.locator("#experience ul").last().locator("> li");
+  await expect(badges).toHaveCount(4);
+  await expect(badges.first()).toContainText("Azure Fundamentals (AZ-900)");
+  for (const badge of await badges.all()) {
+    await expect(badge.getByRole("link", { name: /^Verify / })).toHaveAttribute("href", /linkedin\.com/);
+  }
+  if (!isMobile) {
+    const [first, second] = await Promise.all([badges.nth(0).boundingBox(), badges.nth(1).boundingBox()]);
+    expect(first!.width / second!.width).toBeCloseTo(1.5, 1);
+  }
+});
+
 test.describe("built on court", () => {
   const current = (page: import("@playwright/test").Page) =>
     page.locator("#court [aria-roledescription='slide']:not([inert])");
