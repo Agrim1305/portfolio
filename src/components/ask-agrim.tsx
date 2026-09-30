@@ -1,18 +1,9 @@
 "use client";
 
 import { useEffect, useEffectEvent, useRef, useState } from "react";
-import { ArrowUp, Volume2, VolumeX, X } from "lucide-react";
+import { ArrowUp, X } from "lucide-react";
 import { Cloud } from "@/components/cloud";
 import { Dock } from "@/components/dock";
-import {
-  setMuted,
-  speak,
-  stop,
-  takeSentences,
-  unlock,
-  useCanSpeak,
-  useSpeech,
-} from "@/lib/speech";
 
 // Small models sometimes emit **bold** or __underline__ despite the prompt
 // forbidding it; strip the wrappers so a slip renders as plain text.
@@ -174,15 +165,12 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { muted } = useSpeech();
-  const canSpeak = useCanSpeak();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dockRef = useRef<HTMLButtonElement>(null);
   // Where focus goes back to when the window closes: whatever opened it.
   const returnTo = useRef<HTMLElement | null>(null);
-  // Read inside the streaming loop, so an answer still arriving after the
-  // chat closes keeps filling in but stops talking.
+  // Read by the handlers, which can run before a render catches up.
   const openRef = useRef(open);
   useEffect(() => {
     openRef.current = open;
@@ -198,7 +186,6 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
   function close() {
     if (!openRef.current) return;
     setOpen(false);
-    stop();
     // A frame later, once the window has gone, so focus lands on the page.
     requestAnimationFrame(() => returnTo.current?.focus());
   }
@@ -248,10 +235,6 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
     // A suggested question unmounts and the send button disables once this
     // runs, so move focus to the input rather than letting it drop to <body>.
     inputRef.current?.focus();
-    // A new question cuts off the previous answer. This runs inside the tap,
-    // which iOS needs before it will speak the reply later on.
-    stop();
-    unlock();
 
     const nextMessages: Message[] = [...messages, { role: "user", content: trimmed }];
     setMessages(nextMessages);
@@ -289,18 +272,12 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let received = "";
-      // Speech follows the stream a sentence at a time, so it starts before
-      // the answer has finished arriving.
-      let unspoken = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
         received += chunk;
-        const [sentences, rest] = takeSentences(unspoken + chunk);
-        unspoken = rest;
-        if (openRef.current) sentences.forEach((s) => speak(s));
         setMessages((prev) => {
           const copy = prev.slice();
           const last = copy[copy.length - 1];
@@ -311,14 +288,11 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
           return copy;
         });
       }
-      if (openRef.current) speak(unspoken);
-
       if (!received.trim()) {
         setError("The assistant didn't return a response. Try again.");
         setMessages((prev) => prev.slice(0, -2)); // drop empty assistant + user
       }
     } catch {
-      stop();
       setError("Couldn't reach the assistant. Check your connection and try again.");
       // Remove a trailing empty assistant bubble, then the user message.
       setMessages((prev) => {
@@ -381,20 +355,6 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
                 AI assistant · grounded in his portfolio
               </p>
             </div>
-            {canSpeak && (
-              <button
-                type="button"
-                onClick={() => setMuted(!muted)}
-                aria-pressed={!muted}
-                aria-label="Read answers aloud"
-                title={muted ? "Voice off" : "Voice on"}
-                className={`flex size-10 shrink-0 items-center justify-center rounded-full border transition-colors ${
-                  muted ? "border-ink/20 text-ink-muted hover:text-ink" : "border-accent text-accent-soft"
-                }`}
-              >
-                {muted ? <VolumeX className="size-4" aria-hidden /> : <Volume2 className="size-4" aria-hidden />}
-              </button>
-            )}
             <button
               type="button"
               onClick={close}

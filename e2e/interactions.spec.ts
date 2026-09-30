@@ -25,37 +25,6 @@ test.describe("mobile menu", () => {
   });
 });
 
-test.describe("voice", () => {
-  // A stand-in voice: reports a word boundary every 150ms and finishes after
-  // 1.2s, and records what it was asked to say.
-  test.beforeEach(async ({ page }) => {
-    await page.addInitScript(() => {
-      const w = window as unknown as { __spoken: string[] };
-      w.__spoken = [];
-      window.speechSynthesis.cancel = () => {};
-      window.speechSynthesis.speak = (u) => {
-        w.__spoken.push(u.text);
-        if (!u.text) return;
-        let elapsed = 0;
-        const timer = setInterval(() => {
-          elapsed += 150;
-          u.onboundary?.(new Event("boundary") as SpeechSynthesisEvent);
-          if (elapsed >= 1200) {
-            clearInterval(timer);
-            u.onend?.(new Event("end") as SpeechSynthesisEvent);
-          }
-        }, 150);
-      };
-    });
-  });
-
-  test("starts muted and says nothing until asked", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForTimeout(500);
-    expect(await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken)).toEqual([]);
-  });
-});
-
 test("the sliding keywords read as one label and hold still under reduced motion", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
@@ -98,7 +67,6 @@ test("the cloud is decorative, and holds still under reduced motion", async ({ p
   await expect(cloud).toHaveAttribute("aria-hidden", "true");
   await expect(cloud.locator("img")).toHaveAttribute("src", "/images/cloud.svg");
   expect(await cloud.locator(".cloud-blink").first().evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
-  await expect(page.getByRole("button", { name: "Hear me" })).toHaveCount(0);
 });
 
 test("the cloud's eyes follow the cursor, a small share of the cloud at most", async ({ page, isMobile }) => {
@@ -353,15 +321,6 @@ test.describe("ask Agrim", () => {
     await page.route("/api/chat", (route) =>
       route.fulfill({ status: 200, contentType: "text/plain; charset=utf-8", body: ANSWER }),
     );
-    await page.addInitScript(() => {
-      const w = window as unknown as { __spoken: string[] };
-      w.__spoken = [];
-      window.speechSynthesis.cancel = () => {};
-      window.speechSynthesis.speak = (u) => {
-        w.__spoken.push(u.text);
-        setTimeout(() => u.onend?.(new Event("end") as SpeechSynthesisEvent), 50);
-      };
-    });
   });
 
   test("a question on the hero card opens the chat with its answer", async ({ page }) => {
@@ -372,8 +331,6 @@ test.describe("ask Agrim", () => {
     await expect(chat.getByRole("log")).toContainText("What's Agrim's strongest project?");
     await expect(chat.getByRole("log")).toContainText(ANSWER);
     await expect(chat.getByRole("textbox", { name: "Ask a question" })).toBeFocused();
-    // Muted by default: nothing is read aloud.
-    expect(await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken)).toEqual([]);
 
     await page.keyboard.press("Escape");
     await expect(chat).toBeHidden();
@@ -409,22 +366,6 @@ test.describe("ask Agrim", () => {
     await page.mouse.wheel(0, -300);
     await expect.poll(() => log.evaluate((el) => el.scrollTop)).toBeLessThan(before - 100);
     expect(await page.evaluate(() => window.scrollY)).toBe(pageY);
-  });
-
-  test("with voice on, the answer is read aloud a sentence at a time", async ({ page }) => {
-    await page.goto("/");
-    await page.keyboard.press("ControlOrMeta+k");
-    const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
-    const voice = chat.getByRole("button", { name: "Read answers aloud" });
-    await voice.click();
-    await expect(voice).toHaveAttribute("aria-pressed", "true");
-
-    await chat.getByRole("textbox", { name: "Ask a question" }).fill("What did you build?");
-    await chat.getByRole("button", { name: "Send message" }).click();
-    await expect(chat.getByRole("log")).toContainText(ANSWER);
-    await expect
-      .poll(() => page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken.filter(Boolean)))
-      .toEqual(["I built MetaPlay.", "It runs live on Render today."]);
   });
 
   test("a failed request shows the error and rolls back the question", async ({ page }) => {
@@ -918,31 +859,6 @@ test.describe("built on court", () => {
     await track.evaluate((el) => el.scrollTo({ left: el.clientWidth, behavior: "instant" }));
     await expect(current(page)).toHaveAttribute("aria-label", "2 of 8");
   });
-});
-
-test("closing the chat mid-answer stops the voice", async ({ page }) => {
-  // A slow stream: the second sentence arrives after the chat has closed.
-  await page.route("/api/chat", async (route) => {
-    await new Promise((r) => setTimeout(r, 600));
-    await route.fulfill({ status: 200, contentType: "text/plain", body: "First sentence. Second sentence." });
-  });
-  await page.addInitScript(() => {
-    const w = window as unknown as { __spoken: string[] };
-    w.__spoken = [];
-    window.speechSynthesis.cancel = () => {};
-    window.speechSynthesis.speak = (u) => {
-      w.__spoken.push(u.text);
-    };
-    localStorage.setItem("voice", "on");
-  });
-  await page.goto("/");
-  await page.keyboard.press("ControlOrMeta+k");
-  const chat = page.getByRole("dialog", { name: "Ask about Agrim" });
-  await chat.getByRole("textbox", { name: "Ask a question" }).fill("Hi");
-  await chat.getByRole("button", { name: "Send message" }).click();
-  await page.keyboard.press("Escape");
-  await page.waitForTimeout(1200);
-  expect(await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken.filter(Boolean))).toEqual([]);
 });
 
 test("Ctrl+K inside a text field is left alone", async ({ page }) => {
