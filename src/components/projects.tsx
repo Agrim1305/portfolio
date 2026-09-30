@@ -42,35 +42,50 @@ function Card({
       }}
       // From md up one card takes the section: the content width less a 6%
       // peek of the next card, and pinned, all the height the heading leaves.
-      className="group relative flex min-h-[460px] w-[calc(100vw-4.625rem)] max-w-[520px] shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-3xl pin:h-full pin:min-h-[20rem] md:w-[calc(min(1200px,100vw-4rem)*0.94-1.5rem)] md:max-w-none md:rounded-[28px] md:motion-reduce:h-[min(40rem,calc(100svh-12rem))] md:motion-reduce:min-h-[24rem]"
-      style={{ background: cover.bg }}
+      className="group relative flex min-h-[460px] w-[calc(100vw-4.625rem)] max-w-[520px] shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-3xl bg-surface pin:h-full pin:min-h-[20rem] md:w-[calc(min(1200px,100vw-4rem)*0.94-1.5rem)] md:max-w-none md:rounded-[28px] md:motion-reduce:h-[min(40rem,calc(100svh-12rem))] md:motion-reduce:min-h-[24rem]"
     >
-      {media ? (
-        // On phones a framed screenshot in the card's flow, so a long summary
-        // pushes the card taller instead of running over it. From md up the
-        // screenshot is the card's whole background, under the text's
-        // gradient, with a scrim along the top so the Open pill stays
-        // legible over a busy screen.
-        <div className="relative mx-5 mt-16 aspect-[276/200] shrink-0 overflow-hidden rounded-xl border border-white/14 shadow-[0_24px_48px_rgb(0_0_0/0.5)] md:absolute md:inset-0 md:m-0 md:aspect-auto md:rounded-none md:border-0 md:shadow-none md:after:absolute md:after:inset-x-0 md:after:top-0 md:after:h-32 md:after:bg-[linear-gradient(rgb(15_15_17/0.9),rgb(15_15_17/0.6)_45%,rgb(15_15_17/0))]">
-          <Image
-            src={media.src}
-            alt={media.alt}
-            fill
-            sizes="(min-width: 1280px) 1104px, 90vw"
-            className="object-cover object-left-top transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03] motion-reduce:transition-none"
-          />
-        </div>
-      ) : (
-        <span
-          aria-hidden
-          className="absolute left-5 top-4 font-display text-[7.5rem] font-extrabold leading-none tracking-[-0.04em] transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03] motion-reduce:transition-none lg:left-[60px] lg:top-10 lg:text-[min(18.75rem,19vw)]"
-          style={{ color: cover.ink }}
-        >
-          {project.stack[0]}
-        </span>
-      )}
+      {/* The top of the card, on its cover: the screenshot whole, never
+          cropped or darkened, in a browser-style frame that fits it exactly
+          within the space (a size container, so the frame can take the
+          smaller of its width and height); or, without a screenshot, the
+          big stack word. It is the part that gives way when the card is
+          short, never the text below. */}
+      <div
+        className="relative flex aspect-[16/11] shrink-0 items-center justify-center overflow-hidden px-5 pb-5 pt-16 [container-type:size] md:aspect-auto md:min-h-0 md:flex-1 lg:px-10 lg:pb-7"
+        style={{ background: cover.bg }}
+      >
+        {media ? (
+          <div
+            className="overflow-hidden rounded-xl border border-white/14 bg-paper shadow-[0_24px_48px_rgb(0_0_0/0.45)] transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.02] motion-reduce:transition-none"
+            style={{ width: `min(100cqw, calc((100cqh - 1.375rem) * ${media.width / media.height}))` }}
+          >
+            <div aria-hidden className="flex h-[1.375rem] items-center gap-1.5 border-b border-white/10 px-2.5">
+              <span className="size-1.5 rounded-full bg-ink/25" />
+              <span className="size-1.5 rounded-full bg-ink/25" />
+              <span className="size-1.5 rounded-full bg-ink/25" />
+            </div>
+            <div className="relative" style={{ aspectRatio: `${media.width} / ${media.height}` }}>
+              <Image
+                src={media.src}
+                alt={media.alt}
+                fill
+                sizes="(min-width: 1280px) 1000px, 90vw"
+                className="object-contain"
+              />
+            </div>
+          </div>
+        ) : (
+          <span
+            aria-hidden
+            className="absolute left-5 top-1/2 -translate-y-1/2 font-display text-[min(7.5rem,70cqh)] font-extrabold leading-none tracking-[-0.04em] transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03] motion-reduce:transition-none lg:left-[60px] lg:text-[min(18.75rem,19vw,70cqh)]"
+            style={{ color: cover.ink }}
+          >
+            {project.stack[0]}
+          </span>
+        )}
+      </div>
 
-      <div className="relative mt-auto flex flex-col gap-2 bg-[linear-gradient(180deg,rgb(15_15_17/0),rgb(15_15_17/0.92)_35%)] p-[22px] pt-10 md:bg-[linear-gradient(180deg,rgb(15_15_17/0),rgb(15_15_17/0.88)_40%,rgb(15_15_17/0.96)_70%)] md:pt-28 lg:flex-row lg:items-end lg:justify-between lg:gap-6 lg:px-9 lg:py-8 lg:pt-32">
+      <div className="flex shrink-0 flex-col gap-2 p-[22px] lg:flex-row lg:items-end lg:justify-between lg:gap-6 lg:px-9 lg:py-7">
         <div className="flex max-w-[720px] flex-col gap-2">
           <p className="font-mono text-[11px] text-accent-soft lg:text-xs">{project.status}</p>
           <h3 className="font-display text-[28px] font-extrabold leading-[1.05] tracking-[-0.015em] text-ink lg:text-4xl lg:leading-none">
