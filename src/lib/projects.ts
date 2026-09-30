@@ -7,16 +7,26 @@
 export type ProjectLink = { label: string; url: string; accent?: boolean };
 export type Metric = { value: string; label: string };
 
+/* A screenshot or photo, with its real size in pixels. */
 export type ProjectMedia =
   | {
       kind: "photo";
       src: string;
       alt: string;
       caption?: string;
-      aspect: string; // tailwind aspect class
+      width: number;
+      height: number;
       position?: "top" | "center";
     }
-  | { kind: "browser"; src: string; alt: string; url: string; href: string };
+  | {
+      kind: "browser";
+      src: string;
+      alt: string;
+      url: string;
+      href: string;
+      width: number;
+      height: number;
+    };
 
 export type Project = {
   slug: string;
@@ -100,7 +110,8 @@ export const projects: Project[] = [
       src: "/pacific-app.jpg",
       alt: "Pacific Village Explorer: flooding vulnerability on Christmas Island, Kiribati at 2055, with the sea level timeline and climate planning layers",
       caption: "Christmas Island, Kiribati at 2055",
-      aspect: "aspect-[1920/1035]",
+      width: 1920,
+      height: 1035,
       position: "top",
     },
     gallery: [
@@ -109,7 +120,8 @@ export const projects: Project[] = [
         src: "/pacific-team.jpg",
         alt: "Agrim Sharma with his two teammates at the Humanitarian Innovation Hackathon",
         caption: "The team",
-        aspect: "aspect-[3/2]",
+        width: 1600,
+        height: 850,
         position: "center",
       },
       {
@@ -117,7 +129,8 @@ export const projects: Project[] = [
         src: "/pacific-build.jpg",
         alt: "Whiteboarding the app architecture during the hackathon",
         caption: "Whiteboarding the build",
-        aspect: "aspect-[3/2]",
+        width: 1350,
+        height: 1800,
         position: "center",
       },
       {
@@ -125,7 +138,8 @@ export const projects: Project[] = [
         src: "/pacific-work.jpg",
         alt: "The three-university team building during the 44-hour hackathon",
         caption: "44 hours in",
-        aspect: "aspect-[3/2]",
+        width: 1600,
+        height: 904,
         position: "center",
       },
     ],
@@ -172,6 +186,8 @@ export const projects: Project[] = [
     media: {
       kind: "browser",
       src: "/metaplay-landing.png",
+      width: 2760,
+      height: 1424,
       alt: "MetaPlay landing page: personalised gaming hub with account sign-up and Google sign-in",
       url: "metaplay-g2q7.onrender.com",
       href: "https://metaplay-g2q7.onrender.com/",
