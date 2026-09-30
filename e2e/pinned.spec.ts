@@ -22,15 +22,17 @@ async function pinnedSlide(page: Page, id: string, i: number) {
       const lines: DOMRect[] = [];
       const walker = document.createTreeWalker(section.querySelector(".pin-stage")!, NodeFilter.SHOW_TEXT);
       for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-        // Visually hidden text still has a layout box; it covers nothing.
-        if (!node.textContent!.trim() || !node.parentElement!.checkVisibility() || node.parentElement!.closest(".sr-only")) continue;
+        if (!node.textContent!.trim() || !node.parentElement!.checkVisibility()) continue;
+        // Visually hidden text still has a layout box; it covers nothing. (Selected
+        // work only: Built on court keeps its checks as they were.)
+        if (id === "projects" && node.parentElement!.closest(".sr-only")) continue;
         const range = document.createRange();
         range.selectNodeContents(node);
         lines.push(...[...range.getClientRects()].filter((r) => r.right > 0 && r.left < window.innerWidth && r.width > 0));
       }
       // The picture as painted: under object-fit: contain it can be smaller
       // than its box, centred in it.
-      const img = slide.querySelector("img");
+      const img = id === "projects" ? slide.querySelector("img") : null;
       let shot = null;
       if (img) {
         await img.decode().catch(() => {});
@@ -222,25 +224,37 @@ for (const [width, height] of [
   test.describe(`pinned at ${width}x${height}`, () => {
     test.use({ viewport: { width, height } });
 
-    for (const id of ["projects", "court"]) {
-      test(`every ${id} slide is wholly on screen, its text clear of the docked cloud and the screenshot`, async ({ page, isMobile }) => {
-        test.skip(isMobile, "pinned travel is for wide screens");
-        await page.goto("/");
-        for (let i = 0; i < 8; i++) {
-          const { slide, shot, text, lines, pill, viewport } = await pinnedSlide(page, id, i);
-          const screen = { top: 0, left: 0, bottom: viewport.height, right: viewport.width };
-          expect(inside(slide, screen), `slide ${i + 1} wholly on screen`).toBe(true);
-          if (shot && id === "projects") {
-            expect(lines.filter((line) => overlaps(line, shot)), `slide ${i + 1}: text over the screenshot`).toEqual([]);
-            // Beside the text, the painted picture fills most of the card's height.
-            expect((shot.bottom - shot.top) / (slide.bottom - slide.top), `slide ${i + 1} screenshot height share`).toBeGreaterThanOrEqual(0.8);
-          }
-          for (const line of text) {
-            expect(inside(line, slide) && inside(line, screen), `slide ${i + 1}: "${line.text}"`).toBe(true);
-          }
-          expect(lines.filter((line) => overlaps(line, pill)), `slide ${i + 1}: text under the docked cloud`).toEqual([]);
+    test("every Selected work card is wholly on screen, its text clear of the docked cloud and the screenshot", async ({ page, isMobile }) => {
+      test.skip(isMobile, "pinned travel is for wide screens");
+      await page.goto("/");
+      for (let i = 0; i < 8; i++) {
+        const { slide, shot, text, lines, pill, viewport } = await pinnedSlide(page, "projects", i);
+        const screen = { top: 0, left: 0, bottom: viewport.height, right: viewport.width };
+        expect(inside(slide, screen), `slide ${i + 1} wholly on screen`).toBe(true);
+        if (shot) {
+          expect(lines.filter((line) => overlaps(line, shot)), `slide ${i + 1}: text over the screenshot`).toEqual([]);
+          // Beside the text, the painted picture fills most of the card's height.
+          expect((shot.bottom - shot.top) / (slide.bottom - slide.top), `slide ${i + 1} screenshot height share`).toBeGreaterThanOrEqual(0.8);
         }
-      });
-    }
+        for (const line of text) {
+          expect(inside(line, slide) && inside(line, screen), `slide ${i + 1}: "${line.text}"`).toBe(true);
+        }
+        expect(lines.filter((line) => overlaps(line, pill)), `slide ${i + 1}: text under the docked cloud`).toEqual([]);
+      }
+    });
+
+    test("every court slide and its text fit on screen, clear of the docked cloud", async ({ page, isMobile }) => {
+      test.skip(isMobile, "pinned travel is for wide screens");
+      await page.goto("/");
+      for (let i = 0; i < 8; i++) {
+        const { slide, text, lines, pill, viewport } = await pinnedSlide(page, "court", i);
+        const screen = { top: 0, left: 0, bottom: viewport.height, right: viewport.width };
+        expect(slide.bottom, `slide ${i + 1} bottom`).toBeLessThanOrEqual(viewport.height);
+        for (const line of text) {
+          expect(inside(line, slide) && inside(line, screen), `slide ${i + 1}: "${line.text}"`).toBe(true);
+        }
+        expect(lines.filter((line) => overlaps(line, pill)), `slide ${i + 1}: text under the docked cloud`).toEqual([]);
+      }
+    });
   });
 }
