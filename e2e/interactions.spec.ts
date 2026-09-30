@@ -363,6 +363,20 @@ test.describe("selected work", () => {
     await expect(prev).toBeEnabled();
   });
 
+  test("quick presses queue: each click or key moves one card, and the ends cap them", async ({ page, isMobile }) => {
+    test.skip(isMobile, "the arrows are desktop controls; mobile swipes");
+    await page.goto("/");
+    const next = page.getByRole("button", { name: "Next project" });
+    await next.click();
+    await next.click();
+    await next.click();
+    await expect(page.getByText("4 / 8")).toBeVisible();
+    await page.getByRole("region", { name: "Selected work" }).focus();
+    for (let i = 0; i < 6; i++) await page.keyboard.press("ArrowRight");
+    await expect(page.getByText("8 / 8")).toBeVisible();
+    await expect(next).toBeDisabled();
+  });
+
   test("scrolling down moves the cards sideways, then the page carries on", async ({ page, isMobile }) => {
     test.skip(isMobile, "pinned travel is for wide screens; phones swipe");
     await page.goto("/");
@@ -578,6 +592,17 @@ test.describe("built on court", () => {
     await expect(page.locator("#court").getByRole("group", { name: "4 of 8" })).toBeInViewport({ ratio: 0.6 });
     // The reveal must fire for a section many screens tall, or it stays blank.
     await expect(page.locator("#court h2")).toHaveCSS("opacity", "1");
+  });
+
+  test("quick taps on Next queue on phones too", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "the phone arrows");
+    await page.goto("/");
+    await page.locator("#court .pin-track").scrollIntoViewIfNeeded();
+    const next = page.locator("#court").getByRole("button", { name: "Next stop" }).filter({ visible: true });
+    await next.click();
+    await next.click();
+    await next.click();
+    await expect(current(page)).toHaveAttribute("aria-label", "4 of 8");
   });
 
   test("phones swipe between stops", async ({ page, isMobile }) => {

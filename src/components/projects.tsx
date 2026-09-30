@@ -115,7 +115,7 @@ function Card({
 
 export function Projects() {
   const total = projects.length;
-  const { sectionRef, trackRef, pinned, active, go, onFocus } = usePinnedTrack(total);
+  const { sectionRef, trackRef, pinned, active, step, onFocus } = usePinnedTrack(total);
   const bodyRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState<number | null>(null);
   // Whether the open case study added a history entry that Back should undo.
@@ -200,15 +200,15 @@ export function Projects() {
                 {active + 1} / {total}
               </span>
               {[
-                { label: "Previous project", to: active - 1, Icon: ArrowLeft },
-                { label: "Next project", to: active + 1, Icon: ArrowRight },
-              ].map(({ label, to, Icon }) => (
+                { label: "Previous project", by: -1, Icon: ArrowLeft },
+                { label: "Next project", by: 1, Icon: ArrowRight },
+              ].map(({ label, by, Icon }) => (
                 <button
                   key={label}
                   type="button"
                   aria-label={label}
-                  disabled={to < 0 || to >= total}
-                  onClick={() => go(to)}
+                  disabled={active + by < 0 || active + by >= total}
+                  onClick={() => step(by)}
                   className="flex size-14 items-center justify-center rounded-full border border-ink/25 text-ink transition-colors duration-300 hover:border-accent hover:bg-accent hover:text-paper disabled:pointer-events-none disabled:opacity-30"
                 >
                   <Icon className="size-5" aria-hidden />
@@ -229,8 +229,8 @@ export function Projects() {
           onFocus={onFocus}
           onKeyDown={(e) => {
             if (e.target !== e.currentTarget) return;
-            if (e.key === "ArrowRight") go(active + 1);
-            else if (e.key === "ArrowLeft") go(active - 1);
+            if (e.key === "ArrowRight") step(1);
+            else if (e.key === "ArrowLeft") step(-1);
             else return;
             e.preventDefault();
           }}
