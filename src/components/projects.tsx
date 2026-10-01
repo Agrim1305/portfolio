@@ -52,6 +52,7 @@ function Card({
       <ProjectCover
         project={project}
         sizes="(min-width: 1280px) 750px, (min-width: 1024px) 68vw, (min-width: 768px) 75vw, 90vw"
+        corner={false}
         className="cover-side aspect-[16/11] shrink-0 [--cap:calc(100svh-var(--nav-height)-var(--corner-clear)-5.5rem)] [--w:calc(min(1200px,100vw-4rem)*0.96-1.5rem)] md:aspect-auto md:min-h-0 md:flex-1 lg:w-[68%] lg:flex-none"
       />
 
@@ -77,31 +78,33 @@ function Card({
             <span className="text-xs text-ink-muted lg:text-[13px]">{stat.label}</span>
           </p>
         )}
-        {/* A pill opens its link in a new tab, never the case study too. */}
-        <div className="mt-1 lg:mt-4" onClick={(e) => (e.target as Element).closest("a") && e.stopPropagation()}>
+        {/* One row: the case study first, then the project's own links, all
+            one height; it wraps only when the column is too narrow. A link
+            opens in a new tab, never the case study too. */}
+        <div
+          className="mt-1 flex flex-wrap items-center gap-2 lg:mt-auto lg:pt-5"
+          onClick={(e) => (e.target as Element).closest("a:not([data-expand])") && e.stopPropagation()}
+        >
+          <Link
+            href={`/projects/${project.slug}`}
+            // The card opens the case study in place; the route itself is only
+            // for new tabs and shared links, so there is nothing to prefetch.
+            prefetch={false}
+            data-expand
+            onClick={(e) => {
+              // Let new-tab and new-window clicks through to the real page.
+              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+              e.preventDefault();
+              onOpen(e.currentTarget.closest("article")!);
+            }}
+            className="lift inline-flex h-10 items-center gap-1.5 whitespace-nowrap rounded-full bg-accent pl-4 pr-3.5 text-sm font-semibold text-paper hover:bg-accent-soft"
+          >
+            Open case study
+            <span className="sr-only"> for {project.title}</span>
+            <Plus className="size-[18px]" aria-hidden />
+          </Link>
           <Links project={project} compact />
         </div>
-
-        <Link
-          href={`/projects/${project.slug}`}
-          // The card opens the case study in place; the route itself is only
-          // for new tabs and shared links, so there is nothing to prefetch.
-          prefetch={false}
-          data-expand
-          onClick={(e) => {
-            // Let new-tab and new-window clicks through to the real page.
-            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-            e.preventDefault();
-            onOpen(e.currentTarget.closest("article")!);
-          }}
-          // Stacked, in the card's top-right corner; side by side, at the
-          // foot of the text.
-          className="glass absolute right-3 top-3 z-10 flex h-11 items-center gap-2 rounded-full pl-4 pr-3.5 text-sm font-medium text-ink md:right-5 lg:static lg:mt-auto lg:h-[38px] lg:self-start"
-        >
-          Open case study
-          <span className="sr-only"> for {project.title}</span>
-          <Plus className="size-[18px] text-accent" aria-hidden />
-        </Link>
       </div>
     </article>
   );

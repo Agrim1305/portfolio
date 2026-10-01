@@ -49,11 +49,14 @@ export const COVER: Record<string, { bg: string; ink: string }> = {
 const label = "font-mono text-[11px] uppercase tracking-[0.15em]";
 
 /* The project's links as pills (or, with no public link, its private note),
-   opening in a new tab. Compact on the cards. */
+   opening in a new tab, in the order the data gives them: Source, then a
+   live link. In the case study a live link is the primary, filled; on a
+   card the case study is, so the pills are all secondary, one height with
+   it, and join its row. */
 export function Links({ project, compact = false }: { project: Project; compact?: boolean }) {
   if (!project.links.length && !project.privateNote) return null;
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className={compact ? "contents" : "flex flex-wrap items-center gap-2"}>
       {project.links.map(({ label: text, url, accent }) => (
         <a
           key={text}
@@ -61,15 +64,15 @@ export function Links({ project, compact = false }: { project: Project; compact?
           target="_blank"
           rel="noopener noreferrer"
           className={`lift inline-flex items-center whitespace-nowrap rounded-full ${
-            compact ? "h-9 gap-1 px-3.5 text-[13px]" : "h-11 gap-1.5 px-[18px] text-sm"
-          } ${accent ? "bg-accent font-semibold text-paper hover:bg-accent-soft" : "glass text-ink"}`}
+            compact ? "glass h-10 gap-1 px-4 text-sm text-ink" : "h-11 gap-1.5 px-[18px] text-sm"
+          } ${compact ? "" : accent ? "bg-accent font-semibold text-paper hover:bg-accent-soft" : "glass text-ink"}`}
         >
           {text}
           <ArrowUpRight className={compact ? "size-3.5" : "size-4"} aria-hidden />
         </a>
       ))}
       {project.privateNote && (
-        <p className={`text-ink-muted ${compact ? "text-[13px]" : "text-sm"}`}>{project.privateNote}</p>
+        <p className="text-sm text-ink-muted">{project.privateNote}</p>
       )}
     </div>
   );
@@ -91,24 +94,29 @@ function WindowBar() {
    browser-style frame sized to its aspect ratio, or without one, the big
    stack word. The space is a size container, so the frame can fit both its
    width and its height (see .cover-frame). Stacked, below lg, the frame is
-   top-aligned and from md up keeps clear of the Open case study pill in the
-   top-right corner. From lg up the cover sits beside the text on its own
-   background and the frame is centred in it (see .cover-side). The caller
-   sets the size. */
+   top-aligned and, with `corner`, keeps clear of the case study panel's
+   close button in the top-right corner. From lg up the cover sits beside
+   the text on its own background and the frame is centred in it (see
+   .cover-side). The caller sets the size. */
 export function ProjectCover({
   project,
   sizes,
+  corner = true,
   className = "",
 }: {
   project: Project;
   sizes: string;
+  /** Keep the frame clear of a button in the top-right corner. */
+  corner?: boolean;
   className?: string;
 }) {
   const media = project.media;
   const cover = COVER[project.slug];
   return (
     <div
-      className={`relative overflow-hidden px-5 pb-5 pt-16 [--clear:0px] [--inset:0px] [container-type:size] md:px-0 md:pb-2 md:pt-7 md:[--clear:12.5rem] md:[--inset:2rem] lg:flex lg:items-center lg:p-7 lg:[--clear:0px] lg:[--inset:0px] lg:[background:var(--cover)] ${className}`}
+      className={`relative overflow-hidden px-5 pb-5 [--clear:0px] [--inset:0px] [container-type:size] md:px-0 md:pb-2 md:pt-7 md:[--inset:2rem] lg:flex lg:items-center lg:p-7 lg:[--clear:0px] lg:[--inset:0px] lg:[background:var(--cover)] ${
+        corner ? "pt-16 md:[--clear:12.5rem]" : "pt-5"
+      } ${className}`}
       style={{ "--cover": cover.bg } as React.CSSProperties}
     >
       {media ? (
