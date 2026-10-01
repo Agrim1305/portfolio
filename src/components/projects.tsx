@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Plus } from "lucide-react";
-import { CaseStudy, CaseStudyHero, COVER, ProjectCover } from "@/components/case-study";
+import { CaseStudy, CaseStudyHero, COVER, Links, ProjectCover } from "@/components/case-study";
 import { Panel } from "@/components/panel";
 import { morphClose, morphOpen, morphSwitch } from "@/lib/morph";
 import { SkipLink } from "@/components/skip-link";
@@ -77,6 +77,10 @@ function Card({
             <span className="text-xs text-ink-muted lg:text-[13px]">{stat.label}</span>
           </p>
         )}
+        {/* A pill opens its link in a new tab, never the case study too. */}
+        <div className="mt-1 lg:mt-4" onClick={(e) => (e.target as Element).closest("a") && e.stopPropagation()}>
+          <Links project={project} compact />
+        </div>
 
         <Link
           href={`/projects/${project.slug}`}

@@ -28,6 +28,10 @@ export type ProjectMedia =
       height: number;
     };
 
+/* A real capture of the project running, beyond the card's: a page in a
+   browser or a terminal, shown whole in the case study. */
+export type ProjectScreen = { src: string; alt: string; width: number; height: number };
+
 export type Project = {
   slug: string;
   title: string;
@@ -55,6 +59,7 @@ export type Project = {
   /** Shown instead of links when there is no public source. */
   privateNote?: string;
   media?: ProjectMedia;
+  screens?: ProjectScreen[];
   /** The first three sit in the story; any more follow it as a gallery. */
   gallery?: Extract<ProjectMedia, { kind: "photo" }>[];
 };
@@ -108,13 +113,21 @@ export const projects: Project[] = [
     ],
     media: {
       kind: "photo",
-      src: "/pacific-app.jpg",
+      src: "/images/projects/pacific-village-explorer/map-2055.webp",
       alt: "Pacific Village Explorer: flooding vulnerability on Christmas Island, Kiribati at 2055, with the sea level timeline and climate planning layers",
       caption: "Christmas Island, Kiribati at 2055",
-      width: 1920,
-      height: 1035,
+      width: 2000,
+      height: 1250,
       position: "top",
     },
+    screens: [
+      {
+        src: "/images/projects/pacific-village-explorer/adaptation-methods.webp",
+        alt: "Pacific Village Explorer at 2055 with the Adaptation Methods layer open: Mangrove Planting, Deep-Rooted Plants and Stilted Foundations listed beside the Christmas Island flooding map",
+        width: 2000,
+        height: 1250,
+      },
+    ],
     gallery: [
       {
         kind: "photo",
@@ -218,9 +231,9 @@ export const projects: Project[] = [
     ],
     media: {
       kind: "browser",
-      src: "/metaplay-landing.png",
-      width: 2760,
-      height: 1424,
+      src: "/images/projects/metaplay/landing.webp",
+      width: 2000,
+      height: 1250,
       alt: "MetaPlay landing page: personalised gaming hub with account sign-up and Google sign-in",
       url: "metaplay-g2q7.onrender.com",
       href: "https://metaplay-g2q7.onrender.com/",
@@ -229,7 +242,7 @@ export const projects: Project[] = [
   {
     slug: "adelaide-rising-stars",
     title: "Adelaide Rising Stars",
-    status: "Freelance · 2026",
+    status: "Live · Freelance, 2026",
     period: "Jul 2026 to Sep 2026",
     role: "Sole developer, from quote to delivery",
     oneLiner:
@@ -255,8 +268,24 @@ export const projects: Project[] = [
     learned:
       "Scoping is engineering. Saying no to the booking feature did more for the client than anything I built.",
     stack: ["Nuxt", "Tailwind", "Nuxt Content", "Netlify Forms"],
-    links: [],
-    privateNote: "Client project · live link coming soon",
+    links: [{ label: "Live site", url: "https://arstennisacademy.com.au", accent: true }],
+    media: {
+      kind: "browser",
+      src: "/images/projects/adelaide-rising-stars/home.webp",
+      width: 2000,
+      height: 1250,
+      alt: "Adelaide Rising Stars home page: a night-time squad photo on court under the headline Where Stars Are Made, with Enquire about a squad and See session times buttons",
+      url: "arstennisacademy.com.au",
+      href: "https://arstennisacademy.com.au",
+    },
+    screens: [
+      {
+        src: "/images/projects/adelaide-rising-stars/squads.webp",
+        alt: "Adelaide Rising Stars squads page: the Squads and Session Times heading, a note that places are limited and grouped by level, and three squad photos",
+        width: 2000,
+        height: 1250,
+      },
+    ],
   },
   {
     slug: "portfolio-ai-assistant",
@@ -343,6 +372,13 @@ export const projects: Project[] = [
     links: [
       { label: "Source", url: "https://github.com/Agrim1305/gps-frp-tracker" },
     ],
+    media: {
+      kind: "photo",
+      src: "/images/projects/gps-tracker-dashboard/tests.webp",
+      alt: "Terminal output of the tracker's test suite: 11 of 11 DistanceCalculator tests and 8 of 8 FrpHelpers tests pass, covering feet to metres, distances, range filtering, clearing after a delay and the sliding window",
+      width: 2000,
+      height: 1250,
+    },
   },
   {
     slug: "pathfinder",
@@ -372,6 +408,21 @@ export const projects: Project[] = [
     ],
     stack: ["Python", "BFS", "Dijkstra", "A*"],
     links: [{ label: "Source", url: "https://github.com/Agrim1305/Pathfinder" }],
+    media: {
+      kind: "photo",
+      src: "/images/projects/pathfinder/comparison.webp",
+      alt: "Terminal output of example.py on the 8 by 8 choice map: A* finds the 15-step path at cost 14 after visiting 41 nodes, and the comparison lists 112 nodes explored for BFS, 75 for UCS and 41 for A*",
+      width: 2000,
+      height: 1250,
+    },
+    screens: [
+      {
+        src: "/images/projects/pathfinder/astar-visits.webp",
+        alt: "Terminal output of pathfinder.py in debug mode with A* and the Manhattan heuristic on the choice map: the path marked with asterisks down the left edge and along the bottom, then grids of how often and in what order each cell was visited",
+        width: 2000,
+        height: 1431,
+      },
+    ],
   },
   {
     slug: "virtual-restaurant-simulator",
@@ -398,6 +449,21 @@ export const projects: Project[] = [
       {
         label: "Source",
         url: "https://github.com/Agrim1305/Virtual_Restaurant_Simulator",
+      },
+    ],
+    media: {
+      kind: "photo",
+      src: "/images/projects/virtual-restaurant-simulator/served.webp",
+      alt: "Terminal session of the restaurant simulator: an order of Pasta and Pizza totals $27.98, serving it frees table 4 for customer Maya, and the main menu waits for the next option",
+      width: 2000,
+      height: 1250,
+    },
+    screens: [
+      {
+        src: "/images/projects/virtual-restaurant-simulator/build-and-seat.webp",
+        alt: "Terminal output of make compiling the simulator's 15 source files with g++, then the simulator's main menu, with customer Maya seated at table 4",
+        width: 2000,
+        height: 1358,
       },
     ],
   },

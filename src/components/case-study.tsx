@@ -48,7 +48,9 @@ export const COVER: Record<string, { bg: string; ink: string }> = {
 
 const label = "font-mono text-[11px] uppercase tracking-[0.15em]";
 
-function Links({ project }: { project: Project }) {
+/* The project's links as pills (or, with no public link, its private note),
+   opening in a new tab. Compact on the cards. */
+export function Links({ project, compact = false }: { project: Project; compact?: boolean }) {
   if (!project.links.length && !project.privateNote) return null;
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -58,15 +60,28 @@ function Links({ project }: { project: Project }) {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className={`lift inline-flex h-11 items-center gap-1.5 whitespace-nowrap rounded-full px-[18px] text-sm ${
-            accent ? "bg-accent font-semibold text-paper hover:bg-accent-soft" : "glass text-ink"
-          }`}
+          className={`lift inline-flex items-center whitespace-nowrap rounded-full ${
+            compact ? "h-9 gap-1 px-3.5 text-[13px]" : "h-11 gap-1.5 px-[18px] text-sm"
+          } ${accent ? "bg-accent font-semibold text-paper hover:bg-accent-soft" : "glass text-ink"}`}
         >
           {text}
-          <ArrowUpRight className="size-4" aria-hidden />
+          <ArrowUpRight className={compact ? "size-3.5" : "size-4"} aria-hidden />
         </a>
       ))}
-      {project.privateNote && <p className="text-sm text-ink-muted">{project.privateNote}</p>}
+      {project.privateNote && (
+        <p className={`text-ink-muted ${compact ? "text-[13px]" : "text-sm"}`}>{project.privateNote}</p>
+      )}
+    </div>
+  );
+}
+
+/* The bar across the top of a framed screenshot, like a window's. */
+function WindowBar() {
+  return (
+    <div aria-hidden className="flex h-[1.375rem] items-center gap-1.5 border-b border-white/10 px-2.5">
+      <span className="size-1.5 rounded-full bg-ink/25" />
+      <span className="size-1.5 rounded-full bg-ink/25" />
+      <span className="size-1.5 rounded-full bg-ink/25" />
     </div>
   );
 }
@@ -101,11 +116,7 @@ export function ProjectCover({
           className="cover-frame w-full origin-top overflow-hidden lg:origin-center rounded-xl border border-white/14 bg-paper shadow-[0_24px_48px_rgb(0_0_0/0.45)] transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.02] motion-reduce:transition-none"
           style={{ "--ratio": media.width / media.height } as React.CSSProperties}
         >
-          <div aria-hidden className="flex h-[1.375rem] items-center gap-1.5 border-b border-white/10 px-2.5">
-            <span className="size-1.5 rounded-full bg-ink/25" />
-            <span className="size-1.5 rounded-full bg-ink/25" />
-            <span className="size-1.5 rounded-full bg-ink/25" />
-          </div>
+          <WindowBar />
           <div className="relative" style={{ aspectRatio: `${media.width} / ${media.height}` }}>
             <Image src={media.src} alt={media.alt} fill sizes={sizes} className="object-contain" />
           </div>
@@ -296,6 +307,28 @@ export function CaseStudy({ project, titleAs = "h1" }: { project: Project; title
       {project.gallery?.[2] && (
         <div className="mt-14">
           <GalleryPhoto project={project} index={2} />
+        </div>
+      )}
+
+      {/* More of the project running, each framed and whole. */}
+      {project.screens && (
+        <div className="mt-14 flex flex-col gap-8">
+          {project.screens.map((screen) => (
+            <figure
+              key={screen.src}
+              className="overflow-hidden rounded-xl border border-white/14 bg-paper shadow-[0_24px_48px_rgb(0_0_0/0.45)]"
+            >
+              <WindowBar />
+              <Image
+                src={screen.src}
+                alt={screen.alt}
+                width={screen.width}
+                height={screen.height}
+                sizes="(min-width: 1280px) 1020px, 100vw"
+                className="h-auto w-full"
+              />
+            </figure>
+          ))}
         </div>
       )}
 
