@@ -115,75 +115,207 @@ test.describe("Google bento", () => {
   });
 });
 
-test("Built on court: each mapped stop shows its photo with the number in the corner; ITF and the coaching stop keep the number", async ({ page }) => {
+test("Built on court's stops show only their outline number, no photos", async ({ page }) => {
   await page.goto("/");
   const slides = page.locator("#court [aria-roledescription='slide']");
-  const expected: (string | null)[] = [
-    "Agrim holding a trophy and medal",
-    "Agrim as a junior with Toni Nadal",
-    null,
-    null, // the coaching photo, until consent is confirmed
-    "Agrim shaking hands with the other club's leaders",
-    "Club committee holding the Club of the Year shield and cheque",
-    "Agrim hitting a forehand",
-    "Adelaide University tennis team at the net",
-  ];
-  for (const [i, alt] of expected.entries()) {
-    const slide = slides.nth(i);
-    if (alt) {
-      await expect(slide.locator("img")).toHaveAttribute("alt", alt);
-      await expect(slide.locator("span.font-mono")).toHaveText(String(i + 1).padStart(2, "0"));
-    } else {
-      await expect(slide.locator("img")).toHaveCount(0);
-    }
+  await expect(slides).toHaveCount(8);
+  await expect(slides.locator("img")).toHaveCount(0);
+  for (let i = 0; i < 8; i++) {
+    await expect(slides.nth(i).locator("span[aria-hidden]").first()).toHaveText(String(i + 1).padStart(2, "0"));
   }
-  await expect(page.getByRole("region", { name: "Photos" }).locator("figcaption")).toHaveText([
+});
+
+test.describe("Built on court's photo grid", () => {
+  const CAPTIONS = [
+    "Serving at school, India",
+    "With Toni Nadal at the Rafa Nadal Academy",
+    "State team, Punjab: 3rd at the nationals",
     "SA Challenge Intervarsity 2024, 1st place, men's tennis",
     "Intervarsity Certificate of Merit, tennis, 2024",
     "Certificate of merit from the Vice-Chancellor, first year",
-  ]);
+    "UTL team, Adelaide University",
+    "Match play, UTL",
+  ];
+  const grid = (page: Page) => page.locator(".photo-grid");
+  // Brings every photo in, one at a time, so the lazy ones load.
+  const loadAll = async (page: Page) => {
+    for (const img of await grid(page).locator("img").all()) {
+      await img.scrollIntoViewIfNeeded();
+      await expect.poll(() => img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true);
+    }
+  };
+
+  test("the photos, in order, each at its source's aspect ratio within 1%", async ({ page }) => {
+    await page.goto("/");
+    await expect(grid(page).locator("figcaption")).toHaveText(CAPTIONS);
+    await loadAll(page);
+    for (const { src, shown, natural } of await grid(page).locator("img").evaluateAll((imgs) =>
+      (imgs as HTMLImageElement[]).map((img) => {
+        const r = img.getBoundingClientRect();
+        return { src: img.currentSrc, shown: r.width / r.height, natural: img.naturalWidth / img.naturalHeight };
+      }),
+    )) {
+      expect(Math.abs(shown / natural - 1), src).toBeLessThan(0.01);
+    }
+  });
+
+  test("before loading, every photo already has its box, so nothing shifts", async ({ page }) => {
+    await page.goto("/");
+    const boxes = await grid(page).locator("button").evaluateAll((buttons) =>
+      buttons.map((b) => {
+        const img = b.querySelector("img")!;
+        return { lazy: img.loading, ratio: b.clientWidth / b.clientHeight, attr: Number(img.getAttribute("width")) / Number(img.getAttribute("height")) };
+      }),
+    );
+    for (const { lazy, ratio, attr } of boxes) {
+      expect(lazy).toBe("lazy");
+      expect(Math.abs(ratio / attr - 1)).toBeLessThan(0.01);
+    }
+  });
+
+  test("desktop rows are justified: one height per row, full rows fill the width, the last stays left at the row height", async ({ page, isMobile }) => {
+    test.skip(isMobile, "phones show two masonry columns");
+    await page.goto("/");
+    const { width, left, rows } = await grid(page).evaluate((g) => ({
+      width: g.getBoundingClientRect().width,
+      left: g.getBoundingClientRect().left,
+      rows: [...g.querySelectorAll(".photo-row")].map((row) => ({
+        last: row.hasAttribute("data-last"),
+        boxes: [...row.querySelectorAll("button")].map((b) => b.getBoundingClientRect().toJSON()),
+      })),
+    }));
+    for (const { last, boxes } of rows) {
+      for (const b of boxes) expect(b.height).toBeCloseTo(boxes[0].height, 0);
+      for (let i = 1; i < boxes.length; i++) expect(boxes[i].left - boxes[i - 1].right).toBeCloseTo(12, 0);
+      expect(boxes[0].left).toBeCloseTo(left, 0);
+      if (last) {
+        expect(boxes[0].height).toBeCloseTo(260, 0);
+        expect(boxes.at(-1)!.right).toBeLessThan(left + width - 12);
+      } else {
+        expect(boxes.at(-1)!.right).toBeCloseTo(left + width, 0);
+        expect(Math.abs(boxes[0].height - 260)).toBeLessThan(60);
+      }
+    }
+    const style = await grid(page).locator("button").first().evaluate((b) => {
+      const s = getComputedStyle(b);
+      return { radius: s.borderTopLeftRadius, transform: s.transform, border: s.borderTopWidth, fit: getComputedStyle(b.querySelector("img")!).objectFit };
+    });
+    expect(style).toEqual({ radius: "14px", transform: "none", border: "0px", fit: "fill" });
+  });
+
+  test("phones show two columns of photos at their own shapes", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "the phone layout");
+    await page.goto("/");
+    // Column positions, counting lefts within 2px of each other as one.
+    const columns = () =>
+      grid(page)
+        .locator("figure")
+        .evaluateAll((els) =>
+          els
+            .map((el) => el.getBoundingClientRect().left)
+            .sort((a, b) => a - b)
+            .filter((left, i, all) => i === 0 || left - all[i - 1] > 2).length,
+        );
+    await expect.poll(columns).toBe(2);
+  });
+
+  test("a photo opens in a lightbox: arrows and keys step, Escape closes, focus returns to the photo showing", async ({ page }) => {
+    await page.goto("/");
+    const photos = grid(page).getByRole("button");
+    await photos.nth(1).scrollIntoViewIfNeeded();
+    await photos.nth(1).click();
+    const box = page.getByRole("dialog", { name: CAPTIONS[1] });
+    await expect(box).toBeVisible();
+    await expect(box.locator("figcaption")).toHaveText(CAPTIONS[1]);
+    await expect(box.getByRole("img")).toHaveAttribute("alt", "Agrim as a junior with Toni Nadal");
+    // The whole photo: its own shape, not cropped.
+    await expect.poll(() => box.getByRole("img").evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
+    const shape = await box.getByRole("img").evaluate((img: HTMLImageElement) => {
+      const r = img.getBoundingClientRect();
+      return r.width / r.height / (img.naturalWidth / img.naturalHeight);
+    });
+    expect(Math.abs(shape - 1)).toBeLessThan(0.01);
+
+    await box.getByRole("button", { name: "Next photo" }).click();
+    await expect(page.getByRole("dialog", { name: CAPTIONS[2] })).toBeVisible();
+    await page.keyboard.press("ArrowRight");
+    await expect(page.getByRole("dialog", { name: CAPTIONS[3] })).toBeVisible();
+    await page.keyboard.press("ArrowLeft");
+    await page.keyboard.press("ArrowLeft");
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.getByRole("dialog", { name: CAPTIONS[0] })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.locator("dialog[open]")).toHaveCount(0);
+    await expect(photos.nth(0)).toBeFocused();
+
+    // Enter opens it from the keyboard too.
+    await photos.nth(4).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("dialog", { name: CAPTIONS[4] })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(photos.nth(4)).toBeFocused();
+  });
 });
 
-test.describe("Selected work link pills", () => {
-  test("every card shows its links as pills, or its private note", async ({ page }) => {
+test.describe("Selected work buttons", () => {
+  const cards = (page: Page) => page.locator("#projects [aria-roledescription='slide']");
+
+  test("one row per card: Open case study first, then Source, then the live link, all one height", async ({ page }) => {
     await page.goto("/");
-    const cards = page.locator("#projects [aria-roledescription='slide']");
     for (const [i, project] of projects.entries()) {
-      const card = cards.nth(i);
-      for (const link of project.links) {
-        const pill = card.getByRole("link", { name: link.label });
-        await expect(pill).toHaveAttribute("href", link.url);
-        await expect(pill).toHaveAttribute("target", "_blank");
-        await expect(pill).toHaveAttribute("rel", "noopener noreferrer");
+      const card = cards(page).nth(i);
+      const names = ["Open case study", ...project.links.map((l) => l.label)];
+      const buttons = card.getByRole("link").filter({ hasText: new RegExp(`^(${names.join("|")})`) });
+      await expect(buttons).toHaveCount(names.length);
+      const boxes = await buttons.evaluateAll((els) => els.map((el) => ({ text: el.textContent!.replace(/ for .*/, "").trim(), box: el.getBoundingClientRect().toJSON() })));
+      expect(boxes.map((b) => b.text)).toEqual(names);
+      for (const { box } of boxes) expect(box.height).toBeCloseTo(boxes[0].box.height, 0);
+      // Side by side wherever they share a line, and a line only breaks when
+      // the next one would not fit.
+      for (let j = 1; j < boxes.length; j++) {
+        const [a, b] = [boxes[j - 1].box, boxes[j].box];
+        if (Math.abs(a.top - b.top) < 1) expect(b.left).toBeGreaterThan(a.right);
+        else expect(b.top).toBeGreaterThan(a.bottom);
       }
       if (project.privateNote) await expect(card.getByText(project.privateNote)).toBeAttached();
     }
-    // ARS is live, with no source link.
-    const ars = cards.nth(projects.findIndex((p) => p.slug === "adelaide-rising-stars"));
-    await expect(ars).toContainText("Live · Freelance, 2026");
-    await expect(ars.getByRole("link", { name: "Live site" })).toHaveAttribute("href", "https://arstennisacademy.com.au");
-    await expect(ars.getByRole("link", { name: "Source" })).toHaveCount(0);
+    const metaplay = cards(page).nth(projects.findIndex((p) => p.slug === "metaplay"));
+    await expect(metaplay.getByRole("link", { name: "Live demo" })).toHaveAttribute("target", "_blank");
   });
 
-  test("a pill opens its link in a new tab and never the case study", async ({ page, context }) => {
+  test("a link opens in a new tab and never the case study; Open case study still opens it", async ({ page, context }) => {
     await context.route(/github\.com|sydney\.edu\.au|onrender\.com|arstennisacademy/, (route) => route.fulfill({ body: "ok" }));
     await page.goto("/");
-    const card = page.locator("#projects [aria-roledescription='slide']").first();
+    const card = cards(page).first();
     const [tab] = await Promise.all([context.waitForEvent("page"), card.getByRole("link", { name: "Source" }).click()]);
     expect(tab.url()).toContain("github.com");
     await tab.close();
     await expect(page.locator("dialog[open]")).toHaveCount(0);
-    await expect(page).toHaveURL(/\/$/);
+    await card.getByRole("link", { name: /Open case study/ }).click();
+    await expect(page.locator("dialog[open]")).toHaveCount(1);
+    await expect(page).toHaveURL(/\/projects\/pacific-village-explorer$/);
   });
 
-  test("the keyboard reaches the pills, with a clear focus ring", async ({ page }) => {
+  test("the keyboard reaches them in order, with a clear focus ring", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("region", { name: "Selected work" }).focus();
     await page.keyboard.press("Tab");
-    const pill = page.locator("#projects [aria-roledescription='slide']").first().getByRole("link", { name: "Source" });
-    await expect(pill).toBeFocused();
-    await expect(pill).toHaveCSS("outline-style", "solid");
-    await expect(pill).toHaveCSS("outline-color", "rgb(255, 91, 46)");
+    const card = cards(page).first();
+    await expect(card.getByRole("link", { name: /Open case study/ })).toBeFocused();
+    await page.keyboard.press("Tab");
+    const source = card.getByRole("link", { name: "Source" });
+    await expect(source).toBeFocused();
+    await expect(source).toHaveCSS("outline-style", "solid");
+    await expect(source).toHaveCSS("outline-color", "rgb(255, 91, 46)");
+  });
+
+  test("the case study header keeps the same order and height", async ({ page }) => {
+    await page.goto("/projects/metaplay");
+    const links = page.getByRole("main").getByRole("link").filter({ hasText: /^(Source|Live demo)/ });
+    const boxes = await links.evaluateAll((els) => els.map((el) => ({ text: el.textContent!.trim(), box: el.getBoundingClientRect().toJSON() })));
+    expect(boxes.map((b) => b.text)).toEqual(["Source", "Live demo"]);
+    expect(boxes[1].box.height).toBeCloseTo(boxes[0].box.height, 0);
+    expect(boxes[1].box.top).toBeCloseTo(boxes[0].box.top, 0);
   });
 });
 
