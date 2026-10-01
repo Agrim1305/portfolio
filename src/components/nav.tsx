@@ -7,11 +7,13 @@ import { Sheet } from "@/components/sheet";
 import { openAsk } from "@/components/ask-agrim";
 import { scrollToSection } from "@/lib/scroll-lock";
 
+// In page order: the active-section highlight walks this list.
 const sections = [
-  { id: "projects", label: "Projects" },
+  { id: "projects", label: "Work" },
   { id: "leadership", label: "Leadership" },
   { id: "experience", label: "Experience" },
   { id: "google", label: "Google" },
+  { id: "court", label: "Tennis" },
   { id: "about", label: "About" },
   { id: "contact", label: "Contact" },
 ];
@@ -22,7 +24,7 @@ function Wordmark() {
       href="/#top"
       prefetch={false}
       aria-label="Agrim Sharma, back to top"
-      className="flex min-h-11 items-center font-display text-xl font-extrabold tracking-tight text-ink"
+      className="flex min-h-11 items-center font-display text-[1.5625rem] font-extrabold tracking-tight text-ink"
     >
       agrim<span className="text-accent">.</span>
     </Link>
@@ -136,9 +138,11 @@ export function Nav() {
         label="Menu"
         className="h-dvh w-full border-0 bg-paper"
       >
-        <div className="flex h-full flex-col px-5 pb-8 pt-3">
+        {/* Seven sections fit any phone: the links size to the screen's
+            height, and on the shortest screens the menu scrolls. */}
+        <div data-lenis-prevent className="flex h-full flex-col overflow-y-auto px-5 pb-8 pt-3">
           <div className="flex h-[52px] items-center justify-between">
-            <span className="font-display text-xl font-extrabold tracking-tight">
+            <span className="font-display text-[1.5625rem] font-extrabold tracking-tight">
               agrim<span className="text-accent">.</span>
             </span>
             <button
@@ -150,7 +154,7 @@ export function Nav() {
               <X className="size-5" aria-hidden />
             </button>
           </div>
-          <nav aria-label="Sections" className="mt-9 flex flex-col">
+          <nav aria-label="Sections" className="mb-6 mt-[clamp(1rem,3svh,2.25rem)] flex flex-col">
             {sections.map(({ id, label }) => (
               <Link
                 key={id}
@@ -158,7 +162,7 @@ export function Nav() {
                 prefetch={false}
                 onClick={(e) => goTo(e, id)}
                 aria-current={active === id ? "true" : undefined}
-                className="border-b border-hairline py-3.5 font-display text-[44px] font-extrabold leading-tight tracking-[-0.035em] text-ink transition-colors active:text-accent aria-[current=true]:text-accent"
+                className="border-b border-hairline py-[clamp(0.5rem,1.6svh,0.875rem)] font-display text-[clamp(1.75rem,5.4svh,2.75rem)] font-extrabold leading-tight tracking-[-0.035em] text-ink transition-colors active:text-accent aria-[current=true]:text-accent"
               >
                 {label}
               </Link>
@@ -170,7 +174,7 @@ export function Nav() {
               setOpen(false);
               openAsk();
             }}
-            className="glass mt-auto flex h-[58px] items-center gap-3 rounded-2xl px-[18px] text-left text-base text-ink-soft"
+            className="glass mt-auto flex h-[58px] shrink-0 items-center gap-3 rounded-2xl px-[18px] text-left text-base text-ink-soft"
           >
             <Sparkles className="size-4 text-accent" aria-hidden />
             Ask AI about Agrim
