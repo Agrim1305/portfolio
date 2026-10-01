@@ -15,28 +15,22 @@ export const awardPhoto: Photo = {
   height: 675,
 };
 
-export const clubOfTheYearPhoto: Photo = {
-  src: "/images/leadership/11-club-of-the-year.webp",
-  alt: "Club committee holding the Club of the Year shield and cheque",
-  caption: "Club of the Year, Adelaide University Sport, November 2025",
-  width: 2000,
-  height: 1333,
-  position: "50% 30%",
-};
-
-export const mergerMeetingPhoto: Photo = {
-  src: "/images/leadership/12-merger-meeting.webp",
-  alt: "Agrim shaking hands with the other club's leaders",
-  caption: "Special general meeting on the merger",
-  width: 645,
-  height: 510,
-  position: "50% 40%",
-};
-
 // The club in pictures, after the merger story's beats.
 export const clubPhotos: Photo[] = [
-  clubOfTheYearPhoto,
-  mergerMeetingPhoto,
+  {
+    src: "/images/leadership/11-club-of-the-year.webp",
+    alt: "Club committee holding the Club of the Year shield and cheque",
+    caption: "Club of the Year, Adelaide University Sport, November 2025",
+    width: 2000,
+    height: 1333,
+  },
+  {
+    src: "/images/leadership/12-merger-meeting.webp",
+    alt: "Agrim shaking hands with the other club's leaders",
+    caption: "Special general meeting on the merger",
+    width: 645,
+    height: 510,
+  },
   {
     src: "/images/leadership/15-social-tennis.webp",
     alt: "Selfie with the social tennis group",

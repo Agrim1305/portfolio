@@ -1,16 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { PhotoGrid } from "@/components/photo-grid";
 import { SkipLink } from "@/components/skip-link";
 import { usePinnedTrack } from "@/lib/pinned-track";
-import {
-  COACHING_PHOTO_CONSENT,
-  clubOfTheYearPhoto,
-  coachingPhoto,
-  mergerMeetingPhoto,
-  type Photo,
-} from "@/lib/stories";
+import { COACHING_PHOTO_CONSENT, coachingPhoto, type Photo } from "@/lib/stories";
 
 type Stop = {
   /** Short name under the timeline dot. */
@@ -19,18 +13,14 @@ type Stop = {
   title?: string;
   meta?: string;
   line: string;
-  /** Fills the stop's left half, cropped at its position to keep faces in
-      frame. Without one, the stop's number fills it in outline. */
-  photo?: Photo;
 };
 
-const court = (file: string, width: number, height: number, alt: string, caption: string, position?: string): Photo => ({
+const court = (file: string, width: number, height: number, alt: string, caption: string): Photo => ({
   src: `/images/court/${file}.webp`,
   alt,
   caption,
   width,
   height,
-  position,
 });
 
 // Wording taken as-is from knowledge-base.md, experience.tsx and leadership.tsx.
@@ -40,13 +30,11 @@ const stops: Stop[] = [
     big: "Top 90",
     title: "AITA U18 National Ranking",
     line: "All India Tennis Association, 2022.",
-    photo: court("06-nationals-punjab", 1125, 2000, "Agrim holding a trophy and medal", "State team, Punjab: 3rd at the nationals", "50% 20%"),
   },
   {
     dot: "Rafa Nadal Academy",
     big: "Rafa Nadal Academy",
     line: "Trained at the Rafa Nadal Academy in Spain",
-    photo: court("05-tony-nadal", 768, 1024, "Agrim as a junior with Toni Nadal", "With Toni Nadal at the Rafa Nadal Academy", "50% 25%"),
   },
   {
     dot: "ITF",
@@ -59,7 +47,6 @@ const stops: Stop[] = [
     title: "Assistant Head Coach",
     meta: "Mar 2024 to Present",
     line: "I coach 10+ sessions a week at Tea Tree Gully Tennis Club for more than fifty clients, from juniors to adults, one-on-one and in groups.",
-    photo: COACHING_PHOTO_CONSENT ? coachingPhoto : undefined,
   },
   {
     dot: "President",
@@ -67,14 +54,12 @@ const stops: Stop[] = [
     title: "President",
     meta: "Jul 2024 to Mar 2026",
     line: "A dormant club to Club of the Year in eighteen months.",
-    photo: mergerMeetingPhoto,
   },
   {
     dot: "Club of the Year",
     big: "Winner",
     title: "Club of the Year 2025",
     line: "Awarded for rebuilding Adelaide University Tennis Club from dormant status to 100+ active members, securing $7,000+ in facility upgrades, and leading the merger with UniSA's tennis club.",
-    photo: clubOfTheYearPhoto,
   },
   {
     dot: "UniSport Nationals",
@@ -82,24 +67,26 @@ const stops: Stop[] = [
     title: "Intervarsity Certificate of Merit",
     meta: "UniSport Australia, 2025",
     line: "Recognition for representing Adelaide University at UniSport Nationals.",
-    photo: court("02-utl-playing", 1080, 720, "Agrim hitting a forehand", "Match play, UTL", "50% 25%"),
   },
   {
     dot: "Premier League",
     big: "Premier League",
     line: "the top grade in Tennis South Australia",
-    photo: court("01-utl-team", 1600, 1200, "Adelaide University tennis team at the net", "UTL team, Adelaide University", "50% 35%"),
   },
 ];
 
-// Under the stops, in this order.
+// Under the stops, school to uni.
 const photos: Photo[] = [
+  court("07-school-serve", 800, 1200, "Agrim serving in a school match", "Serving at school, India"),
+  court("05-tony-nadal", 768, 1024, "Agrim as a junior with Toni Nadal", "With Toni Nadal at the Rafa Nadal Academy"),
+  court("06-nationals-punjab", 1125, 2000, "Agrim holding a trophy and medal", "State team, Punjab: 3rd at the nationals"),
   court("04-sa-challenge-win", 1125, 2000, "Agrim with a winner's certificate and shield on court", "SA Challenge Intervarsity 2024, 1st place, men's tennis"),
   court("03-blues-certificate-of-merit", 1334, 2000, "Agrim holding his certificate of merit at the Blues awards", "Intervarsity Certificate of Merit, tennis, 2024"),
   court("14-vc-certificate-of-merit", 800, 533, "Agrim receiving a certificate on stage", "Certificate of merit from the Vice-Chancellor, first year"),
+  court("01-utl-team", 1600, 1200, "Adelaide University tennis team at the net", "UTL team, Adelaide University"),
+  court("02-utl-playing", 1080, 720, "Agrim hitting a forehand", "Match play, UTL"),
+  ...(COACHING_PHOTO_CONSENT ? [coachingPhoto] : []),
 ];
-
-const TILTS = ["-rotate-[2deg]", "rotate-[1.5deg]", "-rotate-1", "rotate-[2deg]"];
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -107,9 +94,8 @@ const pad = (n: number) => String(n).padStart(2, "0");
    underneath (see lib/pinned-track.ts; phones and reduced motion swipe
    instead). Arrows, the timeline dots and the arrow keys scroll to a stop.
    Stops that are out of view are inert, so a screen reader doesn't land on
-   them; the live region says which stop is showing. Under the stops a short
-   strip of photos, each whole, on a rail with a dot per photo, scrolls
-   sideways where it doesn't fit. */
+   them; the live region says which stop is showing. Under the stops, the
+   photos from school to uni (see PhotoGrid). */
 export function Court() {
   const last = stops.length - 1;
   const { sectionRef, trackRef, active: current, go, step, onFocus } = usePinnedTrack<HTMLDivElement>(stops.length);
@@ -179,35 +165,16 @@ export function Court() {
                     aria-label={`${i + 1} of ${stops.length}`}
                     inert={i !== current}
                     // Pinned, the stop takes the height the heading and timeline
-                    // leave; on a narrow stage the photo gives way before the text.
+                    // leave; on a narrow stage the number gives way before the text.
                     className="flex w-full shrink-0 snap-start flex-col pin:h-full lg:flex-row lg:motion-reduce:h-[min(560px,calc(100svh-27rem))] lg:motion-reduce:min-h-[360px]"
                   >
                     <div className="relative h-[220px] shrink-0 overflow-hidden bg-[#1B1B20] pin:h-auto pin:min-h-0 pin:flex-1 lg:h-full lg:w-[55%] lg:flex-none">
-                      {s.photo ? (
-                        <>
-                          <Image
-                            src={s.photo.src}
-                            alt={s.photo.alt}
-                            fill
-                            sizes="(min-width: 1024px) 660px, 100vw"
-                            className="object-cover"
-                            style={{ objectPosition: s.photo.position }}
-                          />
-                          <span
-                            aria-hidden
-                            className="absolute left-3 top-3 rounded-full bg-paper/80 px-2.5 py-1 font-mono text-xs text-ink backdrop-blur-sm lg:left-5 lg:top-5"
-                          >
-                            {pad(i + 1)}
-                          </span>
-                        </>
-                      ) : (
-                        <span
-                          aria-hidden
-                          className="absolute -bottom-6 left-5 font-display text-[11rem] font-extrabold leading-none text-transparent [-webkit-text-stroke:1.5px_rgb(255_91_46/0.4)] lg:-bottom-10 lg:left-10 lg:text-[22rem]"
-                        >
-                          {pad(i + 1)}
-                        </span>
-                      )}
+                      <span
+                        aria-hidden
+                        className="absolute -bottom-6 left-5 font-display text-[11rem] font-extrabold leading-none text-transparent [-webkit-text-stroke:1.5px_rgb(255_91_46/0.4)] lg:-bottom-10 lg:left-10 lg:text-[22rem]"
+                      >
+                        {pad(i + 1)}
+                      </span>
                     </div>
                     <div className="flex flex-col justify-center px-[22px] py-6 lg:w-[45%] lg:px-14 lg:py-0">
                       <p className="text-[13px] text-ink-faint lg:text-[15px]">
@@ -225,9 +192,6 @@ export function Court() {
                       <p className="mt-2 text-[15px] leading-[1.55] text-ink-muted first-letter:uppercase lg:mt-3.5 lg:text-lg lg:leading-relaxed">
                         {s.line}
                       </p>
-                      {s.photo && (
-                        <p className="mt-4 font-mono text-xs text-ink-faint">{s.photo.caption}</p>
-                      )}
                     </div>
                   </article>
                 ))}
@@ -286,43 +250,7 @@ export function Court() {
       </div>
 
       <div className="wrap pb-20 pt-14 lg:pb-28 lg:pt-16">
-        <div
-          role="region"
-          aria-label="Photos"
-          tabIndex={0}
-          className="thin-scroll -mx-5 overflow-x-auto px-5 pb-5 pt-3 sm:-mx-8 sm:px-8"
-        >
-          <ol className="flex w-max">
-            {photos.map((p, i) => (
-              <li key={p.src} className="relative pr-8 lg:pr-12">
-                {/* The rail runs under every photo, with a dot at each. */}
-                <span aria-hidden className="absolute inset-x-0 top-[228px] h-px bg-ink/18 lg:top-[292px]" />
-                <span
-                  aria-hidden
-                  className="absolute left-0 top-[223px] size-[11px] rounded-full bg-accent ring-4 ring-paper lg:top-[287px]"
-                />
-                <figure className="min-w-44">
-                  <div
-                    className={`h-[200px] w-max overflow-hidden rounded-[14px] border-4 border-ink shadow-[0_24px_48px_rgb(0_0_0/0.5)] lg:h-[260px] ${TILTS[i % TILTS.length]}`}
-                  >
-                    <Image
-                      src={p.src}
-                      alt={p.alt}
-                      width={p.width}
-                      height={p.height}
-                      sizes="(min-width: 1024px) 400px, 300px"
-                      className="h-full w-auto"
-                    />
-                  </div>
-                  {/* As wide as the photo, never wider. */}
-                  <figcaption className="mt-14 w-0 min-w-full font-mono text-xs leading-relaxed text-ink-muted lg:mt-16">
-                    {p.caption}
-                  </figcaption>
-                </figure>
-              </li>
-            ))}
-          </ol>
-        </div>
+        <PhotoGrid photos={photos} />
       </div>
     </section>
   );

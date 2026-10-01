@@ -438,11 +438,58 @@ html[data-switch="prev"] {
   }
 }
 
+/* ---- Built on court's photos (see PhotoGrid) ----
+   Phones: two masonry columns, the rows dissolved. From md up, justified
+   rows that PhotoGrid breaks: in a full row each photo grows in proportion
+   to its aspect ratio (--ar) from nothing, so the row fills its width
+   exactly and every photo in it is one height; the last row keeps the row
+   height (--row) and stays left-aligned. Keep --row and the gap in step
+   with PhotoGrid. */
+.photo-grid {
+  columns: 2;
+  column-gap: 12px;
+}
+.photo-row {
+  display: contents;
+}
+.photo-row > figure {
+  break-inside: avoid;
+  margin-bottom: 12px;
+}
+@media (width >= 48rem) {
+  .photo-grid {
+    --row: 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    columns: auto;
+  }
+  .photo-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .photo-row > figure {
+    flex: var(--ar) 1 0px;
+    min-width: 0;
+    margin: 0;
+  }
+  .photo-row[data-last] > figure {
+    flex: none;
+    width: calc(var(--ar) * var(--row));
+  }
+}
+@media (width >= 64rem) {
+  .photo-grid {
+    --row: 260px;
+  }
+}
+
 /* ---- A project's framed screenshot (see ProjectCover in case-study.tsx) ----
    The frame takes the smaller of the width and the height its space allows
-   (the browser bar is 1.375rem), less --inset at the sides and --clear, the
-   Open case study pill's corner. It is centred, unless that would run under
-   the pill. Without container units the frame is simply full width. */
+   (the browser bar is 1.375rem), less --inset at the sides and --clear, a
+   corner button's room. It is centred, unless that would run under the
+   button. Without container units the frame is simply full width. */
 @supports (width: 1cqw) {
   .cover-frame {
     --fw: min(100cqw - var(--clear) - var(--inset), (100cqh - 1.375rem) * var(--ratio));
