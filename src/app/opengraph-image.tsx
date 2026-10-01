@@ -8,12 +8,12 @@ export const contentType = "image/png";
 
 // The site's fonts as TrueType, which is all ImageResponse reads: Geist for
 // the text, and the name's weight of Bricolage Grotesque, cut down to the
-// letters of the name. The cloud is the favicon, face and all.
+// letters of the name. The cloud is drawn with its face (cloud-face.svg).
 export default async function Image() {
   const [geist, bricolage, cloud] = await Promise.all([
     readFile(join(process.cwd(), "src/app/geist-400.ttf")),
     readFile(join(process.cwd(), "src/app/bricolage-800.ttf")),
-    readFile(join(process.cwd(), "src/app/icon.svg"), "base64"),
+    readFile(join(process.cwd(), "src/app/cloud-face.svg"), "base64"),
   ]);
 
   return new ImageResponse(

@@ -12,7 +12,7 @@ test.describe("routes", () => {
     });
   }
 
-  for (const path of ["/sitemap.xml", "/robots.txt", "/opengraph-image", "/resume.pdf", "/icon.svg"]) {
+  for (const path of ["/sitemap.xml", "/robots.txt", "/opengraph-image", "/resume.pdf", "/icon1.svg", "/icon2.png", "/apple-icon.png"]) {
     test(`${path} is served`, async ({ request }) => {
       expect((await request.get(path)).status()).toBe(200);
     });
