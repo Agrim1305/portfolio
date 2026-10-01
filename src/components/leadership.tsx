@@ -2,47 +2,13 @@
 
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
-import { awardPhoto, mergerStory, openStory, type Photo } from "@/lib/stories";
+import { awardPhoto, mergerStory, openStory } from "@/lib/stories";
 
 const outcomes = [
   { value: "2 → 1", label: "clubs merged" },
   { value: "$7,000+", label: "grants secured" },
   { value: "10 → 100+", label: "active members" },
   { value: "Winner", label: "Club of the Year 2025" },
-];
-
-// The first photo leads as a print; the rest sit in two columns beneath it,
-// uncropped, so their different shapes never cut anyone out.
-const photos: Photo[] = [
-  awardPhoto,
-  {
-    src: "/images/leadership/11-club-of-the-year.webp",
-    alt: "Club committee holding the Club of the Year shield and cheque",
-    caption: "Club of the Year, Adelaide University Sport, November 2025",
-    width: 2000,
-    height: 1333,
-  },
-  {
-    src: "/images/leadership/12-merger-meeting.webp",
-    alt: "Agrim shaking hands with the other club's leaders",
-    caption: "Special general meeting on the merger",
-    width: 645,
-    height: 510,
-  },
-  {
-    src: "/images/leadership/15-social-tennis.webp",
-    alt: "Selfie with the social tennis group",
-    caption: "Social tennis nights",
-    width: 2000,
-    height: 1500,
-  },
-  {
-    src: "/images/leadership/15b-club-agm-presentation.webp",
-    alt: "Agrim presenting to club members",
-    caption: "Presenting club awards at the AGM",
-    width: 1152,
-    height: 648,
-  },
 ];
 
 // "What I did" is long, so the page shows its first three sentences, word for
@@ -55,7 +21,6 @@ const print =
   "relative overflow-hidden rounded-[18px] border-[5px] border-ink shadow-[0_30px_60px_rgb(0_0_0/0.5)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:rotate-[0.5deg] hover:scale-[1.02] motion-reduce:transition-none";
 
 export function Leadership() {
-  const [lead, ...rest] = photos;
   return (
     <section id="leadership" tabIndex={-1} className="outline-none wrap py-20 lg:py-28">
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,480px)] lg:items-start lg:gap-14">
@@ -87,29 +52,10 @@ export function Leadership() {
         <div className="rise mx-auto w-full max-w-[460px] lg:max-w-none" style={rise(0.16)}>
           <figure>
             <div className={`${print} aspect-[480/330] rotate-[2deg]`}>
-              <Image src={lead.src} alt={lead.alt} fill sizes="(min-width: 1024px) 480px, 90vw" className="object-cover" />
+              <Image src={awardPhoto.src} alt={awardPhoto.alt} fill sizes="(min-width: 1024px) 480px, 90vw" className="object-cover" />
             </div>
-            <figcaption className="mt-5 font-mono text-xs text-ink-muted">{lead.caption}</figcaption>
+            <figcaption className="mt-5 font-mono text-xs text-ink-muted">{awardPhoto.caption}</figcaption>
           </figure>
-          {rest.length > 0 && (
-            <div className="mt-8 columns-2 gap-4">
-              {rest.map((p, i) => (
-                <figure key={p.src} className="mb-6 break-inside-avoid">
-                  <div className={`${print} ${i % 2 ? "rotate-[1.5deg]" : "-rotate-[1.5deg]"}`}>
-                    <Image
-                      src={p.src}
-                      alt={p.alt}
-                      width={p.width}
-                      height={p.height}
-                      sizes="(min-width: 1024px) 240px, 45vw"
-                      className="h-auto w-full"
-                    />
-                  </div>
-                  <figcaption className="mt-3 font-mono text-xs text-ink-muted">{p.caption}</figcaption>
-                </figure>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 

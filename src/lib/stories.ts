@@ -1,6 +1,7 @@
-/* What the Leadership section and the Experience roles share: the photo
-   shape every gallery renders, the award photo, the merger story's three
-   beats, and the event that opens a role's full story from anywhere. */
+/* What the Leadership section, the Experience roles and Built on court
+   share: the photo shape every gallery renders, the club's photos, the
+   coaching photo and its consent flag, the merger story's three beats, and
+   the event that opens a role's full story from anywhere. */
 
 /* A photo with its real size in pixels. `position` is its object-position
    wherever a frame crops it, chosen so no face is cut. */
@@ -12,6 +13,56 @@ export const awardPhoto: Photo = {
   caption: "Club of the Year · Adelaide University Sport, 2025",
   width: 900,
   height: 675,
+};
+
+export const clubOfTheYearPhoto: Photo = {
+  src: "/images/leadership/11-club-of-the-year.webp",
+  alt: "Club committee holding the Club of the Year shield and cheque",
+  caption: "Club of the Year, Adelaide University Sport, November 2025",
+  width: 2000,
+  height: 1333,
+  position: "50% 30%",
+};
+
+export const mergerMeetingPhoto: Photo = {
+  src: "/images/leadership/12-merger-meeting.webp",
+  alt: "Agrim shaking hands with the other club's leaders",
+  caption: "Special general meeting on the merger",
+  width: 645,
+  height: 510,
+  position: "50% 40%",
+};
+
+// The club in pictures, after the merger story's beats.
+export const clubPhotos: Photo[] = [
+  clubOfTheYearPhoto,
+  mergerMeetingPhoto,
+  {
+    src: "/images/leadership/15-social-tennis.webp",
+    alt: "Selfie with the social tennis group",
+    caption: "Social tennis nights",
+    width: 2000,
+    height: 1500,
+  },
+  {
+    src: "/images/leadership/15b-club-agm-presentation.webp",
+    alt: "Agrim presenting to club members",
+    caption: "Presenting club awards at the AGM",
+    width: 1152,
+    height: 648,
+  },
+];
+
+// The coaching photo shows children. It stays off, and its file stays out of
+// git (see .gitignore), until consent to publish it is confirmed.
+export const COACHING_PHOTO_CONSENT = false;
+export const coachingPhoto: Photo = {
+  src: "/images/experience/13-coaching-kids.webp",
+  alt: "Agrim with a group of young players holding racquets",
+  caption: "Coaching a junior group",
+  width: 2000,
+  height: 1500,
+  position: "50% 55%",
 };
 
 export const mergerStory = [

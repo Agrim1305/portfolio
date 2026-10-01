@@ -6,7 +6,16 @@ import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { Panel, PanelHero } from "@/components/panel";
 import { morphClose, morphOpen, morphSwitch } from "@/lib/morph";
-import { STORY_EVENT, awardPhoto, mergerStory, type Photo, type StoryRequest } from "@/lib/stories";
+import {
+  COACHING_PHOTO_CONSENT,
+  STORY_EVENT,
+  awardPhoto,
+  clubPhotos,
+  coachingPhoto,
+  mergerStory,
+  type Photo,
+  type StoryRequest,
+} from "@/lib/stories";
 
 type Role = {
   /** Used in the story's address, #story-<id>. */
@@ -21,18 +30,6 @@ type Role = {
   photos: Photo[];
   /** Told in beats instead of the description. */
   beats?: typeof mergerStory;
-};
-
-// The coaching photo shows children. It stays off, and its file stays out of
-// git (see .gitignore), until consent to publish it is confirmed.
-const COACHING_PHOTO_CONSENT = false;
-const coachingPhoto: Photo = {
-  src: "/images/experience/13-coaching-kids.webp",
-  alt: "Agrim with a group of young players holding racquets",
-  caption: "Coaching a junior group",
-  width: 2000,
-  height: 1500,
-  position: "50% 55%",
 };
 
 const roles: Role[] = [
@@ -55,7 +52,7 @@ const roles: Role[] = [
     description:
       "Led the club revival covered above: merger, constitution, committee, grants, and the award.",
     stat: { value: "10 → 100+", label: "members" },
-    photos: [awardPhoto],
+    photos: [awardPhoto, ...clubPhotos],
     beats: mergerStory,
   },
   {
@@ -103,17 +100,19 @@ function NowBadge() {
   );
 }
 
-/* Photos mounted as tilted prints, laid out for one to three of them. */
-function Collage({ photos }: { photos: Photo[] }) {
-  const tilts = ["rotate-[2deg]", "-rotate-[3deg]", "rotate-[4deg]"];
+/* The rest of a story's photos, after the story: tilted prints in two
+   columns, each whole, so no shape is cropped to fit. */
+function Gallery({ photos }: { photos: Photo[] }) {
   return (
-    <div className={`grid gap-5 ${photos.length > 1 ? "grid-cols-2" : ""}`}>
-      {photos.slice(0, 3).map((p, i) => (
-        <figure key={p.src} className={i === 0 && photos.length === 3 ? "col-span-2" : ""}>
+    <div className="columns-1 gap-6 sm:columns-2">
+      {photos.map((p, i) => (
+        <figure key={p.src} className="mb-8 break-inside-avoid">
           <div
-            className={`relative aspect-[4/3] overflow-hidden rounded-[18px] border-[5px] border-ink shadow-[0_30px_60px_rgb(0_0_0/0.5)] ${tilts[i]}`}
+            className={`overflow-hidden rounded-[18px] border-[5px] border-ink shadow-[0_30px_60px_rgb(0_0_0/0.5)] ${
+              i % 2 ? "rotate-[1.5deg]" : "-rotate-[1.5deg]"
+            }`}
           >
-            <Image src={p.src} alt={p.alt} fill sizes="(min-width: 1024px) 520px, 90vw" className="object-cover" />
+            <Image src={p.src} alt={p.alt} width={p.width} height={p.height} sizes="(min-width: 1280px) 460px, (min-width: 640px) 45vw, 90vw" className="h-auto w-full" />
           </div>
           <figcaption className="mt-4 font-mono text-xs text-ink-muted">{p.caption}</figcaption>
         </figure>
@@ -449,12 +448,6 @@ export function ExperienceRoles() {
                 <span className="text-[13px] text-ink-muted">{current.stat.label}</span>
               </p>
             )}
-            {/* The first photo is the hero; any more sit here as prints. */}
-            {current.photos.length > 1 && (
-              <div className="mb-12 lg:mb-14">
-                <Collage photos={current.photos.slice(1)} />
-              </div>
-            )}
 
             {current.beats ? (
               <div>
@@ -485,6 +478,13 @@ export function ExperienceRoles() {
               </div>
             ) : (
               <p className="max-w-[760px] text-lg leading-relaxed text-ink-soft lg:text-xl">{current.description}</p>
+            )}
+
+            {/* The first photo is the hero; any more follow the story. */}
+            {current.photos.length > 1 && (
+              <div className="mt-12 lg:mt-14">
+                <Gallery photos={current.photos.slice(1)} />
+              </div>
             )}
           </div>
         )}

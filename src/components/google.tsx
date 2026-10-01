@@ -4,8 +4,9 @@ import type { Photo } from "@/lib/stories";
 
 const CREDENTIAL_URL = "https://www.linkedin.com/feed/update/urn:li:activity:7376092779933835264/";
 
-// The first photo leads, with the certificate under it; the rest stack
-// beside them.
+// A bento: the mentor visit as the large tile, two rows tall, with the neon
+// sign and the selfie stacked beside it. The large tile is cropped taller
+// than the photo, so it keeps Agrim and the sculpture in frame.
 const photos: Photo[] = [
   {
     src: "/google-sydney-1.jpg",
@@ -13,6 +14,7 @@ const photos: Photo[] = [
     caption: "Visiting my mentor at Google Sydney",
     width: 1400,
     height: 787,
+    position: "35% 50%",
   },
   {
     src: "/google-sydney-2.jpg",
@@ -39,13 +41,24 @@ const facts = [
 
 const rise = (delay: number) => ({ "--rise-delay": `${delay}s` }) as React.CSSProperties;
 
-function Shot({ photo, sizes }: { photo: Photo; sizes: string }) {
+/* A photo tile with its caption over the foot of the picture, on a soft
+   gradient that keeps it legible over anything. */
+function Tile({ photo, sizes, className = "" }: { photo: Photo; sizes: string; className?: string }) {
   return (
-    <figure>
-      <div className="relative aspect-[16/9] overflow-hidden rounded-[20px] shadow-[0_30px_60px_rgb(0_0_0/0.45)]">
-        <Image src={photo.src} alt={photo.alt} fill sizes={sizes} className="object-cover" />
-      </div>
-      <figcaption className="mt-3 font-mono text-xs text-ink-muted">{photo.caption}</figcaption>
+    <figure
+      className={`relative aspect-[16/9] overflow-hidden rounded-[20px] shadow-[0_30px_60px_rgb(0_0_0/0.45)] ${className}`}
+    >
+      <Image
+        src={photo.src}
+        alt={photo.alt}
+        fill
+        sizes={sizes}
+        className="object-cover"
+        style={{ objectPosition: photo.position }}
+      />
+      <figcaption className="absolute inset-x-0 bottom-0 bg-[linear-gradient(180deg,rgb(15_15_17/0),rgb(15_15_17/0.88))] px-4 pb-3 pt-12 font-mono text-xs text-ink lg:px-5 lg:pb-4">
+        {photo.caption}
+      </figcaption>
     </figure>
   );
 }
@@ -68,38 +81,33 @@ export function Google() {
         Career Access Mentoring Program · Adelaide University
       </p>
 
-      <div
-        className="rise mt-10 grid gap-8 lg:mt-14 lg:grid-cols-[minmax(0,700fr)_minmax(0,470fr)] lg:gap-[30px]"
-        style={rise(0.16)}
-      >
-        <div className="flex flex-col gap-8 lg:gap-6">
-          <Shot photo={lead} sizes="(min-width: 1024px) 700px, 100vw" />
-          <div className="flex items-center gap-4 rounded-2xl border border-hairline bg-surface px-[18px] py-3">
-            <div className="relative h-14 w-10 shrink-0 overflow-hidden rounded">
-              <Image
-                src="/mentorship.jpeg"
-                alt="University of Adelaide Certificate of Completion for the Career Access Mentoring Program"
-                fill
-                sizes="40px"
-                className="object-cover"
-              />
-            </div>
-            <p className="flex-1 text-[15px] text-ink">Certificate of Completion</p>
-            <a
-              href={CREDENTIAL_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex min-h-11 items-center gap-1 text-[15px] text-accent-soft transition-colors hover:text-accent"
-            >
-              Credential
-              <ArrowUpRight className="size-3.5" aria-hidden />
-            </a>
-          </div>
-        </div>
-        <div className="flex flex-col gap-8 lg:gap-6">
+      <div className="rise mt-10 lg:mt-14" style={rise(0.16)}>
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,700fr)_minmax(0,470fr)] lg:gap-6">
+          <Tile photo={lead} sizes="(min-width: 1024px) 700px, 100vw" className="lg:row-span-2 lg:aspect-auto" />
           {rest.map((photo) => (
-            <Shot key={photo.src} photo={photo} sizes="(min-width: 1024px) 470px, 100vw" />
+            <Tile key={photo.src} photo={photo} sizes="(min-width: 1024px) 470px, 100vw" />
           ))}
+        </div>
+        <div className="mt-4 flex h-14 items-center gap-3.5 rounded-2xl border border-hairline bg-surface pl-3 pr-2 lg:mt-6">
+          <div className="relative h-10 w-7 shrink-0 overflow-hidden rounded-sm">
+            <Image
+              src="/mentorship.jpeg"
+              alt="University of Adelaide Certificate of Completion for the Career Access Mentoring Program"
+              fill
+              sizes="28px"
+              className="object-cover"
+            />
+          </div>
+          <p className="flex-1 text-[15px] text-ink">Certificate of Completion</p>
+          <a
+            href={CREDENTIAL_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-11 items-center gap-1 rounded-full px-3 text-[15px] text-accent-soft transition-colors hover:text-accent"
+          >
+            Credential
+            <ArrowUpRight className="size-3.5" aria-hidden />
+          </a>
         </div>
       </div>
 
