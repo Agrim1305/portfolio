@@ -18,5 +18,10 @@
   "Data Analytics Job Simulation · Deloitte Australia Credential 2026": "relabelled at the owner's request",
   "Partnering with AI in the Workplace · Datacom Credential 2026": "relabelled at the owner's request",
   "Ask about Agrim": "The assistant is named Aris (round nine, item 0): the chat's header is now Aris and the hero card's is Ask Aris",
-  "Hi, I'm an AI assistant trained only on Agrim's portfolio content. Ask me anything about his projects, experience, or background, and I'll answer from what's actually here rather than guessing.": "The greeting now introduces Aris by name (round nine, item 0); the rest of it is unchanged"
+  "Hi, I'm an AI assistant trained only on Agrim's portfolio content. Ask me anything about his projects, experience, or background, and I'll answer from what's actually here rather than guessing.": "The greeting now introduces Aris by name (round nine, item 0); the rest of it is unchanged",
+  "Projects": "Nav label renamed to the approved Work (round ten, item 4); it still points to #projects",
+  "Client project · live link coming soon": "The ARS site is live: its private note is replaced by a Live site link (round ten, item 7)",
+  "Freelance · 2026": "ARS status changed to the approved Live · Freelance, 2026 (round ten, item 7)",
+  "Match play · Adelaide": "The Premier League slide's photo is now court/01 with its approved caption (round ten, item 3)",
+  "alt: Agrim Sharma playing a forehand": "The Premier League slide's photo is now court/01 with its approved alt text (round ten, item 3)"
 }
