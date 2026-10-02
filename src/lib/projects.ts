@@ -82,7 +82,7 @@ export const projects: Project[] = [
     approach: [
       "Built in 44 hours at the University of Sydney with a team put together on day one, across three universities. A coordinator opens the island map (Christmas Island, Kiribati, in our demo), drags a timeline from 2026 to 2100, and sees which ground floods as the water rises, with planning layers for future development, housing, farmland and adaptation. We also designed a village view that tracks houses, wells, farms and sacred sites one by one. The research and design were done, but we cut it to keep the demo solid inside 44 hours.",
       "I built the AI recommendation engine for the village view. Each prompt sends the Claude API the village's name, country, region, population, setting and main threats, and the threatened asset's type, name, description, cultural significance, elevation and flood status in the chosen year, with guardrails that keep recommendations practical for a small council instead of generic climate advice. The next step we researched and scoped was richer village context: budget and available labour, alongside IPCC AR6 and SPREP climate data. When we cut the village view, the engine was cut from the demo with it.",
-      "I also built a rule-based fallback that runs with no API access at all. It was meant as insurance, and it is what the live demo ran on when the venue network dropped.",
+      "I also built a fallback for the engine: a fixed set of adaptation options for each type of asset, so the village view could still recommend something with no API access.",
       "The call I am proudest of was 2D over a 3D digital twin. 86% of the Pacific has mobile coverage but only 27% use mobile internet, so the real constraint is usability, not connectivity.",
     ],
     impact:
@@ -249,7 +249,7 @@ export const projects: Project[] = [
       "A mobile-first website and enquiry system for a tennis academy coaching 100+ players. My first paid client build.",
     emphasis: "My first paid client build",
     summary:
-      "I scoped it with the owners, quoted it, and talked them out of self-service booking, which would have overfilled sessions. Delivered in three weeks.",
+      "Freelance work for a local tennis academy. I built the site around what the business needed, to give it a proper presence online.",
     problem:
       "A tennis academy coaching 100+ players was advertising mostly through a WhatsApp group. The owners wanted a professional online presence that brings in new players, without taking on software they would have to run themselves.",
     approach: [
@@ -290,7 +290,7 @@ export const projects: Project[] = [
   {
     slug: "portfolio-ai-assistant",
     title: "Portfolio AI Assistant",
-    status: "Next.js · 2026",
+    status: "Version 1 · Next.js · 2026",
     period: "May 2026 to Jun 2026",
     role: "Solo build",
     oneLiner:
@@ -314,7 +314,11 @@ export const projects: Project[] = [
       { value: "1", label: "source of truth" },
     ],
     stack: ["Next.js", "TypeScript", "Tailwind", "Claude API", "Vercel"],
-    links: [{ label: "Source", url: "https://github.com/Agrim1305/portfolio" }],
+    links: [
+      { label: "Source", url: "https://github.com/Agrim1305/portfolio" },
+      // The v1 branch's own deployment, kept as it shipped.
+      { label: "Try v1", url: "https://portfolio-git-v1-agrimsharma.vercel.app", accent: true },
+    ],
   },
   {
     slug: "speech-to-text-service",

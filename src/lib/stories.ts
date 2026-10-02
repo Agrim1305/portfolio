@@ -47,9 +47,9 @@ export const clubPhotos: Photo[] = [
   },
 ];
 
-// The coaching photo shows children. It stays off, and its file stays out of
-// git (see .gitignore), until consent to publish it is confirmed.
-export const COACHING_PHOTO_CONSENT = false;
+// The coaching photo shows children; consent to publish it was given on
+// 2 Oct 2026. Turning this off takes it down everywhere it shows.
+export const COACHING_PHOTO_CONSENT = true;
 export const coachingPhoto: Photo = {
   src: "/images/experience/13-coaching-kids.webp",
   alt: "Agrim with a group of young players holding racquets",

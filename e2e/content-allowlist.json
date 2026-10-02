@@ -38,5 +38,7 @@
   "I led the AI recommendation engine. Each prompt carries the village's real context into the Claude API: its population, budget, cultural constraints, sacred sites and available labour, alongside IPCC AR6 and SPREP climate data. Guardrails keep every recommendation tied to what that council can actually do, instead of generic climate advice.": "Pacific Village Explorer rewritten to match what shipped, approved wording with the prompt's contents from the repo (round eleven, item 6)",
   "Live demo Source": "Card and case study buttons now run Source before Live demo (round eleven, item 3)",
   "2026→2075": "The shipped demo's timeline runs to 2100: metric now 2026→2100 (round twelve, item 2, approved)",
-  "React · Vite · Tailwind · Leaflet · Claude API · Vercel": "Leaflet and the Claude API now marked (village view, not in the demo) (round twelve, item 2, approved)"
+  "React · Vite · Tailwind · Leaflet · Claude API · Vercel": "Leaflet and the Claude API now marked (village view, not in the demo) (round twelve, item 2, approved)",
+  "I scoped it with the owners, quoted it, and talked them out of self-service booking, which would have overfilled sessions. Delivered in three weeks.": "Adelaide Rising Stars card summary replaced with the approved freelance summary (round thirteen, item 5); the booking story stays in its case study",
+  "I also built a rule-based fallback that runs with no API access at all. It was meant as insurance, and it is what the live demo ran on when the venue network dropped.": "Pacific Village Explorer approach[2] replaced with the approved fallback wording (round thirteen, item 6)"
 }

@@ -40,8 +40,13 @@ Nepal. He now plays Premier League, the top grade in Tennis South
 Australia, and is Assistant Head Coach at Adelaide Rising Stars Tennis
 Academy, based at Tea Tree Gully Tennis Club.
 
-At the Rafa Nadal Academy he met Toni Nadal, and at Adelaide University he
-plays in the UTL team.
+At the Rafa Nadal Academy he met Toni Nadal, played a night tournament
+match, and was on stage with Team India at the academy's inauguration
+ceremony. As a junior he won an AITA tournament. His first season in
+Australia brought his first title, at Tea Tree Gully Tennis Club. At
+Adelaide University he plays in the UTL team: in his first year he played
+UTL in Perth and UniSport Nationals in Canberra. He also coaches juniors at
+Adelaide Rising Stars.
 
 ---
 
@@ -57,7 +62,9 @@ map (Christmas Island, Kiribati), with its sea-level timeline from 2026 to
 2100 and planning layers for future development, housing, farmland and
 adaptation. The village view that tracks houses, wells, farms and sacred
 sites one by one was designed but cut from the demo, and the AI
-recommendation engine Agrim built for it was cut with it. Richer prompt
+recommendation engine Agrim built for it was cut with it, along with the
+engine's fallback (a fixed set of adaptation options for each type of
+asset, for when there is no API access). Richer prompt
 context (budget, available labour, IPCC AR6 and SPREP climate data) was
 researched and scoped as the next step, not shipped.
 

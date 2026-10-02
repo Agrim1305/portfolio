@@ -48,7 +48,3 @@ CLAUDE.md
 /test-results/
 /playwright-report/
 /e2e/screenshots/
-
-# The coaching photo shows children: out of the repo until consent to publish
-# it is confirmed (COACHING_PHOTO_CONSENT in src/components/experience-roles.tsx).
-/public/images/experience/13-coaching-kids.webp
