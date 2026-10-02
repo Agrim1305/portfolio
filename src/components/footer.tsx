@@ -1,12 +1,9 @@
+// Bottom padding leaves room for the floating Ask launcher.
 export function Footer() {
   return (
-    <footer>
-      <div className="mx-auto max-w-5xl px-5 sm:px-8 pb-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-sm text-ink-faint">
-        <span>© 2026 Agrim Sharma</span>
-        <span className="font-mono text-xs">
-          Built with Next.js · Deployed on Vercel
-        </span>
-      </div>
+    <footer className="wrap flex flex-col gap-2 pb-24 pt-6 text-[13px] text-ink-faint sm:flex-row sm:items-center sm:justify-between">
+      <span>© 2026 Agrim Sharma</span>
+      <span>Built with Next.js · Deployed on Vercel</span>
     </footer>
   );
 }

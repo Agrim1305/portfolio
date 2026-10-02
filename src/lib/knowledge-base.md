@@ -40,6 +40,14 @@ Nepal. He now plays Premier League, the top grade in Tennis South
 Australia, and is Assistant Head Coach at Adelaide Rising Stars Tennis
 Academy, based at Tea Tree Gully Tennis Club.
 
+At the Rafa Nadal Academy he met Toni Nadal, played a night tournament
+match, and was on stage with Team India at the academy's inauguration
+ceremony. As a junior he won an AITA tournament. His first season in
+Australia brought his first title, at Tea Tree Gully Tennis Club. At
+Adelaide University he plays in the UTL team: in his first year he played
+UTL in Perth and UniSport Nationals in Canberra. He also coaches juniors at
+Adelaide Rising Stars.
+
 ---
 
 ## Projects
@@ -48,6 +56,17 @@ Every project also has its own case study page on the site, linked below.
 Project details are generated from the site's project data.
 
 {{PROJECTS}}
+
+What Pacific Village Explorer's hackathon demo shipped: the island flood
+map (Christmas Island, Kiribati), with its sea-level timeline from 2026 to
+2100 and planning layers for future development, housing, farmland and
+adaptation. The village view that tracks houses, wells, farms and sacred
+sites one by one was designed but cut from the demo, and the AI
+recommendation engine Agrim built for it was cut with it, along with the
+engine's fallback (a fixed set of adaptation options for each type of
+asset, for when there is no API access). Richer prompt
+context (budget, available labour, IPCC AR6 and SPREP climate data) was
+researched and scoped as the next step, not shipped.
 
 ### Wumpus World agent (coursework, not public)
 
@@ -114,7 +133,8 @@ the same time. Skills: Customer Service, Teamwork.
 - Partnering with AI in the Workplace, Datacom, 2026 (Applied AI,
   Workflow Design)
 - Career Access Mentoring Program, Adelaide University, 2025 (Industry
-  Mentoring, Professional Skills)
+  Mentoring, Professional Skills). His mentor, Bart, is an APT Analyst at
+  Google Threat Intelligence; they met in person at Google Sydney.
 - Microsoft Certified: Azure Fundamentals (AZ-900), Microsoft, August 2026
   (Cloud Concepts, Azure Services, Governance)
 
@@ -128,6 +148,9 @@ the same time. Skills: Customer Service, Teamwork.
   merger with UniSA's tennis club.
 - Intervarsity Certificate of Merit, UniSport Australia, 2025.
   Recognition for representing Adelaide University at UniSport Nationals.
+- State team, Punjab: 3rd at the nationals.
+- SA Challenge Intervarsity 2024, 1st place, men's tennis.
+- Certificate of merit from the Vice-Chancellor, in his first year.
 - Top 90, AITA U18 National Ranking, All India Tennis Association, 2022.
   Trained at the Rafa Nadal Academy in Spain, competed in junior ITF
   tournaments across India and Nepal.
@@ -168,8 +191,9 @@ a graduate role in Australia. Available for graduate roles from December
 
 **What kinds of problems interest you most?**
 Two threads run through Agrim's work. The first is applied AI inside real
-products: the Claude-powered recommendation engine in Pacific Village
-Explorer, speech-to-text work in his coursework, and now the Aurivox voice
+products: the Claude-powered recommendation engine he built for Pacific
+Village Explorer's village view (cut from the hackathon demo), speech-to-text
+work in his coursework, and now the Aurivox voice
 AI internship. The second is turning messy data into something you can act
 on. He has run his own monthly budget tool in VBA since September 2025,
 tracking expenses, planning travel and thinking about investment, and uses

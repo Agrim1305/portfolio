@@ -35,6 +35,9 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // AVIF first: noticeably smaller photos on the first load, WebP for the
+  // browsers that can't take it.
+  images: { formats: ["image/avif", "image/webp"] },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

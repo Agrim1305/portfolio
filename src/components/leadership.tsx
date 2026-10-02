@@ -1,6 +1,8 @@
-import { ChevronDown } from "lucide-react";
-import { SectionHeading } from "@/components/section-heading";
-import { TickFrame } from "@/components/tick-frame";
+"use client";
+
+import Image from "next/image";
+import { ArrowRight } from "lucide-react";
+import { awardPhoto, mergerStory, openStory } from "@/lib/stories";
 
 const outcomes = [
   { value: "2 → 1", label: "clubs merged" },
@@ -9,44 +11,35 @@ const outcomes = [
   { value: "Winner", label: "Club of the Year 2025" },
 ];
 
-const story = [
-  {
-    label: "Setup",
-    text: "Adelaide and UniSA were merging, so every affiliated club had to merge too. I was president of the club that was ahead on membership and results, so I ran our side of it. That meant recruiting and bringing the right people across, aligning two committees that each ran their own social and competitive tennis, leading the merged constitution, and keeping every stakeholder comfortable, the University most of all, with as few conflicts as possible.",
-  },
-  {
-    label: "What I did",
-    text: "I started by working through what each committee actually wanted and where the two overlapped, then led the merged constitution until both sides were happy to sign it. The hardest piece was the coaches. They were two independent businesses, each loyal to a different club, and any shared model had to close the gaps where money could quietly leak out of the club. We talked through several models over a lot of meetings and settled on a three-month trial with both coaches running sessions together, so the real problems would surface early and we could fix them before locking anything in. Alongside that I ran member feedback to keep people bought into the change, and took on the practical handover myself: the facilities, the nets and fencing, the spare rackets, and the full asset register.",
-  },
-  {
-    label: "Result",
-    text: "One merged club running smoothly, both coaches retained on a model that actually worked, the members kept happy through the transition, and Club of the Year in the same year.",
-  },
-];
+// "What I did" is long, so the page shows its first three sentences, word for
+// word, and the full story holds the rest.
+const trimmed = (text: string) => text.split(/(?<=\.)\s+/).slice(0, 3).join(" ");
+
+const rise = (delay: number) => ({ "--rise-delay": `${delay}s` }) as React.CSSProperties;
+
+const print =
+  "relative overflow-hidden rounded-[18px] border-[5px] border-ink shadow-[0_30px_60px_rgb(0_0_0/0.5)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:rotate-[0.5deg] hover:scale-[1.02] motion-reduce:transition-none";
 
 export function Leadership() {
   return (
-    <section id="leadership" className="scroll-mt-24 pb-24 sm:pb-36">
-      <SectionHeading
-        number="02"
-        title="Leadership"
-        caption="Adelaide University Tennis Club · President, Jul 2024 to Mar 2026"
-      />
-
-      <div
-        className="rise grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:items-stretch"
-        style={{ "--rise-delay": "0.24s" } as React.CSSProperties}
-      >
-        <article className="group relative flex flex-col justify-center card-draft rounded-xl border border-hairline p-7 sm:p-8 transition-colors duration-300 hover:border-accent/60">
-          <span className="reg-tick reg-tl" aria-hidden />
-          <span className="reg-tick reg-tr" aria-hidden />
-          <span className="reg-tick reg-bl" aria-hidden />
-          <span className="reg-tick reg-br" aria-hidden />
-          <h3 className="font-serif text-2xl sm:text-3xl font-medium leading-snug text-ink">
-            A dormant club to <span className="hl">Club of the Year</span> in
+    <section id="leadership" tabIndex={-1} className="outline-none wrap py-20 lg:py-28">
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,480px)] lg:items-start lg:gap-14">
+        <div>
+          <h2 className="rise font-display text-[clamp(3rem,1.2rem+3.8vw,4.75rem)] font-extrabold uppercase leading-[0.9] tracking-[-0.03em] text-ink">
+            Leadership
+          </h2>
+          <p className="rise mt-4 text-[15px] text-ink-muted lg:text-lg" style={rise(0.04)}>
+            Adelaide University Tennis Club · President, Jul 2024 to Mar 2026
+          </p>
+          <h3
+            className="rise mt-6 font-display text-[clamp(2.75rem,1.5rem+3.8vw,4.75rem)] font-extrabold leading-[0.98] tracking-[-0.035em] text-ink"
+            style={rise(0.08)}
+          >
+            A dormant club to{" "}
+            <span className="font-serif font-medium italic tracking-normal text-accent">Club of the Year</span> in
             eighteen months.
           </h3>
-          <p className="mt-5 text-base leading-relaxed text-ink-muted">
+          <p className="rise mt-6 max-w-[620px] text-base leading-relaxed text-ink-soft lg:text-[17px]" style={rise(0.12)}>
             I took over a club that had gone quiet and rebuilt it from scratch. I
             led the merger of two university tennis clubs during the Adelaide and
             UniSA consolidation, co-authored the new constitution, brought
@@ -54,78 +47,64 @@ export function Leadership() {
             upgrades. The real challenge was getting two groups who didn&apos;t
             know each other to trust the process and work as one.
           </p>
-        </article>
+        </div>
 
-        <TickFrame
-          src="/award.jpg"
-          alt="Adelaide University Sport Club of the Year cheque presentation"
-          sizes="(max-width: 1024px) 100vw, 380px"
-          caption="Club of the Year · Adelaide University Sport, 2025"
-          entrance="reveal"
-          className="min-h-56 lg:min-h-0"
-        />
+        <div className="rise mx-auto w-full max-w-[460px] lg:max-w-none" style={rise(0.16)}>
+          <figure>
+            <div className={`${print} aspect-[480/330] rotate-[2deg]`}>
+              <Image src={awardPhoto.src} alt={awardPhoto.alt} fill sizes="(min-width: 1024px) 480px, 90vw" className="object-cover" />
+            </div>
+            <figcaption className="mt-5 font-mono text-xs text-ink-muted">{awardPhoto.caption}</figcaption>
+          </figure>
+        </div>
       </div>
 
-      <dl
-        className="rise mt-6 grid grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-xl border border-hairline bg-hairline"
-        style={{ "--rise-delay": "0.32s" } as React.CSSProperties}
-      >
+      <dl className="rise mt-12 grid grid-cols-2 border-y border-hairline lg:mt-16 lg:grid-cols-4" style={rise(0.24)}>
         {outcomes.map((o) => (
-          <div key={o.label} className="bg-surface p-4 sm:p-6">
-            <dd className="font-serif text-xl sm:text-3xl lg:text-[1.9rem] font-medium text-ink tabular-nums whitespace-nowrap">
+          <div key={o.label} className="flex flex-col py-6 lg:py-[26px]">
+            <dt className="order-last mt-2 text-sm text-ink-muted lg:text-[15px]">{o.label}</dt>
+            <dd className="whitespace-nowrap font-display text-[clamp(2rem,1.2rem+2.4vw,3.25rem)] font-extrabold leading-none tracking-[-0.03em] text-ink">
               {o.value}
             </dd>
-            <dt className="mt-2 font-mono text-[11px] uppercase tracking-[0.15em] text-ink-faint">
-              {o.label}
-            </dt>
           </div>
         ))}
       </dl>
 
-      {/* The 'tell me about a conflict' story, collapsed by default */}
-      <details
-        className="story rise group relative mt-6 rounded-xl border border-hairline card-draft transition-colors duration-300 hover:border-accent/60"
-        style={{ "--rise-delay": "0.4s" } as React.CSSProperties}
-      >
-        <span className="reg-tick reg-tl" aria-hidden />
-        <span className="reg-tick reg-tr" aria-hidden />
-        <span className="reg-tick reg-bl" aria-hidden />
-        <span className="reg-tick reg-br" aria-hidden />
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-6 sm:p-7 [&::-webkit-details-marker]:hidden">
-          <span>
-            <span className="font-mono text-[11px] uppercase tracking-[0.15em] text-accent">
-              The challenge
-            </span>
-            <span className="mt-1.5 block text-lg font-medium text-ink">
-              Running our side of a two-university club merger
-            </span>
-          </span>
-          <span className="flex shrink-0 items-center gap-3">
-            <span className="hidden font-mono text-[11px] uppercase tracking-[0.15em] text-ink-faint transition-colors group-hover:text-accent sm:inline">
-              <span className="group-open:hidden">Read it</span>
-              <span className="hidden group-open:inline">Close</span>
-            </span>
-            <span className="inline-flex size-9 items-center justify-center rounded-md border border-hairline bg-surface text-ink-faint transition-colors group-hover:border-accent/60 group-hover:text-accent">
-              <ChevronDown
-                className="size-4 transition-transform duration-300 group-open:rotate-180"
+      {/* The merger, told in three beats read straight down the page. */}
+      <ol className="rise relative mt-12 grid gap-10 lg:mt-14 lg:grid-cols-3 lg:gap-10" style={rise(0.32)}>
+        <span
+          aria-hidden
+          className="absolute left-0 right-0 top-[14px] hidden h-0.5 bg-[linear-gradient(90deg,var(--accent),rgb(255_91_46/0.1))] lg:block"
+        />
+        {mergerStory.map((beat, i) => {
+          const long = beat.label === "What I did";
+          return (
+            <li key={beat.label} className="relative">
+              <span
                 aria-hidden
-              />
-            </span>
-          </span>
-        </summary>
-        <div className="story-body space-y-4 px-6 pb-6 sm:px-7 sm:pb-7">
-          {story.map((beat) => (
-            <div key={beat.label}>
-              <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-accent">
-                {beat.label}
+                className="flex size-[30px] items-center justify-center rounded-full bg-accent font-mono text-xs font-bold text-paper"
+              >
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <h3 className="mt-5 font-display text-2xl font-bold text-ink">{beat.label}</h3>
+              <p className="mt-2.5 text-[15px] leading-[1.6] text-ink-muted">
+                {long ? trimmed(beat.text) : beat.text}
               </p>
-              <p className="mt-1.5 text-[15px] leading-relaxed text-ink-muted">
-                {beat.text}
-              </p>
-            </div>
-          ))}
-        </div>
-      </details>
+              {long && (
+                <button
+                  type="button"
+                  data-expand
+                  onClick={(e) => openStory("president", e.currentTarget.closest("ol"))}
+                  className="mt-5 flex h-12 items-center gap-2.5 rounded-full border border-accent bg-accent/10 px-5 text-[15px] font-semibold text-accent-soft transition-[background-color,color,transform] duration-250 hover:translate-x-[3px] hover:bg-accent hover:text-paper motion-reduce:hover:translate-x-0"
+                >
+                  Read the whole story
+                  <ArrowRight className="size-4" aria-hidden />
+                </button>
+              )}
+            </li>
+          );
+        })}
+      </ol>
     </section>
   );
 }

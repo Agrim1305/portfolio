@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { X, Send, Sparkles } from "lucide-react";
-import { setPageScrollLocked } from "@/lib/scroll-lock";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { ArrowUp, X } from "lucide-react";
+import { Cloud } from "@/components/cloud";
+import { Dock } from "@/components/dock";
 
 // Small models sometimes emit **bold** or __underline__ despite the prompt
 // forbidding it; strip the wrappers so a slip renders as plain text.
@@ -86,10 +87,79 @@ const SUGGESTED_QUESTIONS = [
 const INTRO_MESSAGE: Message = {
   role: "assistant",
   content:
-    "Hi, I'm an AI assistant trained only on Agrim's portfolio content. Ask me anything about his projects, experience, or background, and I'll answer from what's actually here rather than guessing.",
+    "Hi, I'm Aris, an AI assistant trained only on Agrim's portfolio content. Ask me anything about his projects, experience, or background, and I'll answer from what's actually here rather than guessing.",
 };
 
-export function AskAgrim() {
+const OPEN_EVENT = "ask:open";
+
+/* Opens the assistant from anywhere on the page (hero card, menu, the cloud,
+   a section's question), optionally sending a first message. */
+export function openAsk(message?: string) {
+  window.dispatchEvent(new CustomEvent<string | undefined>(OPEN_EVENT, { detail: message }));
+}
+
+/* The hero's open Ask card, under the cloud: the assistant's header, the
+   suggested questions and an input. A question or a submitted message opens
+   the chat window and sends it there. */
+export function AskCard({ className = "" }: { className?: string }) {
+  const [text, setText] = useState("");
+  return (
+    <div
+      className={`hero-rise rounded-[26px] border border-ink/12 bg-[linear-gradient(180deg,#1B1B20,#141417)] p-5 shadow-[0_40px_80px_rgb(0_0_0/0.45)] ${className}`}
+      style={{ animationDelay: "1.1s" }}
+    >
+      <p className="font-display text-[20px] font-bold leading-tight lg:text-[22px]">Ask Aris</p>
+      {/* From md up the hero's cloud perches on the card's top-right corner;
+          the line wraps short of it. */}
+      <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-muted md:pr-[190px]">
+        AI assistant · grounded in his portfolio
+      </p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {SUGGESTED_QUESTIONS.map((q) => (
+          <button
+            key={q}
+            type="button"
+            onClick={() => openAsk(q)}
+            className="min-h-11 rounded-full border border-ink/16 px-3.5 py-2 text-left text-sm text-[#D6D3CD] transition-colors hover:border-accent hover:text-ink"
+          >
+            {q}
+          </button>
+        ))}
+      </div>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!text.trim()) return;
+          openAsk(text);
+          setText("");
+        }}
+        className="mt-3 flex h-12 items-center gap-2.5 rounded-2xl border border-accent/70 pl-4 pr-1.5 transition-colors focus-within:border-accent"
+      >
+        <input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Ask a question…"
+          aria-label="Ask a question"
+          maxLength={500}
+          className="chat-input min-w-0 flex-1 bg-transparent text-base text-ink placeholder:text-ink-faint"
+        />
+        <button
+          type="submit"
+          disabled={!text.trim()}
+          aria-label="Send message"
+          className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-accent text-paper transition-opacity disabled:opacity-40"
+        >
+          <ArrowUp className="size-5" aria-hidden />
+        </button>
+      </form>
+    </div>
+  );
+}
+
+/* The chat window and its button, the docked cloud. `heroId` names the hero,
+   where the cloud starts (see dock.tsx); without one it is docked from the
+   start. */
+export function AskAgrim({ heroId }: { heroId?: string }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([INTRO_MESSAGE]);
   const [input, setInput] = useState("");
@@ -97,8 +167,56 @@ export function AskAgrim() {
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const launcherRef = useRef<HTMLButtonElement>(null);
+  const dockRef = useRef<HTMLButtonElement>(null);
+  // Where focus goes back to when the window closes: whatever opened it.
+  const returnTo = useRef<HTMLElement | null>(null);
+  // Read by the handlers, which can run before a render catches up.
+  const openRef = useRef(open);
+  useEffect(() => {
+    openRef.current = open;
+  }, [open]);
+
+  function show() {
+    if (openRef.current) return;
+    const from = document.activeElement;
+    returnTo.current = from instanceof HTMLElement && from !== document.body ? from : dockRef.current;
+    setOpen(true);
+  }
+
+  function close() {
+    if (!openRef.current) return;
+    setOpen(false);
+    // A frame later, once the window has gone, so focus lands on the page.
+    requestAnimationFrame(() => returnTo.current?.focus());
+  }
+
+  // Opened by the hero card, the menu, the cloud, or Cmd/Ctrl+K, which also
+  // closes it again.
+  const onOpenEvent = useEffectEvent((message?: string) => {
+    show();
+    if (message) sendMessage(message);
+  });
+  const onKey = useEffectEvent((e: KeyboardEvent) => {
+    if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "k") return;
+    // Ctrl+K in a text field is "delete to end of line" on macOS; leave it be.
+    // Cmd+K has no such meaning, so it still works from the chat's own input.
+    const target = e.target as HTMLElement;
+    const inField = target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName);
+    if (inField && !e.metaKey) return;
+    e.preventDefault();
+    if (openRef.current) close();
+    else show();
+  });
+  useEffect(() => {
+    const open = (e: Event) => onOpenEvent((e as CustomEvent<string | undefined>).detail);
+    const key = (e: KeyboardEvent) => onKey(e);
+    window.addEventListener(OPEN_EVENT, open);
+    window.addEventListener("keydown", key);
+    return () => {
+      window.removeEventListener(OPEN_EVENT, open);
+      window.removeEventListener("keydown", key);
+    };
+  }, []);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -110,49 +228,6 @@ export function AskAgrim() {
   useEffect(() => {
     if (open) inputRef.current?.focus();
   }, [open]);
-
-  // Lock background scroll while the panel is open on mobile, so the
-  // widget feels like a contained sheet rather than the page shifting
-  // underneath it.
-  useEffect(() => {
-    if (open) {
-      const prevOverflow = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      setPageScrollLocked(true);
-      return () => {
-        document.body.style.overflow = prevOverflow;
-        setPageScrollLocked(false);
-      };
-    }
-  }, [open]);
-
-  function close() {
-    setOpen(false);
-    launcherRef.current?.focus();
-  }
-
-  // The panel is modal: Escape closes it, and Tab wraps inside it so keyboard
-  // focus can't reach the scroll-locked page behind.
-  function handlePanelKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "Escape") {
-      close();
-      return;
-    }
-    if (e.key !== "Tab") return;
-    const focusable = panelRef.current?.querySelectorAll<HTMLElement>(
-      "a[href], button:not(:disabled), input",
-    );
-    if (!focusable?.length) return;
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
-      e.preventDefault();
-      first.focus();
-    }
-  }
 
   async function sendMessage(text: string) {
     const trimmed = text.trim();
@@ -186,7 +261,7 @@ export function AskAgrim() {
           const data = await res.json();
           msg = data?.error ?? msg;
         } catch {
-          // response wasn't JSON — keep the default message
+          // response wasn't JSON, keep the default message
         }
         setError(msg);
         setMessages((prev) => prev.slice(0, -1)); // roll back the user msg on hard failure
@@ -213,7 +288,6 @@ export function AskAgrim() {
           return copy;
         });
       }
-
       if (!received.trim()) {
         setError("The assistant didn't return a response. Try again.");
         setMessages((prev) => prev.slice(0, -2)); // drop empty assistant + user
@@ -242,161 +316,141 @@ export function AskAgrim() {
   const lastMessage = messages[messages.length - 1];
   const waitingForFirstToken =
     lastMessage?.role !== "assistant" || lastMessage.content === "";
+  // The cloud thinks while the request waits for its first token, and
+  // answers while the tokens stream in.
+  const mood = !loading ? "idle" : waitingForFirstToken ? "thinking" : "answering";
 
   return (
     <>
-      <button
-        ref={launcherRef}
-        onClick={() => setOpen((v) => !v)}
-        aria-label={open ? "Close AI assistant" : "Ask AI about Agrim"}
-        aria-expanded={open}
-        aria-controls="ask-agrim-panel"
-        className="fixed bottom-5 right-5 z-50 flex min-h-11 items-center gap-2.5 pl-4 pr-5 py-3 rounded-full bg-ink text-paper shadow-[0_12px_32px_-12px_hsl(230_15%_13%/0.5)] hover:bg-ink/90 transition-all active:scale-[0.98]"
-      >
-        <span className="relative flex size-2">
-          <span className="relative inline-flex size-2 rounded-full bg-accent" />
-        </span>
-        {open ? (
-          <X className="size-4 text-paper" />
-        ) : (
-          <>
-            <Sparkles className="size-4 text-paper" />
-            <span className="font-mono text-xs text-paper uppercase tracking-wider hidden sm:inline">
-              Ask AI about Agrim
-            </span>
-            <span className="font-mono text-xs text-paper uppercase tracking-wider sm:hidden">
-              Ask AI
-            </span>
-          </>
-        )}
-      </button>
+      <Dock heroId={heroId} open={open} mood={mood} onClick={show} onAsk={openAsk} buttonRef={dockRef} />
 
+      {/* A small window, not a modal: no backdrop, no scroll lock and no focus
+          trap, so the page stays usable behind it. It opens above the docked
+          cloud; below md it is a bottom sheet. */}
       <div
-        ref={panelRef}
-        id="ask-agrim-panel"
+        id="ask-agrim"
         role="dialog"
-        aria-modal="true"
+        aria-modal="false"
         aria-labelledby="ask-agrim-title"
-        onKeyDown={handlePanelKeyDown}
-        data-open={open}
-        className="chat-panel fixed z-50 inset-x-3 bottom-3 top-16 sm:inset-x-auto sm:top-auto sm:bottom-24 sm:right-5 sm:left-auto sm:w-[400px] sm:h-[min(560px,70vh)] rounded-xl bg-surface shadow-[0_24px_64px_-24px_hsl(0_0%_0%/0.6)] border border-hairline flex flex-col overflow-hidden"
+        hidden={!open}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") {
+            e.stopPropagation();
+            close();
+          }
+        }}
+        className="chat-window fixed inset-x-0 bottom-0 z-50 h-[85dvh] overflow-hidden rounded-t-[22px] border border-b-0 border-white/14 bg-sheet text-ink shadow-[0_30px_80px_rgb(0_0_0/0.6)] md:inset-x-auto md:bottom-[7.25rem] md:right-6 md:h-[min(540px,calc(100dvh-8.75rem))] md:w-[380px] md:rounded-[22px] md:border-b"
       >
-        <div className="px-5 py-4 border-b border-hairline flex items-center gap-3">
-          <div className="size-9 rounded-lg bg-accent-wash border border-hairline flex items-center justify-center shrink-0">
-            <Sparkles className="size-4 text-accent" />
+        <div className="flex h-full flex-col">
+          <span aria-hidden className="mx-auto mt-2.5 h-[5px] w-10 shrink-0 rounded-full bg-ink/25 md:hidden" />
+          <div className="flex items-center gap-2.5 border-b border-hairline px-4 py-3 md:py-3.5">
+            <Cloud className="w-11 shrink-0 md:w-10" />
+            <div className="min-w-0 flex-1">
+              <p id="ask-agrim-title" className="font-display text-[17px] font-bold leading-tight">
+                Aris
+              </p>
+              <p className="font-mono text-[10px] uppercase leading-snug tracking-[0.06em] text-ink-muted">
+                Agrim&apos;s AI assistant · grounded in his portfolio
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={close}
+              aria-label="Close chat"
+              className="flex size-10 shrink-0 items-center justify-center rounded-full border border-ink/20 text-ink-soft transition-colors hover:text-ink"
+            >
+              <X className="size-[18px]" aria-hidden />
+            </button>
           </div>
-          <div className="min-w-0 flex-1">
-            <p id="ask-agrim-title" className="text-sm font-semibold text-ink">
-              Ask about Agrim
-            </p>
-            <p className="font-mono text-[10px] text-ink-faint uppercase tracking-wider">
-              AI assistant · grounded in his portfolio
-            </p>
-          </div>
-          <button
-            onClick={close}
-            aria-label="Close chat"
-            className="size-7 shrink-0 rounded-lg hover:bg-secondary flex items-center justify-center transition-colors"
-          >
-            <X className="size-4 text-ink-faint" />
-          </button>
-        </div>
 
-        {/* data-lenis-prevent keeps a wheel inside the transcript scrolling the
-            transcript rather than the page behind it. */}
-        <div
-          ref={scrollRef}
-          data-lenis-prevent
-          role="log"
-          aria-live="polite"
-          aria-busy={loading}
-          className="flex-1 overflow-y-auto px-4 py-4 space-y-3 chat-scroll"
-        >
-          {messages.map((m, i) => {
-            // The streaming assistant bubble is empty until the first token
-            // arrives — the typing dots stand in for it until then.
-            if (m.role === "assistant" && m.content === "") return null;
-            return (
-              <div
-                key={i}
-                className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
-              >
+          <div
+            ref={scrollRef}
+            role="log"
+            aria-live="polite"
+            aria-busy={loading}
+            className="thin-scroll flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-4"
+          >
+            {messages.map((m, i) => {
+              // The streaming assistant bubble is empty until the first token
+              // arrives; the typing dots stand in for it until then.
+              if (m.role === "assistant" && m.content === "") return null;
+              return (
                 <div
-                  className={`max-w-[85%] rounded-xl px-3.5 py-2.5 text-sm leading-relaxed break-words ${
+                  key={i}
+                  className={`max-w-[88%] break-words px-3.5 py-2.5 text-[15px] leading-relaxed md:text-sm ${
                     m.role === "user"
-                      ? "bg-ink text-paper"
-                      : "bg-secondary text-ink"
+                      ? "self-end rounded-[18px_18px_6px_18px] bg-accent font-medium text-paper"
+                      : "self-start rounded-[18px_18px_18px_6px] bg-surface-raised text-[#E4E1DB]"
                   }`}
                 >
                   {renderMessageContent(m.content)}
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
 
-          {loading && waitingForFirstToken && (
-            <div className="flex justify-start">
+            {loading && waitingForFirstToken && (
               <div
-                className="bg-secondary rounded-xl px-3.5 py-2.5 flex items-center gap-1.5"
+                className="flex items-center gap-1.5 self-start rounded-[18px_18px_18px_6px] bg-surface-raised px-4 py-3.5"
                 aria-hidden
               >
                 <span className="size-1.5 rounded-full bg-ink-faint animate-bounce motion-reduce:animate-none [animation-delay:-0.3s]" />
                 <span className="size-1.5 rounded-full bg-ink-faint animate-bounce motion-reduce:animate-none [animation-delay:-0.15s]" />
                 <span className="size-1.5 rounded-full bg-ink-faint animate-bounce motion-reduce:animate-none" />
               </div>
-            </div>
-          )}
+            )}
 
-          {error && (
-            <p role="alert" className="text-xs text-destructive font-mono px-1">
-              {error}
-            </p>
-          )}
+            {error && (
+              <p role="alert" className="px-1 font-mono text-xs text-destructive">
+                {error}
+              </p>
+            )}
+          </div>
 
-          {/* Suggested questions — only before the conversation gets going */}
+          {/* Suggested questions, only before the conversation gets going */}
           {messages.length === 1 && !loading && (
-            <div className="flex flex-col gap-2 pt-2">
+            <div className="flex flex-wrap gap-1.5 px-4 pb-3">
               {SUGGESTED_QUESTIONS.map((q) => (
                 <button
                   key={q}
+                  type="button"
                   onClick={() => sendMessage(q)}
-                  className="text-left text-xs font-mono px-3 py-2.5 rounded-lg border border-hairline text-ink-muted hover:border-accent hover:text-accent transition-colors"
+                  className="min-h-10 rounded-full border border-ink/20 px-3 py-1.5 text-left text-[13px] text-ink-soft transition-colors hover:border-accent hover:text-ink"
                 >
                   {q}
                 </button>
               ))}
             </div>
           )}
-        </div>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            sendMessage(input);
-          }}
-          className="p-3 border-t border-hairline flex items-center gap-2"
-        >
-          <input
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask a question..."
-            aria-label="Ask a question"
-            maxLength={500}
-            // readOnly rather than disabled: a disabled input drops keyboard
-            // focus to <body> mid-conversation.
-            readOnly={loading}
-            className="flex-1 bg-secondary border border-hairline rounded-lg px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-accent transition-colors read-only:opacity-50"
-          />
-          <button
-            type="submit"
-            disabled={loading || !input.trim()}
-            aria-label="Send message"
-            className="size-11 shrink-0 rounded-lg bg-ink hover:bg-ink/85 disabled:opacity-30 disabled:hover:bg-ink flex items-center justify-center transition-all"
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              sendMessage(input);
+            }}
+            className="mx-4 mb-4 flex h-[54px] shrink-0 items-center gap-2.5 rounded-[14px] border border-ink/15 bg-paper pl-4 pr-1.5 transition-colors focus-within:border-accent"
           >
-            <Send className="size-4 text-paper" />
-          </button>
-        </form>
+            <input
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask a question..."
+              aria-label="Ask a question"
+              maxLength={500}
+              // readOnly rather than disabled: a disabled input drops keyboard
+              // focus to <body> mid-conversation.
+              readOnly={loading}
+              className="chat-input min-w-0 flex-1 bg-transparent text-base text-ink placeholder:text-ink-faint read-only:opacity-50"
+            />
+            <button
+              type="submit"
+              disabled={loading || !input.trim()}
+              aria-label="Send message"
+              className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent text-paper transition-opacity disabled:opacity-40"
+            >
+              <ArrowUp className="size-5" aria-hidden />
+            </button>
+          </form>
+        </div>
       </div>
     </>
   );
