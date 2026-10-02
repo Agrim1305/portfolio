@@ -1,10 +1,9 @@
 "use client";
 
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { PhotoGrid } from "@/components/photo-grid";
+import { Journey } from "@/components/journey";
 import { SkipLink } from "@/components/skip-link";
 import { usePinnedTrack } from "@/lib/pinned-track";
-import { COACHING_PHOTO_CONSENT, coachingPhoto, type Photo } from "@/lib/stories";
 
 type Stop = {
   /** Short name under the timeline dot. */
@@ -14,14 +13,6 @@ type Stop = {
   meta?: string;
   line: string;
 };
-
-const court = (file: string, width: number, height: number, alt: string, caption: string): Photo => ({
-  src: `/images/court/${file}.webp`,
-  alt,
-  caption,
-  width,
-  height,
-});
 
 // Wording taken as-is from knowledge-base.md, experience.tsx and leadership.tsx.
 const stops: Stop[] = [
@@ -75,19 +66,6 @@ const stops: Stop[] = [
   },
 ];
 
-// Under the stops, school to uni.
-const photos: Photo[] = [
-  court("07-school-serve", 800, 1200, "Agrim serving in a school match", "Serving at school, India"),
-  court("05-tony-nadal", 768, 1024, "Agrim as a junior with Toni Nadal", "With Toni Nadal at the Rafa Nadal Academy"),
-  court("06-nationals-punjab", 1125, 2000, "Agrim holding a trophy and medal", "State team, Punjab: 3rd at the nationals"),
-  court("04-sa-challenge-win", 1125, 2000, "Agrim with a winner's certificate and shield on court", "SA Challenge Intervarsity 2024, 1st place, men's tennis"),
-  court("03-blues-certificate-of-merit", 1334, 2000, "Agrim holding his certificate of merit at the Blues awards", "Intervarsity Certificate of Merit, tennis, 2024"),
-  court("14-vc-certificate-of-merit", 800, 533, "Agrim receiving a certificate on stage", "Certificate of merit from the Vice-Chancellor, first year"),
-  court("01-utl-team", 1600, 1200, "Adelaide University tennis team at the net", "UTL team, Adelaide University"),
-  court("02-utl-playing", 1080, 720, "Agrim hitting a forehand", "Match play, UTL"),
-  ...(COACHING_PHOTO_CONSENT ? [coachingPhoto] : []),
-];
-
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /* One stop per 80svh of scroll, sliding sideways, with a timeline
@@ -95,8 +73,8 @@ const pad = (n: number) => String(n).padStart(2, "0");
    instead). Arrows, the timeline dots and the arrow keys scroll to a stop.
    Stops that are out of view are inert, so a screen reader doesn't land on
    them; the live region says which stop is showing. Under the stops, the
-   photos from school to uni (see PhotoGrid). */
-export function Court() {
+   journey strip (see Journey), with the glow colours worked out at build. */
+export function Court({ colours }: { colours: Record<string, string> }) {
   const last = stops.length - 1;
   const { sectionRef, trackRef, active: current, go, step, onFocus } = usePinnedTrack<HTMLDivElement>(stops.length);
 
@@ -249,8 +227,8 @@ export function Court() {
         </div>
       </div>
 
-      <div className="wrap pb-20 pt-14 lg:pb-28 lg:pt-16">
-        <PhotoGrid photos={photos} />
+      <div className="pb-20 pt-14 lg:pb-28 lg:pt-16">
+        <Journey colours={colours} />
       </div>
     </section>
   );

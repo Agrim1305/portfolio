@@ -438,51 +438,123 @@ html[data-switch="prev"] {
   }
 }
 
-/* ---- Built on court's photos (see PhotoGrid) ----
-   Phones: two masonry columns, the rows dissolved. From md up, justified
-   rows that PhotoGrid breaks: in a full row each photo grows in proportion
-   to its aspect ratio (--ar) from nothing, so the row fills its width
-   exactly and every photo in it is one height; the last row keeps the row
-   height (--row) and stays left-aligned. Keep --row and the gap in step
-   with PhotoGrid. */
-.photo-grid {
-  columns: 2;
-  column-gap: 12px;
+/* ---- The journey strip under Built on court (see journey.tsx) ----
+   One sideways track, bleeding off the right edge. --H is a column's
+   height: a tall medium fills it less a 40px caption; a pair stacks two
+   half-height media with 16px between. Widths come from each medium's own
+   ratio, so nothing is cropped. Phones: one row, every medium 260px tall,
+   pairs come apart. Keep the heights in step with HEIGHTS in journey.tsx. */
+.journey-track {
+  --H: 300px;
+  --tall: calc(var(--H) - 40px);
+  --half: var(--tall);
+  --card: 220px;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-right: calc((100% - 100vw) / 2);
+  padding-right: calc((100vw - 100%) / 2);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
 }
-.photo-row {
+.journey-track::-webkit-scrollbar {
+  display: none;
+}
+.journey-card,
+.journey-item,
+.journey-pair {
+  flex: none;
+  scroll-snap-align: start;
+}
+.journey-card {
+  display: flex;
+  height: var(--H);
+  width: var(--card);
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  background: linear-gradient(160deg, #1d1d22, #121215 70%);
+  padding: 22px 24px 26px;
+}
+.journey-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.journey-media {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--surface);
+  transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+}
+.journey-tall {
+  height: var(--tall);
+}
+.journey-half {
+  height: var(--half);
+}
+.journey-pair {
   display: contents;
+  scroll-snap-align: none;
 }
-.photo-row > figure {
-  break-inside: avoid;
-  margin-bottom: 12px;
+.journey-pair > .journey-item {
+  scroll-snap-align: start;
 }
 @media (width >= 48rem) {
-  .photo-grid {
-    --row: 180px;
+  .journey-track {
+    --H: 380px;
+    --half: calc((var(--H) - 96px) / 2);
+    --card: 240px;
+  }
+  .journey-pair {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    columns: auto;
+    align-items: center;
+    gap: 16px;
+    scroll-snap-align: start;
   }
-  .photo-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-  }
-  .photo-row > figure {
-    flex: var(--ar) 1 0px;
-    min-width: 0;
-    margin: 0;
-  }
-  .photo-row[data-last] > figure {
-    flex: none;
-    width: calc(var(--ar) * var(--row));
+  .journey-pair > .journey-item {
+    scroll-snap-align: none;
   }
 }
 @media (width >= 64rem) {
-  .photo-grid {
-    --row: 260px;
+  .journey-track {
+    --H: 470px;
+    --card: 260px;
   }
+}
+@media (hover: hover) {
+  .journey:not([data-quiet]) .journey-media:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 22px 44px rgb(0 0 0 / 0.5);
+  }
+}
+/* Behind the track, tinted with the column in front; still when quiet. */
+.journey-glow {
+  position: absolute;
+  inset: 12% 8%;
+  border-radius: 50%;
+  filter: blur(110px);
+  opacity: 0.3;
+  pointer-events: none;
+  transition: background-color 600ms ease;
+}
+.journey[data-quiet] .journey-glow {
+  transition: none;
+}
+/* In the lightbox: the medium at its own ratio, as large as fits above its
+   caption (the figure is a size container). */
+.journey-fit {
+  display: block;
+  aspect-ratio: var(--ar);
+  width: min(100cqw, (100cqh - 3.5rem) * var(--ar));
+  height: auto;
 }
 
 /* ---- A project's framed screenshot (see ProjectCover in case-study.tsx) ----

@@ -12,8 +12,10 @@ import { AskAgrim } from "@/components/ask-agrim";
 import { Reveal } from "@/components/reveal";
 import { Footer } from "@/components/footer";
 import { SectionSnap } from "@/components/section-snap";
+import { journeyColours } from "@/lib/journey-colours";
 
-export default function Home() {
+export default async function Home() {
+  const colours = await journeyColours();
   return (
     <>
       <Nav />
@@ -31,7 +33,7 @@ export default function Home() {
           <Google />
         </Reveal>
         <Reveal>
-          <Court />
+          <Court colours={colours} />
         </Reveal>
         <Reveal>
           <About />
