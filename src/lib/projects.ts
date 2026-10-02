@@ -76,12 +76,12 @@ export const projects: Project[] = [
       "A climate adaptation planner that shows a Pacific village council its own coastline decades out, built in 44 hours and a top 12 finalist.",
     emphasis: "top 12 finalist",
     summary:
-      "Drag a timeline from 2026 to 2075 and watch which ground floods as the sea rises, with planning layers for where to build, house, farm and adapt.",
+      "Drag a timeline from 2026 to 2100 and watch which ground floods as the sea rises, with planning layers for where to build, house, farm and adapt.",
     problem:
       "A village council deciding where to rebuild after a flood, where to move a school, or how to farm ground turning saline has no way to see its own coastline in twenty years. The digital twin platforms that answer that cost over $10,000 per site and need technical staff villages do not have.",
     approach: [
-      "Built in 44 hours at the University of Sydney with a team put together on day one, across three universities. A coordinator picks their island, drags a timeline from 2026 to 2075, and sees which ground floods as the water rises, with planning layers for future development, housing, farmland and adaptation. We also designed a village view that tracks houses, wells, farms and sacred sites one by one. The research and design were done, but we cut it to keep the demo solid inside 44 hours.",
-      "I led the AI recommendation engine. Each prompt sends the Claude API the village's name, country, region, population, setting and main threats, and the threatened asset's type, name, description, cultural significance, elevation and flood status in the chosen year, with guardrails that keep recommendations practical for a small council instead of generic climate advice. The next step we researched and scoped was richer village context: population, budget, available labour, cultural constraints and sacred sites, alongside IPCC AR6 and SPREP climate data.",
+      "Built in 44 hours at the University of Sydney with a team put together on day one, across three universities. A coordinator opens the island map (Christmas Island, Kiribati, in our demo), drags a timeline from 2026 to 2100, and sees which ground floods as the water rises, with planning layers for future development, housing, farmland and adaptation. We also designed a village view that tracks houses, wells, farms and sacred sites one by one. The research and design were done, but we cut it to keep the demo solid inside 44 hours.",
+      "I built the AI recommendation engine for the village view. Each prompt sends the Claude API the village's name, country, region, population, setting and main threats, and the threatened asset's type, name, description, cultural significance, elevation and flood status in the chosen year, with guardrails that keep recommendations practical for a small council instead of generic climate advice. The next step we researched and scoped was richer village context: budget and available labour, alongside IPCC AR6 and SPREP climate data. When we cut the village view, the engine was cut from the demo with it.",
       "I also built a rule-based fallback that runs with no API access at all. It was meant as insurance, and it is what the live demo ran on when the venue network dropped.",
       "The call I am proudest of was 2D over a 3D digital twin. 86% of the Pacific has mobile coverage but only 27% use mobile internet, so the real constraint is usability, not connectivity.",
     ],
@@ -95,11 +95,11 @@ export const projects: Project[] = [
       { value: "Top 12", label: "of 75 submissions" },
       { value: "44 hrs", label: "idea to demo" },
       { value: "<$500", label: "per village" },
-      { value: "2026→2075", label: "timeline modelled" },
+      { value: "2026→2100", label: "timeline modelled" },
     ],
     learned:
       "Appropriate technology beats impressive technology. And a fallback path is not optional polish: the one I built as insurance is the version the judges actually saw.",
-    stack: ["React", "Vite", "Tailwind", "Leaflet", "Claude API", "Vercel"],
+    stack: ["React", "Vite", "Tailwind", "Leaflet (village view, not in the demo)", "Claude API (village view, not in the demo)", "Vercel"],
     links: [
       {
         label: "Source",

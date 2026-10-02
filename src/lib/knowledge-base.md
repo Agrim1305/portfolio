@@ -53,11 +53,13 @@ Project details are generated from the site's project data.
 {{PROJECTS}}
 
 What Pacific Village Explorer's hackathon demo shipped: the island flood
-map, with its sea-level timeline and planning layers for future
-development, housing, farmland and adaptation. The village view that tracks
-houses, wells, farms and sacred sites one by one, and the richer prompt
-context (budget, available labour, IPCC AR6 and SPREP climate data), were
-researched and designed but not shipped.
+map (Christmas Island, Kiribati), with its sea-level timeline from 2026 to
+2100 and planning layers for future development, housing, farmland and
+adaptation. The village view that tracks houses, wells, farms and sacred
+sites one by one was designed but cut from the demo, and the AI
+recommendation engine Agrim built for it was cut with it. Richer prompt
+context (budget, available labour, IPCC AR6 and SPREP climate data) was
+researched and scoped as the next step, not shipped.
 
 ### Wumpus World agent (coursework, not public)
 
@@ -182,8 +184,9 @@ a graduate role in Australia. Available for graduate roles from December
 
 **What kinds of problems interest you most?**
 Two threads run through Agrim's work. The first is applied AI inside real
-products: the Claude-powered recommendation engine he led for Pacific
-Village Explorer, speech-to-text work in his coursework, and now the Aurivox voice
+products: the Claude-powered recommendation engine he built for Pacific
+Village Explorer's village view (cut from the hackathon demo), speech-to-text
+work in his coursework, and now the Aurivox voice
 AI internship. The second is turning messy data into something you can act
 on. He has run his own monthly budget tool in VBA since September 2025,
 tracking expenses, planning travel and thinking about investment, and uses
