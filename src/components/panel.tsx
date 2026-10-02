@@ -63,9 +63,7 @@ export function Panel({
           onKeyDown={(e) => {
             if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
             const step = e.key === "ArrowLeft" ? prev : e.key === "ArrowRight" ? next : null;
-            if (!step) return;
-            e.preventDefault();
-            step.onClick();
+            step?.onClick();
           }}
         >
           {/* Focusable, so a keyboard can scroll a story with nothing to tab

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { setPageScrollLocked } from "@/lib/scroll-lock";
 
 /* A modal sheet built on the native <dialog>. showModal() supplies the focus
    trap, an inert page behind, and focus return on close, so none of that is
@@ -30,9 +29,6 @@ export function Sheet({
     if (!dialog) return;
     if (open && !dialog.open) dialog.showModal();
     if (!open && dialog.open) dialog.close();
-    if (!open) return;
-    setPageScrollLocked(true);
-    return () => setPageScrollLocked(false);
   }, [open]);
 
   return (
@@ -55,8 +51,6 @@ export function Sheet({
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
-      // Lets a wheel over the sheet scroll the sheet, not the page behind.
-      data-lenis-prevent
       className={`sheet m-0 max-h-none max-w-none p-0 text-ink shadow-[0_60px_120px_rgb(0_0_0/0.6)] ${className}`}
     >
       {children}

@@ -167,8 +167,10 @@ test.describe("hello", () => {
   test("no hello once the chat has been opened", async ({ page }) => {
     await page.goto("/");
     await page.keyboard.press("ControlOrMeta+k");
-    await expect(chat(page)).toBeVisible();
+    // Escape is the chat's once focus is in it.
+    await expect(chat(page).getByRole("textbox", { name: "Ask a question" })).toBeFocused();
     await page.keyboard.press("Escape");
+    await expect(chat(page)).toBeHidden();
     await dock(page);
     await expect(cloud(page)).toBeVisible();
     await page.waitForTimeout(600);

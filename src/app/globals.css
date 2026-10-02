@@ -42,9 +42,6 @@
     monospace;
 }
 
-/* Where Selected work and Built on court pin (see lib/pinned-track.ts). */
-@custom-variant pin (@media (width >= 48rem) and (prefers-reduced-motion: no-preference));
-
 /* The page column: 1200px of content with side gutters. */
 @utility wrap {
   margin-inline: auto;
@@ -74,27 +71,25 @@
   outline-offset: 2px;
 }
 
-/* --nav-height is the sticky header's height. Anchor targets clear it with
-   room to spare; Lenis reads the padding too, so it needs no offset of its
-   own. --corner-clear is the docked cloud's footprint from the bottom of the
-   screen (its margin, its height and a gap), which a pinned stage keeps free
-   so no text sits under it. */
+/* --nav-height is the sticky header's height: a section an anchor jumps
+   to, and anything focused, comes to rest below it. --corner-clear is the
+   docked cloud's footprint from the bottom of the screen (its margin, its
+   height and a gap), which a Selected work card keeps free so no text sits
+   under it. Scrolling is the browser's own; anchors glide unless motion is
+   reduced. */
 html {
   --nav-height: 4rem;
   --corner-clear: 6.75rem;
-  scroll-behavior: smooth;
-  scroll-padding-top: 5.5rem;
   @media (width >= 64rem) {
     --nav-height: 6rem;
-    scroll-padding-top: 7rem;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    scroll-behavior: smooth;
   }
 }
-
-/* Lenis animates the scroll position itself, so the native smooth behaviour has
-   to step aside while it runs. It stays in place for the no-JS case, where
-   Lenis never starts and this class is never added. */
-html.smooth-scroll {
-  scroll-behavior: auto;
+section[id],
+:focus {
+  scroll-margin-top: var(--nav-height);
 }
 
 /* Any open sheet locks the page behind it. */
@@ -408,36 +403,6 @@ html[data-switch="prev"] {
   from { opacity: 0; transform: translateX(var(--panel-shift)); }
 }
 
-/* ---- Pinned sideways travel (Selected work, Built on court) ----
-   Wide screens with motion allowed: the stage sticks to the top for 80svh of
-   scroll per slide and lib/pinned-track.ts slides the track in step with the
-   page. The stage is exactly one screen under the nav: the heading keeps its
-   size and the slides take what is left, so nothing falls below the fold.
-   Elsewhere the track is a native sideways scroller with its own snap. Keep
-   the media query in step with PIN_QUERY and the pin variant. */
-@media (width >= 48rem) and (prefers-reduced-motion: no-preference) {
-  .pin-section {
-    position: relative;
-    height: calc((var(--slides) - 1) * 80svh + 100svh);
-    padding-block: 0;
-  }
-  .pin-stage {
-    position: sticky;
-    top: 0;
-    display: flex;
-    height: 100svh;
-    flex-direction: column;
-    justify-content: center;
-    overflow: clip;
-    padding-top: var(--nav-height);
-    padding-bottom: var(--corner-clear);
-  }
-  .pin-track {
-    overflow: visible;
-    scroll-snap-type: none;
-  }
-}
-
 /* ---- The journey strip under Built on court (see journey.tsx) ----
    One sideways track, bleeding off the right edge. --H is a column's
    height: a tall medium fills it less a 40px caption; a pair stacks two
@@ -456,8 +421,9 @@ html[data-switch="prev"] {
   margin-right: calc((100% - 100vw) / 2);
   padding-right: calc((100vw - 100%) / 2);
   overflow-x: auto;
+  overflow-y: hidden;
   overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
+  scroll-snap-type: x proximity;
   scrollbar-width: none;
 }
 .journey-track::-webkit-scrollbar {
@@ -574,7 +540,7 @@ html[data-switch="prev"] {
    width (--w, the card's or the panel's). It is as tall as a 1.94:1
    screenshot, the widest there is, needs to fill that width inside its
    1.75rem insets and 1.375rem browser bar, so the picture fills most of the
-   height; --cap keeps a card inside the pinned stage. */
+   height; --cap keeps a card within one screen. */
 @media (width >= 64rem) {
   .cover-side {
     min-height: min((var(--w) * 0.68 - 3.5rem) / 1.94 + 4.875rem, var(--cap, 100vh));
@@ -639,7 +605,6 @@ html[data-switch="prev"] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
   .hero-name { animation: none; clip-path: none; }
   .hero-rise { opacity: 1; animation: none; }
   .hero-fade { animation: none; }

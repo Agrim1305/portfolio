@@ -3,8 +3,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type RefObject } from "react";
 import { Sparkle, X } from "lucide-react";
 import { Cloud, type Mood } from "@/components/cloud";
-import { usePinned } from "@/lib/pinned-track";
-import { onLenisScroll } from "@/lib/scroll-lock";
 import { useSectionQuestion } from "@/lib/section-questions";
 
 // The cloud reaches its dock once the page has scrolled this share of the
@@ -16,7 +14,9 @@ const SWAP_AT = 0.25;
 // The pill beside the docked cloud fades in from this share of the way.
 const PILL_FROM = 0.85;
 
-// Where the cloud and the card swap by fading instead of travelling.
+// Where the cloud travels from the hero to the corner, and where it and the
+// card swap by fading instead.
+const TRAVEL_QUERY = "(min-width: 48rem) and (prefers-reduced-motion: no-preference)";
 const STILL_QUERY = "(min-width: 48rem) and (prefers-reduced-motion: reduce)";
 
 // How long a one-beat face lasts, and how long without input before the
@@ -55,12 +55,18 @@ function chattedThisVisit() {
 }
 const subscribeToNothing = () => () => {};
 
+function subscribeTravel(onChange: () => void) {
+  const mq = window.matchMedia(TRAVEL_QUERY);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+
 /* The cloud in the bottom-right corner is the chat's button. From md up with
    motion allowed, the page's cloud starts in the hero: this button takes the
    hero cloud's place (the hero's copy hides) and, as the hero scrolls away,
    shrinks and glides down a gentle curve into the corner, and back up again
-   on the way up. It moves with transforms only, from Lenis's scroll event, so
-   it keeps pace with the page, and the hero's Ask card folds into it on the
+   on the way up. It moves with transforms only, from a passive scroll
+   listener once a frame, so it keeps pace with the page, and the hero's Ask card folds into it on the
    way: smaller, fainter and rounder, until only the cloud is left. Under
    reduced motion nothing travels: from md up the card fades out and the
    button fades in once the page is a little way down. On phones and on pages
@@ -83,7 +89,8 @@ export function Dock({
   onAsk: (question: string) => void;
   buttonRef: RefObject<HTMLButtonElement | null>;
 }) {
-  const travels = usePinned() && Boolean(heroId);
+  const travels =
+    useSyncExternalStore(subscribeTravel, () => window.matchMedia(TRAVEL_QUERY).matches, () => false) && Boolean(heroId);
   const [heroGone, setHeroGone] = useState(!heroId);
   const [swapped, setSwapped] = useState(false);
   // Travelling, whether the cloud has reached the corner.
@@ -305,13 +312,22 @@ export function Dock({
       place();
     };
 
+    let frame = 0;
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(() => {
+        frame = 0;
+        place();
+      });
+    };
+
     heroCloud.style.visibility = "hidden";
     measure();
     place();
-    const offScroll = onLenisScroll(place);
+    window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onResize, { passive: true });
     return () => {
-      offScroll();
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
       button.style.transform = "";
       button.style.removeProperty("--scale");

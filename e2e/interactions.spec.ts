@@ -134,8 +134,8 @@ test.describe("the docked cloud", () => {
     await expect(card).toHaveCSS("visibility", "hidden");
 
     await scroll(page, 0);
-    // The cloud moves from Lenis's scroll event, which can land a frame or
-    // two later on a busy machine.
+    // The cloud moves on the frame after the scroll event, which can land a
+    // frame or two later on a busy machine.
     await expect.poll(async () => Math.abs((await box(page, "button.dock")).x - slot.x)).toBeLessThan(1);
     const back = await box(page, "button.dock");
     for (const k of ["x", "y", "width"] as const) expect(Math.abs(back[k] - slot[k])).toBeLessThan(1);
@@ -471,34 +471,18 @@ test.describe("selected work", () => {
     await expect(next).toBeDisabled();
   });
 
-  test("scrolling down moves the cards sideways, then the page carries on", async ({ page, isMobile }) => {
-    test.skip(isMobile, "pinned travel is for wide screens; phones swipe");
-    await page.goto("/");
-    const section = page.locator("#projects");
-    const { top, height } = await section.evaluate((el) => ({
-      top: el.getBoundingClientRect().top + window.scrollY,
-      height: (el as HTMLElement).offsetHeight,
-    }));
-    // 80svh of scroll per card after the first, plus the pinned screen itself.
-    expect(height).toBe(7 * 720 + 900);
-    await page.evaluate((y) => window.scrollTo(0, y), top + 7 * 720);
-    await expect(page.locator("#projects").getByRole("group", { name: "8 of 8" })).toBeInViewport({ ratio: 0.6 });
-    await expect(page.getByText("8 / 8")).toBeVisible();
-    await page.evaluate((y) => window.scrollTo(0, y), top + height + 200);
-    await expect(section).not.toBeInViewport();
-  });
-
   test("phones swipe the cards sideways and the current card follows", async ({ page, isMobile }) => {
     test.skip(!isMobile, "native swipe is the phone layout");
     await page.goto("/");
-    const track = page.locator("#projects .pin-track");
+    const track = page.getByRole("region", { name: "Selected work" }).locator("> div");
     await track.scrollIntoViewIfNeeded();
     await track.evaluate((el) => el.scrollTo({ left: el.scrollWidth, behavior: "instant" }));
     await expect(page.locator("#projects").getByRole("group", { name: "8 of 8" })).toBeInViewport({ ratio: 0.6 });
+    await expect(page.locator("#projects")).toHaveAttribute("data-active", "7");
   });
 
   test("Tab onto an off-screen card brings it into view", async ({ page, isMobile }) => {
-    test.skip(isMobile, "pinned travel is for wide screens");
+    test.skip(isMobile, "a keyboard is a desktop input");
     await page.goto("/");
     await page.getByRole("link", { name: "Open case study for Pathfinder" }).focus();
     await expect(page.locator("#projects").getByRole("group", { name: "7 of 8" })).toBeInViewport({ ratio: 0.6 });
@@ -521,9 +505,6 @@ test.describe("selected work", () => {
     await page.goto("/");
     const track = page.getByRole("region", { name: "Selected work" });
     await track.scrollIntoViewIfNeeded();
-    // At rest first: a wheel that arrives while the page is still gliding
-    // comes to rest on the slide it reached, by design.
-    await page.waitForTimeout(800);
     const before = await page.evaluate(() => window.scrollY);
     await track.hover();
     await page.mouse.wheel(0, 500);
@@ -672,7 +653,11 @@ test.describe("experience", () => {
     const ids = ["aurivox", "president", "coaching", "retail"];
     for (let i = 0; i < 4; i++) {
       await tabs.nth(i).click();
-      await page.getByRole("tabpanel").getByRole("button", { name: "Read the full story" }).click();
+      const read = page.getByRole("tabpanel").getByRole("button", { name: "Read the full story" });
+      // Playwright's own scroll into view glides under the page's smooth
+      // scrolling and can give up on a moving target; jump instead.
+      await read.evaluate((el) => el.scrollIntoView({ block: "center", behavior: "instant" }));
+      await read.click();
       const sheet = page.getByRole("dialog", { name: names[i] });
       await expect(sheet).toBeVisible();
       await expect(page).toHaveURL(new RegExp(`#story-${ids[i]}$`));
@@ -753,119 +738,47 @@ test("certifications are four matching cards: the badge or logo in a fixed slot,
   }
 });
 
-test.describe("section tops settle into place", () => {
-  const topOf = (page: import("@playwright/test").Page, id: string) =>
-    page.locator(`#${id}`).evaluate((el) => Math.round(el.getBoundingClientRect().top) || 0);
-  const stopAt = (page: import("@playwright/test").Page, id: string, offset: number) =>
-    page.locator(`#${id}`).evaluate((el, offset) => {
-      window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY + offset, behavior: "instant" });
-    }, offset);
-
-  test("scrolling down, a top just below comes up; scrolling up, a top just above comes down", async ({ page, isMobile }) => {
-    test.skip(isMobile, "phones keep native scroll");
-    await page.goto("/");
-    // Down from further up, stopping with the top 150px below.
-    await stopAt(page, "leadership", -600);
-    await page.waitForTimeout(300);
-    await stopAt(page, "leadership", -150);
-    await expect.poll(() => topOf(page, "leadership")).toBe(0);
-    // Up from further down, stopping with the top 150px above.
-    await stopAt(page, "leadership", 600);
-    await page.waitForTimeout(300);
-    await stopAt(page, "leadership", 150);
-    await expect.poll(() => topOf(page, "leadership")).toBe(0);
-  });
-
-  test("it never pulls back against the way the page was going", async ({ page, isMobile }) => {
-    test.skip(isMobile, "phones keep native scroll");
-    await page.goto("/");
-    // Scrolled 150px into Experience on the way down: stay there.
-    await stopAt(page, "experience", -300);
-    await page.waitForTimeout(300);
-    await stopAt(page, "experience", 150);
-    await page.waitForTimeout(1000);
-    expect(await topOf(page, "experience")).toBe(-150);
-  });
-
-  test("deep inside a section taller than the screen nothing moves", async ({ page, isMobile }) => {
-    test.skip(isMobile, "phones keep native scroll");
-    await page.goto("/");
-    expect(await page.locator("#experience").evaluate((el) => el.getBoundingClientRect().height)).toBeGreaterThan(900);
-    await stopAt(page, "experience", 400);
-    await page.waitForTimeout(1000);
-    expect(await topOf(page, "experience")).toBe(-400);
-  });
-
-  test("phones keep their native scroll", async ({ page, isMobile }) => {
-    test.skip(!isMobile, "the phone layout");
-    await page.goto("/");
-    await stopAt(page, "leadership", 100);
-    await page.waitForTimeout(800);
-    expect(await topOf(page, "leadership")).toBe(-100);
-  });
-
-  test("under reduced motion it jumps instead of gliding", async ({ page, isMobile }) => {
-    test.skip(isMobile, "phones keep native scroll");
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/");
-    await stopAt(page, "leadership", -600);
-    await page.waitForTimeout(300);
-    await stopAt(page, "leadership", -150);
-    await page.waitForTimeout(400);
-    expect(await topOf(page, "leadership")).toBe(0);
-  });
-});
-
 test.describe("built on court", () => {
-  const current = (page: import("@playwright/test").Page) =>
-    page.locator("#court [aria-roledescription='slide']:not([inert])");
+  // The live region names the stop in view.
+  const current = (page: import("@playwright/test").Page) => page.locator("#court [aria-live]");
 
   test("arrows, timeline dots and arrow keys move between stops", async ({ page }) => {
     await page.goto("/");
-    // The pinned section is taller than the screen; start at its top.
-    await page.locator("#court").evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY));
-    await expect(current(page)).toHaveAttribute("aria-label", "1 of 8");
+    await page.getByRole("region", { name: "Built on court" }).scrollIntoViewIfNeeded();
+    await expect(current(page)).toHaveText(/^1 of 8/);
 
     await page.locator("#court").getByRole("button", { name: "Next stop" }).filter({ visible: true }).click();
-    await expect(current(page)).toHaveAttribute("aria-label", "2 of 8");
+    await expect(current(page)).toHaveText(/^2 of 8/);
 
     await page.getByRole("button", { name: "Go to Premier League" }).click();
-    await expect(current(page)).toContainText("Premier League");
+    await expect(current(page)).toHaveText("8 of 8: Premier League");
 
     await page.getByRole("region", { name: "Built on court" }).focus();
     await page.keyboard.press("ArrowLeft");
-    await expect(current(page)).toHaveAttribute("aria-label", "7 of 8");
-  });
-
-  test("scrolling down slides the stops sideways, 80svh each", async ({ page, isMobile }) => {
-    test.skip(isMobile, "pinned travel is for wide screens; phones swipe");
-    await page.goto("/");
-    const top = await page.locator("#court").evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
-    await page.evaluate((y) => window.scrollTo(0, y + 3 * 720), top);
-    await expect(current(page)).toHaveAttribute("aria-label", "4 of 8");
-    await expect(page.locator("#court").getByRole("group", { name: "4 of 8" })).toBeInViewport({ ratio: 0.6 });
-    // The reveal must fire for a section many screens tall, or it stays blank.
-    await expect(page.locator("#court").getByRole("heading", { name: "Built on court." })).toHaveCSS("opacity", "1");
+    await expect(current(page)).toHaveText(/^7 of 8/);
   });
 
   test("quick taps on Next queue on phones too", async ({ page, isMobile }) => {
     test.skip(!isMobile, "the phone arrows");
     await page.goto("/");
-    await page.locator("#court .pin-track").scrollIntoViewIfNeeded();
+    await page.getByRole("region", { name: "Built on court" }).scrollIntoViewIfNeeded();
     const next = page.locator("#court").getByRole("button", { name: "Next stop" }).filter({ visible: true });
     await next.click();
     await next.click();
     await next.click();
-    await expect(current(page)).toHaveAttribute("aria-label", "4 of 8");
+    await expect(current(page)).toHaveText(/^4 of 8/);
   });
 
   test("phones swipe between stops", async ({ page, isMobile }) => {
     test.skip(!isMobile, "native swipe is the phone layout");
     await page.goto("/");
-    const track = page.locator("#court .pin-track");
+    const track = page.getByRole("region", { name: "Built on court" });
     await track.scrollIntoViewIfNeeded();
-    await track.evaluate((el) => el.scrollTo({ left: el.clientWidth, behavior: "instant" }));
-    await expect(current(page)).toHaveAttribute("aria-label", "2 of 8");
+    await track.evaluate((el) => {
+      const second = el.querySelectorAll<HTMLElement>("[data-stop]")[1];
+      el.scrollTo({ left: second.offsetLeft - (el.firstElementChild as HTMLElement).offsetLeft, behavior: "instant" });
+    });
+    await expect(current(page)).toHaveText(/^2 of 8/);
   });
 });
 

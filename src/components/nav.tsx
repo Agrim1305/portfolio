@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Sparkles, X } from "lucide-react";
 import { Sheet } from "@/components/sheet";
 import { openAsk } from "@/components/ask-agrim";
-import { scrollToSection } from "@/lib/scroll-lock";
 
 // In page order: the active-section highlight walks this list.
 const sections = [
@@ -78,7 +77,7 @@ export function Nav() {
     setOpen(false);
     if (!el) return;
     e.preventDefault();
-    requestAnimationFrame(() => scrollToSection(el));
+    requestAnimationFrame(() => el.scrollIntoView());
   }
 
   return (
@@ -140,7 +139,7 @@ export function Nav() {
       >
         {/* Seven sections fit any phone: the links size to the screen's
             height, and on the shortest screens the menu scrolls. */}
-        <div data-lenis-prevent className="flex h-full flex-col overflow-y-auto px-5 pb-8 pt-3">
+        <div className="flex h-full flex-col overflow-y-auto px-5 pb-8 pt-3">
           <div className="flex h-[52px] items-center justify-between">
             <span className="font-display text-[1.5625rem] font-extrabold tracking-tight">
               agrim<span className="text-accent">.</span>

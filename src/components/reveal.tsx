@@ -51,8 +51,8 @@ export function Reveal({
         }
       },
       // Triggers once the top clears the bottom 12% of the screen. A share of
-      // the section's own area would never be reached by a pinned section
-      // many screens tall.
+      // the section's own area would never be reached by a section taller
+      // than the screen.
       { threshold: 0, rootMargin: "0px 0px -12% 0px" }
     );
     io.observe(el);

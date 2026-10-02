@@ -8,7 +8,9 @@ test.beforeEach(async ({ page }) => {
 });
 
 const media = chapters.flatMap((c) => c.media);
-const track = (page: Page) => page.getByRole("region", { name: "A glimpse of my journey" });
+// The region takes focus and the arrow keys; the row inside it scrolls.
+const region = (page: Page) => page.getByRole("region", { name: "A glimpse of my journey" });
+const track = (page: Page) => region(page).locator(".journey-track");
 const toJourney = (page: Page) =>
   page.locator(".journey").evaluate((el) => window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 90, behavior: "instant" }));
 const playing = (page: Page) => track(page).locator("video").evaluateAll((vs) => (vs as HTMLVideoElement[]).filter((v) => !v.paused).length);
@@ -18,13 +20,13 @@ const position = (page: Page) =>
     left: el.scrollLeft,
     stops: [...el.querySelectorAll<HTMLElement>("[data-stop]")]
       .filter((s) => getComputedStyle(s).scrollSnapAlign.includes("start"))
-      .map((s) => s.offsetLeft),
+      .map((s) => Math.round(s.getBoundingClientRect().left - el.getBoundingClientRect().left + el.scrollLeft)),
   }));
 
 test("a region with a heading per chapter, and a button per medium that says what it shows", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 2, name: "A glimpse of my journey." })).toBeVisible();
-  await expect(track(page).getByRole("heading", { level: 3 })).toHaveText(chapters.map((c) => c.heading));
+  await expect(region(page).getByRole("heading", { level: 3 })).toHaveText(chapters.map((c) => c.heading));
   const buttons = track(page).getByRole("button");
   await expect(buttons).toHaveCount(media.length);
   for (const [i, m] of media.entries()) {
@@ -89,7 +91,7 @@ test("buttons and the arrow keys move one column", async ({ page, isMobile }) =>
   }
   await prev.click();
   await expect.poll(async () => Math.round((await position(page)).left)).toBe(stops[1]);
-  await track(page).focus();
+  await region(page).focus();
   await page.keyboard.press("ArrowRight");
   await expect.poll(async () => Math.round((await position(page)).left)).toBe(stops[2]);
   await page.keyboard.press("ArrowLeft");
@@ -108,31 +110,35 @@ test("a vertical wheel over the track scrolls the page, not the track", async ({
   expect((await position(page)).left).toBe(0);
 });
 
-test("one clip plays at a time, only near the column in front, and stops when the section leaves the screen", async ({ page, isMobile }) => {
-  test.skip(isMobile, "stepping by button");
+test("every clip loops, muted, while a quarter of the strip is on screen, and all stop when it leaves", async ({ page }) => {
+  const clips = media.filter((m) => m.kind === "video").length;
   await page.goto("/");
-  await toJourney(page);
-  const next = page.locator(".journey").getByRole("button", { name: "Next", exact: true });
-  // At the start the first pair of clips is two columns away: nothing plays.
   await page.waitForTimeout(600);
   expect(await playing(page)).toBe(0);
-  let seen = 0;
-  for (let i = 0; i < 8; i++) {
-    await next.click();
-    await page.waitForTimeout(900);
-    const n = await playing(page);
-    expect(n).toBeLessThanOrEqual(1);
-    seen += n;
-  }
-  expect(seen).toBeGreaterThan(0);
-  // Quick presses queue: seven back lands on the second stop, beside the
-  // first clip, which plays again; then away from the section, it stops.
-  const { stops } = await position(page);
-  for (let i = 0; i < 7; i++) await page.locator(".journey").getByRole("button", { name: "Previous", exact: true }).click();
-  await expect.poll(async () => Math.round((await position(page)).left)).toBe(stops[1]);
-  await expect.poll(() => playing(page)).toBe(1);
+  // A sliver of the strip on screen is not enough.
+  await page.locator(".journey").evaluate((el) => window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - innerHeight + 60, behavior: "instant" }));
+  await page.waitForTimeout(600);
+  expect(await playing(page)).toBe(0);
+  await toJourney(page);
+  await expect.poll(() => playing(page)).toBe(clips);
+  expect(await track(page).locator("video").evaluateAll((vs) => (vs as HTMLVideoElement[]).every((v) => v.muted && v.loop))).toBe(true);
+  // Every pill says so.
+  await expect(track(page).getByText("Playing")).toHaveCount(clips);
+  // Moving along the strip doesn't stop any of them.
+  await track(page).evaluate((el) => el.scrollBy({ left: 600, behavior: "instant" }));
+  await page.waitForTimeout(500);
+  expect(await playing(page)).toBe(clips);
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
   await expect.poll(() => playing(page)).toBe(0);
+});
+
+test("with Save-Data on, nothing plays", async ({ page }) => {
+  await page.addInitScript(() => Object.defineProperty(navigator, "connection", { value: { saveData: true } }));
+  await page.goto("/");
+  await toJourney(page);
+  await page.waitForTimeout(800);
+  expect(await playing(page)).toBe(0);
+  await expect(track(page).getByText("Playing")).toHaveCount(0);
 });
 
 test("under reduced motion nothing plays, fades or lifts", async ({ page, isMobile }) => {
@@ -163,7 +169,7 @@ test("columns well ahead sit back at 55%", async ({ page, isMobile }) => {
   expect(opacities[5]).toBeCloseTo(0.55, 2);
 });
 
-test("full clips load only when the lightbox opens, and play there with controls and sound", async ({ page }) => {
+test("full clips load only when the lightbox opens, and play there muted, with controls to unmute", async ({ page }) => {
   const full: string[] = [];
   page.on("request", (r) => r.url().includes("-full.mp4") && full.push(r.url()));
   await page.goto("/");
@@ -177,12 +183,52 @@ test("full clips load only when the lightbox opens, and play there with controls
   await expect(box).toBeVisible();
   const video = box.locator("video");
   await expect(video).toHaveAttribute("src", "/videos/court/v1-clay-rally-india-full.mp4");
-  expect(await video.evaluate((v: HTMLVideoElement) => ({ controls: v.controls, muted: v.muted }))).toEqual({ controls: true, muted: false });
+  expect(await video.evaluate((v: HTMLVideoElement) => ({ controls: v.controls, muted: v.muted }))).toEqual({ controls: true, muted: true });
   await expect.poll(() => full.length).toBeGreaterThan(0);
+  await expect.poll(() => video.evaluate((v: HTMLVideoElement) => !v.paused)).toBe(true);
+  // The strip behind waits.
   await expect.poll(() => playing(page)).toBe(0);
   await page.keyboard.press("Escape");
   await expect(page.locator("dialog[open]")).toHaveCount(0);
   await expect(clip).toBeFocused();
+});
+
+test("when quiet, the lightbox clip waits for play, and plays with sound", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await toJourney(page);
+  await track(page).getByRole("button", { name: /clay court, video/ }).click();
+  const video = page.getByRole("dialog", { name: "On clay" }).locator("video");
+  await expect(video).toHaveAttribute("src", /-full\.mp4$/);
+  await page.waitForTimeout(800);
+  expect(await video.evaluate((v: HTMLVideoElement) => ({ paused: v.paused, muted: v.muted, controls: v.controls }))).toEqual({
+    paused: true,
+    muted: false,
+    controls: true,
+  });
+});
+
+test("chapter 03 opens with the first season in Australia, a full column to itself, and no column is half empty", async ({ page, isMobile }) => {
+  test.skip(isMobile, "phones show one row, no columns");
+  await page.goto("/");
+  const columns = await region(page).evaluate((el) => {
+    const card = [...el.querySelectorAll(".journey-card")].find((c) => c.textContent?.includes("03 / Adelaide"))!;
+    const out: { srcs: string[]; tall: boolean }[] = [];
+    for (let n = card.nextElementSibling; n; n = n.nextElementSibling) {
+      out.push({
+        srcs: [...n.querySelectorAll<HTMLElement>("[data-src]")].map((m) => m.dataset.src!.split("/").pop()!),
+        tall: n.querySelector(".journey-tall") !== null,
+      });
+    }
+    return out;
+  });
+  expect(columns).toEqual([
+    { srcs: ["10-local-tournament-four.webp"], tall: true },
+    { srcs: ["09-unisport-nationals-team.webp"], tall: true },
+    { srcs: ["11-nationals-serve.webp"], tall: true },
+    { srcs: ["01-utl-team.webp", "02-utl-playing.webp"], tall: false },
+    { srcs: ["v4-adelaide-hitting-loop.mp4", "13-coaching-kids.webp"], tall: false },
+  ]);
 });
 
 test("photos open in the lightbox too, and the arrows step through every medium", async ({ page }) => {

@@ -11,7 +11,6 @@ import { Contact } from "@/components/contact";
 import { AskAgrim } from "@/components/ask-agrim";
 import { Reveal } from "@/components/reveal";
 import { Footer } from "@/components/footer";
-import { SectionSnap } from "@/components/section-snap";
 import { journeyColours } from "@/lib/journey-colours";
 
 export default async function Home() {
@@ -44,7 +43,6 @@ export default async function Home() {
       </main>
       <Footer />
       <AskAgrim heroId="top" />
-      <SectionSnap />
     </>
   );
 }

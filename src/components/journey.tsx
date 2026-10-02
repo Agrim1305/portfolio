@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ArrowLeft, ArrowRight, Play, X } from "lucide-react";
 import { Sheet } from "@/components/sheet";
 import { chapters, columnsOf, type JourneyMedia } from "@/lib/journey";
+import { useRow } from "@/lib/row";
 
 // Media heights by breakpoint, for next/image's sizes. Keep in step with
 // .journey-track in globals.css.
@@ -26,43 +27,58 @@ function subscribeQuiet(onChange: () => void) {
 }
 const useQuiet = () => useSyncExternalStore(subscribeQuiet, () => window.matchMedia(QUIET_QUERY).matches || saveData(), () => true);
 
-/* The places the track snaps to: a chapter card, a medium filling a
-   column, a pair's column, or on phones, where pairs come apart, each
-   medium in it. CSS decides which (see .journey-track). */
-const stops = (track: HTMLElement) =>
-  [...track.querySelectorAll<HTMLElement>("[data-stop]")].filter((el) => getComputedStyle(el).scrollSnapAlign.includes("start"));
-
-/* "A glimpse of my journey": a sideways track of chapter cards, photos and
+/* "A glimpse of my journey": a sideways row of chapter cards, photos and
    clips, school to university. Tall media fill a column; wide ones stack in
    pairs; nothing is cropped. Buttons and the arrow keys move a column, a
-   trackpad or a mouse drag scrolls it, and the vertical wheel is the page's.
-   As the track moves, columns well ahead fade back, the glow behind it takes
-   the colour of the column in front, and the clip in or beside that column
-   plays (one at a time, only while the section is on screen, never when
-   quiet). Any medium opens in the lightbox, where a clip plays in full with
-   sound. */
+   trackpad, a finger or a mouse drag scrolls it, and the vertical wheel is
+   the page's (see lib/row.ts). As it moves, columns well ahead fade back
+   and the glow behind it takes the colour of the column in front. While a
+   quarter of the strip is on screen every clip loops, muted, never when
+   quiet. Any medium opens in the lightbox, where a clip plays in full. */
 export function Journey({ colours }: { colours: Record<string, string> }) {
   const quiet = useQuiet();
-  const track = useRef<HTMLDivElement>(null);
+  const root = useRef<HTMLDivElement>(null);
   const glow = useRef<HTMLDivElement>(null);
   const thumb = useRef<HTMLDivElement>(null);
+  const snapped = useRef(-1);
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
-  const [ends, setEnds] = useState({ start: true, end: false });
   const [near, setNear] = useState(false);
   const [open, setOpen] = useState<number | null>(null);
   const openRef = useRef(open);
   useEffect(() => {
     openRef.current = open;
   }, [open]);
-  // Set by the effect below; plays the right clip, or none.
+  // Set by the effect below; plays every clip or none.
   const sync = useRef(() => {});
-  // The stop a press sent the track to, until it comes to rest there, so
-  // quick presses queue rather than counting from mid-glide.
-  const pending = useRef<number | null>(null);
 
-  // Clips and their posters load only once the track is close.
+  const { ref: track, ends, step } = useRow({
+    onMove: (at, stops) => {
+      const row = track.current!;
+      // Columns more than three ahead sit back at 55%, coming forward as
+      // they approach.
+      stops.forEach((stop, i) => {
+        stop.style.opacity = quiet ? "" : String(1 - 0.45 * Math.min(1, Math.max(0, i - at - 3)));
+      });
+      const bar = thumb.current;
+      if (bar) {
+        // A scrollbar's thumb: the share of the row in view, where it is.
+        const width = bar.parentElement!.clientWidth;
+        bar.style.width = `${(row.clientWidth / row.scrollWidth) * width}px`;
+        bar.style.transform = `translateX(${(row.scrollLeft / row.scrollWidth) * width}px)`;
+      }
+      const now = Math.round(at);
+      if (now === snapped.current || !stops[now] || quiet) return;
+      snapped.current = now;
+      // A chapter card takes the colour of the column after it.
+      const stop = stops[now];
+      const src = (stop.querySelector<HTMLElement>("[data-src]") ?? stop.nextElementSibling?.querySelector<HTMLElement>("[data-src]"))?.dataset.src;
+      if (src && colours[src] && glow.current) glow.current.style.backgroundColor = colours[src];
+    },
+  });
+
+  // Clips and their posters load only once the strip is close.
   useEffect(() => {
-    const el = track.current;
+    const el = root.current;
     if (!el) return;
     const io = new IntersectionObserver(([e]) => e.isIntersecting && setNear(true), { rootMargin: "800px 0px" });
     io.observe(el);
@@ -70,150 +86,35 @@ export function Journey({ colours }: { colours: Record<string, string> }) {
   }, []);
 
   useEffect(() => {
-    const el = track.current;
+    const el = root.current;
     if (!el) return;
-    let targets = stops(el);
-    let onScreen = false;
-    let snapped = -1;
-    let frame = 0;
-
-    const colourOf = (stop: HTMLElement) => {
-      const src = stop.querySelector<HTMLElement>("[data-src]")?.dataset.src ?? stop.nextElementSibling?.querySelector<HTMLElement>("[data-src]")?.dataset.src;
-      return src ? colours[src] : undefined;
-    };
-    const playable = () => {
-      const videos = [...el.querySelectorAll("video")];
-      if (quiet || !onScreen || openRef.current !== null) return { videos, play: null };
-      const nearby = targets.slice(Math.max(0, snapped), snapped + 2);
-      return { videos, play: videos.find((v) => nearby.some((t) => t.contains(v))) ?? null };
-    };
+    let inView = false;
     sync.current = () => {
-      const { videos, play } = playable();
-      for (const v of videos) if (v !== play && !v.paused) v.pause();
-      if (play?.paused) play.play().catch(() => {});
-    };
-
-    const update = () => {
-      frame = 0;
-      const left = el.scrollLeft;
-      const max = el.scrollWidth - el.clientWidth;
-      // Where the track is, in stops, fractionally.
-      let at = 0;
-      for (let i = 0; i < targets.length - 1; i++) {
-        const a = targets[i].offsetLeft;
-        const b = targets[i + 1].offsetLeft;
-        if (left >= b) continue;
-        at = i + Math.max(0, (left - a) / (b - a));
-        break;
+      const play = inView && !quiet && openRef.current === null;
+      for (const v of el.querySelectorAll<HTMLVideoElement>(".journey-track video")) {
+        if (!play) v.pause();
+        else if (v.paused && v.src) v.play().catch(() => {});
       }
-      if (left >= max - 1) at = Math.max(at, targets.findIndex((t) => t.offsetLeft >= left - 1));
-      const now = Math.round(at);
-      // Columns more than three ahead sit back at 55%, coming forward as
-      // they approach.
-      targets.forEach((t, i) => {
-        const ahead = i - at;
-        t.style.opacity = quiet ? "" : String(1 - 0.45 * Math.min(1, Math.max(0, ahead - 3)));
-      });
-      const bar = thumb.current;
-      if (bar) {
-        // A scrollbar's thumb: the share of the track in view, where it is.
-        const width = bar.parentElement!.clientWidth;
-        bar.style.width = `${(el.clientWidth / el.scrollWidth) * width}px`;
-        bar.style.transform = `translateX(${(left / el.scrollWidth) * width}px)`;
-      }
-      setEnds((e) => (e.start === left <= 1 && e.end === left >= max - 1 ? e : { start: left <= 1, end: left >= max - 1 }));
-      if (now !== snapped) {
-        snapped = now;
-        const colour = targets[now] && colourOf(targets[now]);
-        if (colour && glow.current && !quiet) glow.current.style.backgroundColor = colour;
-        sync.current();
-      }
-    };
-    let idle = 0;
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(update);
-      clearTimeout(idle);
-      idle = window.setTimeout(() => (pending.current = null), 150);
-    };
-    const onResize = () => {
-      targets = stops(el);
-      snapped = -1;
-      update();
     };
     const io = new IntersectionObserver(
       ([e]) => {
-        onScreen = e.isIntersecting;
+        inView = e.intersectionRatio >= 0.25;
         sync.current();
       },
       { threshold: 0.25 },
     );
-
-    update();
     io.observe(el);
-    el.addEventListener("scroll", onScroll, { passive: true });
-    const ro = new ResizeObserver(onResize);
-    ro.observe(el);
     return () => {
-      cancelAnimationFrame(frame);
-      clearTimeout(idle);
       io.disconnect();
-      ro.disconnect();
-      el.removeEventListener("scroll", onScroll);
-      for (const v of el.querySelectorAll("video")) v.pause();
+      for (const v of el.querySelectorAll<HTMLVideoElement>(".journey-track video")) v.pause();
     };
-  }, [quiet, colours]);
+  }, [quiet]);
 
-  // The lightbox pauses the track; closing it lets the right clip play again.
+  // The clips start once they have a source, pause while the lightbox is
+  // open and start again when it closes.
   useEffect(() => {
     sync.current();
-  }, [open]);
-
-  function move(by: number) {
-    const el = track.current;
-    if (!el) return;
-    const targets = stops(el);
-    const at =
-      pending.current ??
-      targets.reduce((best, t, i) => (Math.abs(t.offsetLeft - el.scrollLeft) < Math.abs(targets[best].offsetLeft - el.scrollLeft) ? i : best), 0);
-    const to = Math.max(0, Math.min(targets.length - 1, at + by));
-    pending.current = to;
-    el.scrollTo({ left: targets[to].offsetLeft, behavior: quiet ? "instant" : "smooth" });
-  }
-
-  // A mouse drag scrolls the track; the click that ends a drag opens nothing.
-  const drag = useRef<{ x: number; left: number; moved: boolean } | null>(null);
-  function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
-    if (e.pointerType !== "mouse" || e.button !== 0) return;
-    drag.current = { x: e.clientX, left: e.currentTarget.scrollLeft, moved: false };
-  }
-  function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
-    const d = drag.current;
-    if (!d) return;
-    const dx = e.clientX - d.x;
-    if (!d.moved && Math.abs(dx) < 5) return;
-    if (!d.moved) {
-      d.moved = true;
-      e.currentTarget.setPointerCapture(e.pointerId);
-      e.currentTarget.style.scrollSnapType = "none";
-    }
-    e.currentTarget.scrollLeft = d.left - dx;
-  }
-  function onPointerUp(e: React.PointerEvent<HTMLDivElement>) {
-    const d = drag.current;
-    if (!d) return;
-    if (d.moved) {
-      // Come to rest on the nearest stop, then hand snapping back.
-      const el = e.currentTarget;
-      const targets = stops(el);
-      const to = targets.reduce((best, t) => (Math.abs(t.offsetLeft - el.scrollLeft) < Math.abs(best.offsetLeft - el.scrollLeft) ? t : best));
-      el.scrollTo({ left: to.offsetLeft, behavior: quiet ? "instant" : "smooth" });
-      setTimeout(() => (el.style.scrollSnapType = ""), quiet ? 0 : 500);
-      // The click that follows a drag lands on whatever is under the pointer.
-      setTimeout(() => (drag.current = null));
-      return;
-    }
-    drag.current = null;
-  }
+  }, [open, near]);
 
   function close() {
     const last = open;
@@ -226,7 +127,7 @@ export function Journey({ colours }: { colours: Record<string, string> }) {
   let index = 0;
 
   return (
-    <div className="journey overflow-x-clip" data-quiet={quiet || undefined}>
+    <div ref={root} className="journey overflow-x-clip" data-quiet={quiet || undefined}>
       <div className="wrap flex items-end justify-between gap-6">
         <div>
           <h2 className="font-display text-[2.25rem] font-extrabold leading-[1.05] tracking-[-0.03em] text-ink lg:text-[3.25rem]">
@@ -236,10 +137,10 @@ export function Journey({ colours }: { colours: Record<string, string> }) {
           <p className="mt-2 text-[15px] text-ink-muted lg:text-[17px]">From a school court in India to university tennis in Adelaide.</p>
         </div>
         <div className="hidden shrink-0 gap-3 pb-1 md:flex">
-          <button type="button" aria-label="Previous" disabled={ends.start} onClick={() => move(-1)} className={`${arrow} border border-ink/25 text-ink hover:border-ink`}>
+          <button type="button" aria-label="Previous" disabled={ends.start} onClick={() => step(-1)} className={`${arrow} border border-ink/25 text-ink hover:border-ink`}>
             <ArrowLeft className="size-[18px]" aria-hidden />
           </button>
-          <button type="button" aria-label="Next" disabled={ends.end} onClick={() => move(1)} className={`${arrow} bg-ink text-paper hover:bg-accent`}>
+          <button type="button" aria-label="Next" disabled={ends.end} onClick={() => step(1)} className={`${arrow} bg-ink text-paper hover:bg-accent`}>
             <ArrowRight className="size-[18px]" aria-hidden />
           </button>
         </div>
@@ -252,28 +153,20 @@ export function Journey({ colours }: { colours: Record<string, string> }) {
           className="journey-glow"
           style={{ backgroundColor: colours[chapters[0].media[0].src] }}
         />
-        <div className="wrap relative">
-          <div
-            ref={track}
-            role="region"
-            aria-label="A glimpse of my journey"
-            tabIndex={0}
-            className="journey-track"
-            onKeyDown={(e) => {
-              if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
-              e.preventDefault();
-              move(e.key === "ArrowLeft" ? -1 : 1);
-            }}
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={onPointerUp}
-            onPointerCancel={onPointerUp}
-            onClickCapture={(e) => {
-              if (!drag.current?.moved) return;
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-          >
+        {/* The region takes focus and the arrow keys; it doesn't scroll, so
+            they have nothing of their own to do here. */}
+        <div
+          role="region"
+          aria-label="A glimpse of my journey"
+          tabIndex={0}
+          className="wrap relative"
+          onKeyDown={(e) => {
+            if (e.target !== e.currentTarget) return;
+            if (e.key === "ArrowRight") step(1);
+            if (e.key === "ArrowLeft") step(-1);
+          }}
+        >
+          <div ref={track} className="journey-track">
             {layout.map(({ chapter, columns }) => (
               <div key={chapter.label} className="contents">
                 <div data-stop className="journey-card">
@@ -321,7 +214,7 @@ export function Journey({ colours }: { colours: Record<string, string> }) {
         </div>
       </div>
 
-      <Lightbox open={open} onStep={(by) => setOpen((i) => (i === null ? i : (i + by + media.length) % media.length))} onClose={close} />
+      <Lightbox open={open} quiet={quiet} onStep={(by) => setOpen((i) => (i === null ? i : (i + by + media.length) % media.length))} onClose={close} />
     </div>
   );
 }
@@ -400,10 +293,23 @@ function Medium({
   );
 }
 
-/* The whole photo, or the full clip with sound and controls, fitted to the
-   screen, with its caption. Arrows and the arrow keys step through every
-   medium, round the ends; Escape closes. The full clip loads only here. */
-function Lightbox({ open, onStep, onClose }: { open: number | null; onStep: (by: number) => void; onClose: () => void }) {
+/* The whole photo, or the full clip with controls, fitted to the screen,
+   with its caption. The clip starts muted, and its sound comes on only when
+   the visitor unmutes it; when quiet it waits for play, and plays with
+   sound. Arrows and the arrow keys step through every medium, round the
+   ends (a focused clip keeps its own arrow keys); Escape closes. The full
+   clip loads only here. */
+function Lightbox({
+  open,
+  quiet,
+  onStep,
+  onClose,
+}: {
+  open: number | null;
+  quiet: boolean;
+  onStep: (by: number) => void;
+  onClose: () => void;
+}) {
   const m = open === null ? null : media[open];
   const arrow = "glass flex size-12 shrink-0 items-center justify-center rounded-full text-ink";
   return (
@@ -417,9 +323,9 @@ function Lightbox({ open, onStep, onClose }: { open: number | null; onStep: (by:
         <div
           className="flex h-full flex-col p-4 md:p-6"
           onKeyDown={(e) => {
-            if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
-            e.preventDefault();
-            onStep(e.key === "ArrowLeft" ? -1 : 1);
+            if (e.target instanceof HTMLVideoElement) return;
+            if (e.key === "ArrowRight") onStep(1);
+            if (e.key === "ArrowLeft") onStep(-1);
           }}
         >
           <div className="flex items-center justify-between">
@@ -455,7 +361,8 @@ function Lightbox({ open, onStep, onClose }: { open: number | null; onStep: (by:
                   src={m.full}
                   poster={m.poster}
                   controls
-                  autoPlay
+                  autoPlay={!quiet}
+                  muted={!quiet}
                   playsInline
                   aria-label={`${m.alt}, video`}
                   className="journey-fit rounded-[14px] bg-black"

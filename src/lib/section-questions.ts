@@ -39,7 +39,7 @@ function remember(id: string) {
 
 /* The section in view: the one showing the most of itself, as long as that is
    at least 40% of the section or of the screen, whichever is smaller (a
-   pinned section is several screens tall). */
+   section can be taller than the screen). */
 function sectionInView() {
   let best: string | null = null;
   let most = 0;
@@ -125,11 +125,13 @@ export function useSectionQuestion(active: boolean, bubble: RefObject<HTMLElemen
       rest = window.setTimeout(check, REST_MS);
     };
     rest = window.setTimeout(check, REST_MS);
-    window.addEventListener("scroll", onMove, { passive: true });
+    // Captured on the document, so a sideways row moving (Selected work's
+    // card in view) counts as well as the page.
+    document.addEventListener("scroll", onMove, { capture: true, passive: true });
     window.addEventListener("resize", onMove, { passive: true });
     return () => {
       clearTimeout(rest);
-      window.removeEventListener("scroll", onMove);
+      document.removeEventListener("scroll", onMove, { capture: true });
       window.removeEventListener("resize", onMove);
     };
   }, [active, bubble, corner]);

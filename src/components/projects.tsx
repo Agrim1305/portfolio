@@ -8,7 +8,7 @@ import { CaseStudy, CaseStudyHero, COVER, Links, ProjectCover } from "@/componen
 import { Panel } from "@/components/panel";
 import { morphClose, morphOpen, morphSwitch } from "@/lib/morph";
 import { SkipLink } from "@/components/skip-link";
-import { usePinnedTrack } from "@/lib/pinned-track";
+import { useRow } from "@/lib/row";
 import { projects, type Project } from "@/lib/projects";
 
 const slugFromPath = () => window.location.pathname.match(/^\/projects\/([^/]+)/)?.[1];
@@ -30,6 +30,7 @@ function Card({
   return (
     <article
       data-index={index}
+      data-stop
       role="group"
       aria-roledescription="slide"
       aria-label={`${index + 1} of ${total}`}
@@ -39,10 +40,10 @@ function Card({
         if (!(e.target as Element).closest("a")) onOpen(e.currentTarget);
       }}
       // From md up one card takes the section: the content width less a 4%
-      // peek of the next card. Pinned, below lg it takes all the height the
-      // heading leaves; from lg up the cover sets its height (see
-      // .cover-side) and the text may make it taller, never shorter.
-      className="group relative flex min-h-[460px] w-[calc(100vw-4.625rem)] max-w-[520px] shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-3xl pin:h-full pin:min-h-[20rem] md:w-[calc(min(1200px,100vw-4rem)*0.96-1.5rem)] md:max-w-none md:rounded-[28px] md:motion-reduce:h-[min(40rem,calc(100svh-12rem))] md:motion-reduce:min-h-[24rem] lg:flex-row lg:bg-surface lg:bg-none lg:pin:h-auto lg:pin:min-h-0 [background:var(--cover)]"
+      // peek of the next card. Below lg it is as tall as the screen allows;
+      // from lg up the cover sets its height (see .cover-side) and the text
+      // may make it taller, never shorter.
+      className="group relative flex min-h-[460px] w-[calc(100vw-4.625rem)] max-w-[520px] shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-3xl md:h-[min(40rem,calc(100svh-12rem))] md:min-h-[24rem] md:w-[calc(min(1200px,100vw-4rem)*0.96-1.5rem)] md:max-w-none md:rounded-[28px] lg:h-auto lg:min-h-0 lg:flex-row lg:bg-surface lg:bg-none [background:var(--cover)]"
       style={{ "--cover": cover.bg } as React.CSSProperties}
     >
       {/* Stacked, the cover takes the height the text doesn't need, so when
@@ -112,7 +113,7 @@ function Card({
 
 export function Projects() {
   const total = projects.length;
-  const { sectionRef, trackRef, pinned, active, go, step, onFocus } = usePinnedTrack(total);
+  const { ref: trackRef, active, ends, go, step } = useRow();
   const bodyRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState<number | null>(null);
   // Whether the open case study added a history entry that Back should undo.
@@ -183,100 +184,95 @@ export function Projects() {
   return (
     <section
       id="projects"
-      ref={sectionRef}
       // The card in view, for the assistant's question about it (see
       // lib/section-questions.ts).
       data-active={active}
-      className="pin-section py-20 lg:py-28"
-      style={{ "--slides": total } as React.CSSProperties}
+      className="py-20 lg:py-28"
     >
-      <div className="pin-stage">
-        <SkipLink to="leadership" />
-        <div className="wrap">
-          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
-            {/* From xl up the line sits beside the heading, so the card gets
-                its height. */}
-            <div className="xl:flex xl:items-end xl:gap-6">
-              <h2 className="font-display text-[3.75rem] font-extrabold uppercase leading-[0.9] tracking-[-0.03em] text-ink md:text-[clamp(3rem,1.2rem+3.1vw,4rem)]">
-                <span className="block md:inline">Selected</span>{" "}
-                {/* The reference ghosts this word almost into the page; this is the
-                    faintest grey that still clears 3:1 for large text. */}
-                <span className="block text-[#636167] md:inline">work</span>
-              </h2>
-              <p className="mt-4 text-[15px] text-ink-muted md:mt-1 lg:text-base xl:mt-0 xl:max-w-[15rem] xl:pb-0.5 xl:text-[15px] xl:leading-snug">
-                Problem, approach, and impact. The stack comes second.
-              </p>
-            </div>
-            <div className="hidden items-center gap-5 md:flex">
-              <div aria-hidden className="h-[3px] w-[220px] overflow-hidden rounded-full bg-ink/12 xl:w-[140px]">
-                <div
-                  className="h-full rounded-full bg-accent transition-[width] duration-500 motion-reduce:transition-none"
-                  style={{ width: `${((active + 1) / total) * 100}%` }}
-                />
-              </div>
-              <span aria-hidden className="min-w-14 font-mono text-sm text-ink-faint">
-                {active + 1} / {total}
-              </span>
-              {[
-                { label: "Previous project", by: -1, Icon: ArrowLeft },
-                { label: "Next project", by: 1, Icon: ArrowRight },
-              ].map(({ label, by, Icon }) => (
-                <button
-                  key={label}
-                  type="button"
-                  aria-label={label}
-                  disabled={active + by < 0 || active + by >= total}
-                  onClick={() => step(by)}
-                  className="flex size-14 items-center justify-center rounded-full border border-ink/25 text-ink transition-colors duration-300 hover:border-accent hover:bg-accent hover:text-paper disabled:pointer-events-none disabled:opacity-30"
-                >
-                  <Icon className="size-5" aria-hidden />
-                </button>
-              ))}
-            </div>
+      <SkipLink to="leadership" />
+      <div className="wrap">
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
+          {/* From xl up the line sits beside the heading, so the card gets
+              its height. */}
+          <div className="xl:flex xl:items-end xl:gap-6">
+            <h2 className="font-display text-[3.75rem] font-extrabold uppercase leading-[0.9] tracking-[-0.03em] text-ink md:text-[clamp(3rem,1.2rem+3.1vw,4rem)]">
+              <span className="block md:inline">Selected</span>{" "}
+              {/* The reference ghosts this word almost into the page; this is the
+                  faintest grey that still clears 3:1 for large text. */}
+              <span className="block text-[#636167] md:inline">work</span>
+            </h2>
+            <p className="mt-4 text-[15px] text-ink-muted md:mt-1 lg:text-base xl:mt-0 xl:max-w-[15rem] xl:pb-0.5 xl:text-[15px] xl:leading-snug">
+              Problem, approach, and impact. The stack comes second.
+            </p>
           </div>
-        </div>
-
-        <div
-          role="region"
-          aria-roledescription="carousel"
-          aria-label="Selected work"
-          tabIndex={0}
-          onFocus={onFocus}
-          onKeyDown={(e) => {
-            if (e.target !== e.currentTarget) return;
-            if (e.key === "ArrowRight") step(1);
-            else if (e.key === "ArrowLeft") step(-1);
-            else return;
-            e.preventDefault();
-          }}
-          className="mt-10 pin:mt-[clamp(0.5rem,1.8svh,1rem)] pin:min-h-0 pin:flex-1 lg:pin:flex-none"
-        >
-          <div
-            ref={trackRef}
-            className="pin-track flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-5 [scroll-padding-inline:1.25rem] [scrollbar-width:none] motion-reduce:scroll-auto pin:h-full sm:px-8 lg:pin:h-auto sm:[scroll-padding-inline:2rem] md:gap-6 lg:px-[max(2rem,calc(50vw-600px))] lg:[scroll-padding-inline:max(2rem,calc(50vw-600px))] [&::-webkit-scrollbar]:hidden"
-          >
-            {projects.map((project, i) => (
-              <Card
-                key={project.slug}
-                project={project}
-                index={i}
-                total={total}
-                onOpen={(card) => openCase(i, card)}
+          <div className="hidden items-center gap-5 md:flex">
+            <div aria-hidden className="h-[3px] w-[220px] overflow-hidden rounded-full bg-ink/12 xl:w-[140px]">
+              <div
+                className="h-full rounded-full bg-accent transition-[width] duration-500 motion-reduce:transition-none"
+                style={{ width: `${((active + 1) / total) * 100}%` }}
               />
+            </div>
+            <span aria-hidden className="min-w-14 font-mono text-sm text-ink-faint">
+              {active + 1} / {total}
+            </span>
+            {[
+              { label: "Previous project", by: -1, Icon: ArrowLeft },
+              { label: "Next project", by: 1, Icon: ArrowRight },
+            ].map(({ label, by, Icon }) => (
+              <button
+                key={label}
+                type="button"
+                aria-label={label}
+                disabled={by < 0 ? ends.start : ends.end}
+                onClick={() => step(by)}
+                className="flex size-14 items-center justify-center rounded-full border border-ink/25 text-ink transition-colors duration-300 hover:border-accent hover:bg-accent hover:text-paper disabled:pointer-events-none disabled:opacity-30"
+              >
+                <Icon className="size-5" aria-hidden />
+              </button>
             ))}
           </div>
         </div>
+      </div>
 
-        <div aria-hidden className={`wrap mt-5 flex gap-1.5 ${pinned ? "hidden" : "md:hidden"}`}>
-          {projects.map((p, i) => (
-            <span
-              key={p.slug}
-              className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${
-                i === active ? "w-[22px] bg-accent" : "w-1.5 bg-ink/25"
-              }`}
+      <div
+        role="region"
+        aria-roledescription="carousel"
+        aria-label="Selected work"
+        tabIndex={0}
+        // The region doesn't scroll, so the arrows have nothing of their
+        // own to do here; from a link inside a card they are the link's.
+        onKeyDown={(e) => {
+          if (e.target !== e.currentTarget) return;
+          if (e.key === "ArrowRight") step(1);
+          if (e.key === "ArrowLeft") step(-1);
+        }}
+        className="mt-10"
+      >
+        <div
+          ref={trackRef}
+          className="flex snap-x snap-mandatory gap-3 overflow-x-auto overflow-y-hidden overscroll-x-contain px-5 [scroll-padding-inline:1.25rem] [scrollbar-width:none] sm:px-8 sm:[scroll-padding-inline:2rem] md:gap-6 lg:px-[max(2rem,calc(50vw-600px))] lg:[scroll-padding-inline:max(2rem,calc(50vw-600px))] [&::-webkit-scrollbar]:hidden"
+        >
+          {projects.map((project, i) => (
+            <Card
+              key={project.slug}
+              project={project}
+              index={i}
+              total={total}
+              onOpen={(card) => openCase(i, card)}
             />
           ))}
         </div>
+      </div>
+
+      <div aria-hidden className="wrap mt-5 flex gap-1.5 md:hidden">
+        {projects.map((p, i) => (
+          <span
+            key={p.slug}
+            className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${
+              i === active ? "w-[22px] bg-accent" : "w-1.5 bg-ink/25"
+            }`}
+          />
+        ))}
       </div>
 
       <Panel
