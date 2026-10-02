@@ -845,7 +845,7 @@ test.describe("built on court", () => {
     await expect(current(page)).toHaveAttribute("aria-label", "4 of 8");
     await expect(page.locator("#court").getByRole("group", { name: "4 of 8" })).toBeInViewport({ ratio: 0.6 });
     // The reveal must fire for a section many screens tall, or it stays blank.
-    await expect(page.locator("#court h2")).toHaveCSS("opacity", "1");
+    await expect(page.locator("#court").getByRole("heading", { name: "Built on court." })).toHaveCSS("opacity", "1");
   });
 
   test("quick taps on Next queue on phones too", async ({ page, isMobile }) => {
