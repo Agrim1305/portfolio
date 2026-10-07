@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
+import { MergerBeats } from "@/components/merger-beats";
 import { awardPhoto, mergerStory, openStory } from "@/lib/stories";
 
 const outcomes = [
@@ -10,10 +11,6 @@ const outcomes = [
   { value: "10 → 100+", label: "active members" },
   { value: "Winner", label: "Club of the Year 2025" },
 ];
-
-// "What I did" is long, so the page shows its first three sentences, word for
-// word, and the full story holds the rest.
-const trimmed = (text: string) => text.split(/(?<=\.)\s+/).slice(0, 3).join(" ");
 
 const rise = (delay: number) => ({ "--rise-delay": `${delay}s` }) as React.CSSProperties;
 
@@ -70,41 +67,20 @@ export function Leadership() {
         ))}
       </dl>
 
-      {/* The merger, told in three beats read straight down the page. */}
-      <ol className="rise relative mt-12 grid gap-10 lg:mt-14 lg:grid-cols-3 lg:gap-10" style={rise(0.32)}>
-        <span
-          aria-hidden
-          className="absolute left-0 right-0 top-[14px] hidden h-0.5 bg-[linear-gradient(90deg,var(--accent),rgb(255_91_46/0.1))] lg:block"
-        />
-        {mergerStory.map((beat, i) => {
-          const long = beat.label === "What I did";
-          return (
-            <li key={beat.label} className="relative">
-              <span
-                aria-hidden
-                className="flex size-[30px] items-center justify-center rounded-full bg-accent font-mono text-xs font-bold text-paper"
-              >
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <h3 className="mt-5 font-display text-2xl font-bold text-ink">{beat.label}</h3>
-              <p className="mt-2.5 text-[15px] leading-[1.6] text-ink-muted">
-                {long ? trimmed(beat.text) : beat.text}
-              </p>
-              {long && (
-                <button
-                  type="button"
-                  data-expand
-                  onClick={(e) => openStory("president", e.currentTarget.closest("ol"))}
-                  className="mt-5 flex h-12 items-center gap-2.5 rounded-full border border-accent bg-accent/10 px-5 text-[15px] font-semibold text-accent-soft transition-[background-color,color,transform] duration-250 hover:translate-x-[3px] hover:bg-accent hover:text-paper motion-reduce:hover:translate-x-0"
-                >
-                  Read the whole story
-                  <ArrowRight className="size-4" aria-hidden />
-                </button>
-              )}
-            </li>
-          );
-        })}
-      </ol>
+      {/* The merger in three beats, each held to a few lines here; the
+          whole story grows out of them. */}
+      <div className="rise mt-12 lg:mt-14" style={rise(0.32)}>
+        <MergerBeats beats={mergerStory} clamp />
+        <button
+          type="button"
+          data-expand
+          onClick={(e) => openStory("president", e.currentTarget.parentElement)}
+          className="mt-6 flex h-12 items-center gap-2.5 rounded-full border border-accent bg-accent/10 px-5 text-[15px] font-semibold text-accent-soft transition-[background-color,color,transform] duration-250 hover:translate-x-[3px] hover:bg-accent hover:text-paper motion-reduce:hover:translate-x-0"
+        >
+          Read the whole story
+          <ArrowRight className="size-4" aria-hidden />
+        </button>
+      </div>
     </section>
   );
 }

@@ -72,6 +72,86 @@ test("Leadership shows only its award photo; the four club photos follow the bea
   }
 });
 
+test.describe("the merger beats", () => {
+  const beats = (page: Page) => page.locator("#leadership ol > li");
+
+  test("three equal boxes, the initial in the corner clear of the text, each held to its lines with a fade", async ({ page, isMobile }) => {
+    await page.goto("/");
+    await scrollTo(page, "leadership", 900);
+    const boxes = await beats(page).evaluateAll((els) =>
+      els.map((li) => {
+        const p = li.querySelector("p")!;
+        const letter = li.querySelector("span[aria-hidden]")!;
+        const label = li.querySelector("h4")!.getBoundingClientRect();
+        const box = li.getBoundingClientRect();
+        const style = getComputedStyle(li);
+        const l = letter.getBoundingClientRect();
+        const t = p.getBoundingClientRect();
+        return {
+          box: { x: box.x, top: box.top, width: box.width, height: box.height, right: box.right },
+          padding: style.padding,
+          border: style.borderWidth,
+          lines: Math.round(p.clientHeight / parseFloat(getComputedStyle(p).lineHeight)),
+          cut: p.scrollHeight > p.clientHeight + 1,
+          fades: getComputedStyle(p).maskImage !== "none",
+          letterSize: parseFloat(getComputedStyle(letter).fontSize),
+          letterClear: l.bottom <= t.top && l.left >= label.right,
+          letterInside: l.right <= box.right - parseFloat(style.paddingRight) + 1 && l.top >= box.top + parseFloat(style.paddingTop) - 1,
+        };
+      }),
+    );
+    expect(boxes.map((b) => b.padding)).toEqual(Array(3).fill(boxes[0].padding));
+    expect(boxes.map((b) => b.border)).toEqual(Array(3).fill(boxes[0].border));
+    for (const b of boxes) {
+      expect(b.letterSize).toBe(120);
+      expect(b.letterClear).toBe(true);
+      expect(b.letterInside).toBe(true);
+      // Held to six lines on phones and seven from md up; only a beat that
+      // is cut short fades, so no line is cut without one.
+      expect(b.lines).toBeLessThanOrEqual(isMobile ? 6 : 7);
+      expect(b.fades).toBe(b.cut);
+    }
+    expect(boxes.some((b) => b.cut)).toBe(true);
+    if (isMobile) {
+      // Stacked.
+      for (let i = 1; i < 3; i++) expect(boxes[i].box.top).toBeGreaterThan(boxes[i - 1].box.top + boxes[i - 1].box.height);
+    } else {
+      // One row of equal columns, one top edge, one height.
+      for (const b of boxes) {
+        expect(b.box.width).toBeCloseTo(boxes[0].box.width, 0);
+        expect(b.box.height).toBeCloseTo(boxes[0].box.height, 0);
+        expect(b.box.top).toBeCloseTo(boxes[0].box.top, 0);
+      }
+    }
+    // One way into the whole story, under the grid.
+    const read = page.locator("#leadership").getByRole("button", { name: "Read the whole story" });
+    await expect(read).toHaveCount(1);
+    const last = boxes.at(-1)!.box;
+    expect((await read.boundingBox())!.y).toBeGreaterThan(last.top + last.height);
+    expect((await read.boundingBox())!.x).toBeCloseTo(boxes[0].box.x, 0);
+  });
+
+  test("the whole story holds every beat in full, in the same equal boxes", async ({ page, isMobile }) => {
+    await page.goto("/");
+    await page.locator("#leadership").getByRole("button", { name: "Read the whole story" }).click();
+    const sheet = page.getByRole("dialog", { name: "President" });
+    await expect(sheet).toBeVisible();
+    const boxes = await sheet.locator("ol > li").evaluateAll((els) =>
+      els.map((li) => {
+        const p = li.querySelector("p")!;
+        const r = li.getBoundingClientRect();
+        return { width: r.width, height: r.height, full: p.scrollHeight <= p.clientHeight + 1, fades: getComputedStyle(p).maskImage !== "none" };
+      }),
+    );
+    for (const b of boxes) {
+      expect(b.full).toBe(true);
+      expect(b.fades).toBe(false);
+      expect(b.width).toBeCloseTo(boxes[0].width, 0);
+      if (!isMobile) expect(b.height).toBeCloseTo(boxes[0].height, 0);
+    }
+  });
+});
+
 test.describe("Google bento", () => {
   const tiles = (page: Page) => page.locator("#google figure");
 
@@ -97,9 +177,26 @@ test.describe("Google bento", () => {
       expect(caption.bottom).toBeCloseTo(tile.bottom, 0);
       expect(caption.left).toBeCloseTo(tile.left, 0);
     }
-    const row = page.locator("#google").getByText("Certificate of Completion").locator("..");
-    expect((await row.boundingBox())!.height).toBeCloseTo(56, 0);
-    await expect(row.getByRole("link", { name: "Credential" })).toHaveAttribute("target", "_blank");
+  });
+
+  test("the credential is one small pill under the description's first column", async ({ page, isMobile }) => {
+    await page.goto("/");
+    await scrollTo(page, "google");
+    const pill = page.locator("#google").getByRole("link", { name: /Certificate of Completion Credential$/ });
+    await expect(pill).toHaveAttribute("href", "https://www.linkedin.com/feed/update/urn:li:activity:7376092779933835264/");
+    await expect(pill).toHaveAttribute("target", "_blank");
+    const [link, text, thumb] = await Promise.all([
+      pill.boundingBox(),
+      page.locator("#google p").last().boundingBox(),
+      pill.locator("img").boundingBox(),
+    ]);
+    expect(link!.height).toBeCloseTo(36, 0);
+    expect(thumb!.height).toBeCloseTo(24, 0);
+    expect(link!.x).toBeCloseTo(text!.x, 0);
+    expect(link!.y).toBeGreaterThan(text!.y + text!.height);
+    // No full-width row any more: from lg up it fits under the first column.
+    if (!isMobile) expect(link!.width).toBeLessThan(text!.width / 2);
+    await expect(page.locator("#google").getByText("Certificate of Completion", { exact: true })).toHaveCount(1);
   });
 
   test("phones stack the tiles, large tile first", async ({ page, isMobile }) => {

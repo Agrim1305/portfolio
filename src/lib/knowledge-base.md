@@ -66,7 +66,9 @@ recommendation engine Agrim built for it was cut with it, along with the
 engine's fallback (a fixed set of adaptation options for each type of
 asset, for when there is no API access). Richer prompt
 context (budget, available labour, IPCC AR6 and SPREP climate data) was
-researched and scoped as the next step, not shipped.
+researched and scoped as the next step, not shipped. Cutting the village
+view was a deliberate scope decision: it is what let the team ship a demo
+that worked inside the 44 hours.
 
 ### Wumpus World agent (coursework, not public)
 

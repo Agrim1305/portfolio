@@ -286,8 +286,9 @@ function Medium({
       </button>
       <figcaption className="h-10 w-0 min-w-full pt-1.5">
         <p className="truncate text-[15px] font-semibold leading-5 text-ink">{m.title}</p>
-        {/* A step brighter than muted: it can sit over the brightest glow. */}
-        <p className="truncate font-mono text-xs leading-4 text-ink-soft">{m.detail}</p>
+        {/* A step brighter than muted: it can sit over the brightest glow. The
+            caption keeps its height without one, so every medium lines up. */}
+        {m.detail && <p className="truncate font-mono text-xs leading-4 text-ink-soft">{m.detail}</p>}
       </figcaption>
     </figure>
   );
@@ -371,7 +372,7 @@ function Lightbox({
               )}
               <figcaption className="mt-3 text-center">
                 <p className="text-[15px] font-semibold text-ink">{m.title}</p>
-                <p className="font-mono text-xs text-ink-muted">{m.detail}</p>
+                {m.detail && <p className="font-mono text-xs text-ink-muted">{m.detail}</p>}
               </figcaption>
             </figure>
             <button type="button" aria-label="Next" onClick={() => onStep(1)} className={arrow}>

@@ -231,6 +231,20 @@ test("chapter 03 opens with the first season in Australia, a full column to itse
   ]);
 });
 
+test("the coaching photo is captioned by its title alone, and lines up with the rest", async ({ page }) => {
+  await page.goto("/");
+  const captions = track(page).locator("figcaption");
+  const coaching = track(page).locator("figure", { has: page.locator('[data-src="/images/experience/13-coaching-kids.webp"]') }).locator("figcaption");
+  await expect(coaching.locator("p")).toHaveText(["Coaching juniors"]);
+  // Every caption keeps the same height, with or without its second line,
+  // and each sits straight under its medium.
+  const boxes = await captions.evaluateAll((els) =>
+    els.map((el) => ({ h: el.getBoundingClientRect().height, gap: el.getBoundingClientRect().top - el.previousElementSibling!.getBoundingClientRect().bottom })),
+  );
+  expect(new Set(boxes.map((b) => b.h)).size).toBe(1);
+  expect(new Set(boxes.map((b) => Math.round(b.gap))).size).toBe(1);
+});
+
 test("photos open in the lightbox too, and the arrows step through every medium", async ({ page }) => {
   await page.goto("/");
   await toJourney(page);

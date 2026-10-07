@@ -40,5 +40,6 @@
   "2026→2075": "The shipped demo's timeline runs to 2100: metric now 2026→2100 (round twelve, item 2, approved)",
   "React · Vite · Tailwind · Leaflet · Claude API · Vercel": "Leaflet and the Claude API now marked (village view, not in the demo) (round twelve, item 2, approved)",
   "I scoped it with the owners, quoted it, and talked them out of self-service booking, which would have overfilled sessions. Delivered in three weeks.": "Adelaide Rising Stars card summary replaced with the approved freelance summary (round thirteen, item 5); the booking story stays in its case study",
-  "I also built a rule-based fallback that runs with no API access at all. It was meant as insurance, and it is what the live demo ran on when the venue network dropped.": "Pacific Village Explorer approach[2] replaced with the approved fallback wording (round thirteen, item 6)"
+  "I also built a rule-based fallback that runs with no API access at all. It was meant as insurance, and it is what the live demo ran on when the venue network dropped.": "Pacific Village Explorer approach[2] replaced with the approved fallback wording (round thirteen, item 6)",
+  "Appropriate technology beats impressive technology. And a fallback path is not optional polish: the one I built as insurance is the version the judges actually saw.": "Pacific Village Explorer's lesson replaced with the approved scope wording (round fourteen, item 7); the fallback was cut with the village view, so the judges never saw it"
 }

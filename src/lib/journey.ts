@@ -16,7 +16,8 @@ export type JourneyMedia = {
   /** What is visible. A video's button adds "video" to it. */
   alt: string;
   title: string;
-  detail: string;
+  /** The line under the title; a few have none. */
+  detail?: string;
   /** A wide medium that fills a column alone, at full height. */
   solo?: boolean;
 };
@@ -115,7 +116,7 @@ export const chapters: Chapter[] = [
       photo("02-utl-playing", 1080, 720, "Agrim hitting a forehand", "Match play", "UTL"),
       video("v4-adelaide-hitting", 1080, 608, "Agrim hitting on a blue hard court", "Hitting session", "Adelaide"),
       ...(COACHING_PHOTO_CONSENT
-        ? [{ ...coachingPhoto, kind: "photo" as const, title: "Coaching juniors", detail: "Adelaide Rising Stars" }]
+        ? [{ ...coachingPhoto, kind: "photo" as const, title: coachingPhoto.caption }]
         : []),
     ],
   },

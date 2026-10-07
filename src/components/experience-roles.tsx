@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
+import { MergerBeats } from "@/components/merger-beats";
 import { Panel, PanelHero } from "@/components/panel";
 import { morphClose, morphOpen, morphSwitch } from "@/lib/morph";
 import {
@@ -455,25 +456,8 @@ export function ExperienceRoles() {
                 <h3 className="mt-3 max-w-[820px] font-display text-[clamp(1.75rem,1.2rem+1.8vw,2.5rem)] font-extrabold leading-[1.05] tracking-[-0.02em] text-ink">
                   Running our side of a two-university club merger
                 </h3>
-                <div className="mt-8 grid gap-4 lg:grid-cols-[1fr_1.45fr_1fr] lg:items-start">
-                  {current.beats.map((beat) => (
-                    <section
-                      key={beat.label}
-                      className="relative overflow-hidden rounded-[22px] border border-hairline bg-[#1A1A1F] px-[22px] pb-7 pt-6 transition-[transform,border-color] duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:border-accent/50 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-                    >
-                      {/* The beat's initial, outlined, as a watermark. */}
-                      <span
-                        aria-hidden
-                        className="absolute -right-1.5 -top-6 font-display text-[150px] font-extrabold leading-none text-transparent [-webkit-text-stroke:1.5px_rgb(255_91_46/0.35)]"
-                      >
-                        {beat.label[0]}
-                      </span>
-                      <h4 className="relative font-mono text-xs uppercase tracking-[0.15em] text-accent-soft">
-                        {beat.label}
-                      </h4>
-                      <p className="relative mt-16 text-base leading-relaxed text-[#D6D3CD]">{beat.text}</p>
-                    </section>
-                  ))}
+                <div className="mt-8">
+                  <MergerBeats beats={current.beats} />
                 </div>
               </div>
             ) : (

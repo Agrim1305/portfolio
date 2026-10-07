@@ -88,27 +88,6 @@ export function Google() {
             <Tile key={photo.src} photo={photo} sizes="(min-width: 1024px) 470px, 100vw" />
           ))}
         </div>
-        <div className="mt-4 flex h-14 items-center gap-3.5 rounded-2xl border border-hairline bg-surface pl-3 pr-2 lg:mt-6">
-          <div className="relative h-10 w-7 shrink-0 overflow-hidden rounded-sm">
-            <Image
-              src="/mentorship.jpeg"
-              alt="University of Adelaide Certificate of Completion for the Career Access Mentoring Program"
-              fill
-              sizes="28px"
-              className="object-cover"
-            />
-          </div>
-          <p className="flex-1 text-[15px] text-ink">Certificate of Completion</p>
-          <a
-            href={CREDENTIAL_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-11 items-center gap-1 rounded-full px-3 text-[15px] text-accent-soft transition-colors hover:text-accent"
-          >
-            Credential
-            <ArrowUpRight className="size-3.5" aria-hidden />
-          </a>
-        </div>
       </div>
 
       <dl
@@ -145,6 +124,30 @@ export function Google() {
         still reviews my thinking whenever I am making a decision about my
         career.
       </p>
+      {/* The credential, small, under the paragraph's first column. */}
+      <a
+        href={CREDENTIAL_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="rise glass lift mt-6 inline-flex h-9 items-center gap-2 rounded-full pl-2 pr-3.5 text-sm"
+        style={rise(0.36)}
+      >
+        {/* The whole certificate, 24px tall at its own shape. */}
+        <span className="relative ml-1 h-6 w-[17px] shrink-0 overflow-hidden rounded-[3px]">
+          <Image
+            src="/mentorship.jpeg"
+            alt="University of Adelaide Certificate of Completion for the Career Access Mentoring Program"
+            fill
+            sizes="17px"
+            className="object-cover"
+          />
+        </span>
+        <span className="text-ink">Certificate of Completion</span>
+        <span className="flex items-center gap-0.5 text-accent-soft">
+          Credential
+          <ArrowUpRight className="size-3.5" aria-hidden />
+        </span>
+      </a>
     </section>
   );
 }

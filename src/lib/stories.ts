@@ -53,7 +53,7 @@ export const COACHING_PHOTO_CONSENT = true;
 export const coachingPhoto: Photo = {
   src: "/images/experience/13-coaching-kids.webp",
   alt: "Agrim with a group of young players holding racquets",
-  caption: "Coaching a junior group",
+  caption: "Coaching juniors",
   width: 2000,
   height: 1500,
   position: "50% 55%",

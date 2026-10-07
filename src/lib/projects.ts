@@ -98,7 +98,7 @@ export const projects: Project[] = [
       { value: "2026→2100", label: "timeline modelled" },
     ],
     learned:
-      "Appropriate technology beats impressive technology. And a fallback path is not optional polish: the one I built as insurance is the version the judges actually saw.",
+      "Appropriate technology beats impressive technology. And scope is a decision: cutting the village view is what let us ship a demo that worked inside 44 hours.",
     stack: ["React", "Vite", "Tailwind", "Leaflet (village view, not in the demo)", "Claude API (village view, not in the demo)", "Vercel"],
     links: [
       {
