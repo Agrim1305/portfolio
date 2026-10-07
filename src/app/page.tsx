@@ -1,28 +1,38 @@
 import { Nav } from "@/components/nav";
 import { Hero } from "@/components/hero";
+import { TechStrip } from "@/components/tech-strip";
 import { Projects } from "@/components/projects";
 import { Leadership } from "@/components/leadership";
 import { Experience } from "@/components/experience";
+import { Google } from "@/components/google";
+import { Court } from "@/components/court";
 import { About } from "@/components/about";
 import { Contact } from "@/components/contact";
 import { AskAgrim } from "@/components/ask-agrim";
 import { Reveal } from "@/components/reveal";
 import { Footer } from "@/components/footer";
+import { journeyColours } from "@/lib/journey-colours";
 
-export default function Home() {
+export default async function Home() {
+  const colours = await journeyColours();
   return (
     <>
       <Nav />
-      <main className="mx-auto max-w-5xl px-5 sm:px-8">
+      <main>
         <Hero />
-        <Reveal>
-          <Projects />
-        </Reveal>
+        <TechStrip />
+        <Projects />
         <Reveal>
           <Leadership />
         </Reveal>
         <Reveal>
           <Experience />
+        </Reveal>
+        <Reveal>
+          <Google />
+        </Reveal>
+        <Reveal>
+          <Court colours={colours} />
         </Reveal>
         <Reveal>
           <About />
@@ -32,7 +42,7 @@ export default function Home() {
         </Reveal>
       </main>
       <Footer />
-      <AskAgrim />
+      <AskAgrim heroId="top" />
     </>
   );
 }

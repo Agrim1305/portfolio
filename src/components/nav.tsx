@@ -2,59 +2,32 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
+import { Sheet } from "@/components/sheet";
+import { openAsk } from "@/components/ask-agrim";
+import { scrollToElement } from "@/components/smooth-scroll";
 
+// In page order: the active-section highlight walks this list.
 const sections = [
-  { id: "projects", number: "01", label: "Projects" },
-  { id: "leadership", number: "02", label: "Leadership" },
-  { id: "experience", number: "03", label: "Experience" },
-  { id: "about", number: "04", label: "About" },
-  { id: "contact", number: "05", label: "Contact" },
+  { id: "projects", label: "Work" },
+  { id: "leadership", label: "Leadership" },
+  { id: "experience", label: "Experience" },
+  { id: "google", label: "Google" },
+  { id: "court", label: "Tennis" },
+  { id: "about", label: "About" },
+  { id: "contact", label: "Contact" },
 ];
 
-function Brackets() {
+function Wordmark() {
   return (
-    <>
-      <span className="nav-bracket tl" aria-hidden />
-      <span className="nav-bracket tr" aria-hidden />
-      <span className="nav-bracket bl" aria-hidden />
-      <span className="nav-bracket br" aria-hidden />
-    </>
-  );
-}
-
-/* The site mark, mirroring app/icon.svg (the favicon) so the logo is identical
-   in the tab and on the page. Colours are the hex of the surface and accent
-   tokens, because the standalone favicon can't read CSS variables. */
-function Logo() {
-  return (
-    <svg viewBox="0 0 64 64" className="size-10" aria-hidden>
-      <rect width="64" height="64" rx="14" fill="#1b1a18" />
-      <rect
-        x="1.5"
-        y="1.5"
-        width="61"
-        height="61"
-        rx="12.5"
-        fill="none"
-        stroke="#e2b05a"
-        strokeOpacity="0.25"
-        strokeWidth="1.5"
-      />
-      <text
-        x="32"
-        y="33"
-        fontFamily="Arial, Helvetica, sans-serif"
-        fontSize="34"
-        fontWeight="700"
-        fill="#e2b05a"
-        textAnchor="middle"
-        dominantBaseline="central"
-        letterSpacing="-1"
-      >
-        AS
-      </text>
-    </svg>
+    <Link
+      href="/#top"
+      prefetch={false}
+      aria-label="Agrim Sharma, back to top"
+      className="flex min-h-11 items-center font-display text-[1.5625rem] font-extrabold tracking-tight text-ink"
+    >
+      agrim<span className="text-accent">.</span>
+    </Link>
   );
 }
 
@@ -62,6 +35,8 @@ export function Nav() {
   const [active, setActive] = useState("");
   const [open, setOpen] = useState(false);
 
+  // Section links point into the home page, so prefetching them (on by
+  // default) would only re-download the page the visitor is already on.
   useEffect(() => {
     // Highlight the last section whose top has passed a line a third of the way
     // down the viewport. A plain scroll listener, since the browser pauses rAF
@@ -96,102 +71,116 @@ export function Nav() {
     };
   }, []);
 
+  // On the home page, close the menu first and scroll once the page unlocks.
+  // Elsewhere the link navigates to the home page as normal.
+  function goTo(e: React.MouseEvent, id: string) {
+    const el = document.getElementById(id);
+    setOpen(false);
+    if (!el) return;
+    e.preventDefault();
+    requestAnimationFrame(() => scrollToElement(el));
+  }
+
   return (
-    <header className="sticky top-0 z-40 bg-paper">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-        <Link
-          href="/#top"
-          aria-label="Agrim Sharma, back to top"
-          className="inline-flex size-10 items-center justify-center rounded-[11px] transition-opacity hover:opacity-80"
+    <header className="sticky top-0 z-40 border-b border-hairline bg-paper/70 backdrop-blur-lg lg:border-0 lg:bg-transparent lg:bg-gradient-to-b lg:from-paper lg:via-paper/80 lg:to-transparent lg:backdrop-blur-none">
+      <div className="wrap flex h-16 items-center justify-between gap-4 lg:h-24">
+        <Wordmark />
+
+        <nav
+          aria-label="Sections"
+          className="glass hidden h-14 items-center gap-0.5 rounded-full px-1.5 lg:flex"
         >
-          <Logo />
-        </Link>
-
-        <div className="hidden items-center gap-5 sm:flex">
-          <nav className="flex items-center gap-1">
-            {sections.map(({ id, number, label }) => {
-              const isActive = active === id;
-              return (
-                <Link
-                  key={id}
-                  href={`/#${id}`}
-                  aria-current={isActive ? "true" : undefined}
-                  className={`nav-link relative px-3.5 py-2 text-sm transition-colors ${
-                    isActive ? "text-accent" : "text-ink-muted hover:text-ink"
-                  }`}
-                >
-                  <Brackets />
-                  <span className="inline-flex items-baseline gap-1.5">
-                    <span
-                      className={`font-mono text-[11px] ${
-                        isActive ? "text-accent" : "text-ink-faint"
-                      }`}
-                    >
-                      {number}
-                    </span>
-                    {label}
-                  </span>
-                </Link>
-              );
-            })}
-          </nav>
-          <a
-            href="/resume.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-10 items-center rounded-md bg-accent px-5 text-sm font-semibold text-paper transition-colors hover:bg-accent/85"
-          >
-            Resume
-          </a>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-label={open ? "Close menu" : "Open menu"}
-          aria-expanded={open}
-          className="inline-flex size-11 items-center justify-center rounded-md text-ink sm:hidden"
-        >
-          {open ? <X className="size-5" /> : <Menu className="size-5" />}
-        </button>
-      </div>
-
-      {open && (
-        <nav className="menu-panel border-t border-hairline bg-paper px-5 pb-5 sm:hidden">
-          {sections.map(({ id, number, label }) => {
+          {sections.map(({ id, label }) => {
             const isActive = active === id;
             return (
               <Link
                 key={id}
                 href={`/#${id}`}
-                onClick={() => setOpen(false)}
+                prefetch={false}
                 aria-current={isActive ? "true" : undefined}
-                className={`flex items-baseline gap-2.5 border-b border-hairline py-3.5 text-base ${
-                  isActive ? "text-accent" : "text-ink"
+                className={`flex h-11 items-center rounded-full px-[18px] text-[15px] transition-colors duration-300 ${
+                  isActive
+                    ? "bg-ink font-medium text-paper"
+                    : "text-ink-soft hover:text-ink"
                 }`}
               >
-                <span
-                  className={`font-mono text-[11px] ${
-                    isActive ? "text-accent" : "text-ink-faint"
-                  }`}
-                >
-                  {number}
-                </span>
                 {label}
               </Link>
             );
           })}
+        </nav>
+
+        <div className="flex items-center gap-2">
           <a
             href="/resume.pdf"
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => setOpen(false)}
-            className="mt-4 flex min-h-11 items-center justify-center rounded-md bg-accent px-4 text-sm font-semibold text-paper"
+            className="lift flex h-11 items-center rounded-full border border-ink/20 px-4 text-sm text-ink lg:glass lg:h-[52px] lg:px-6 lg:text-[15px] lg:font-medium"
           >
             Resume
           </a>
-        </nav>
-      )}
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            aria-label="Open menu"
+            aria-expanded={open}
+            className="flex size-11 flex-col items-center justify-center gap-[5px] rounded-full bg-ink lg:hidden"
+          >
+            <span className="h-0.5 w-[18px] rounded-full bg-paper" />
+            <span className="h-0.5 w-[18px] rounded-full bg-paper" />
+          </button>
+        </div>
+      </div>
+
+      <Sheet
+        open={open}
+        onClose={() => setOpen(false)}
+        label="Menu"
+        className="h-dvh w-full border-0 bg-paper"
+      >
+        {/* Seven sections fit any phone: the links size to the screen's
+            height, and on the shortest screens the menu scrolls. */}
+        <div className="flex h-full flex-col overflow-y-auto px-5 pb-8 pt-3">
+          <div className="flex h-[52px] items-center justify-between">
+            <span className="font-display text-[1.5625rem] font-extrabold tracking-tight">
+              agrim<span className="text-accent">.</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="Close menu"
+              className="flex size-11 items-center justify-center rounded-full border border-ink/20 text-ink"
+            >
+              <X className="size-5" aria-hidden />
+            </button>
+          </div>
+          <nav aria-label="Sections" className="mb-6 mt-[clamp(1rem,3svh,2.25rem)] flex flex-col">
+            {sections.map(({ id, label }) => (
+              <Link
+                key={id}
+                href={`/#${id}`}
+                prefetch={false}
+                onClick={(e) => goTo(e, id)}
+                aria-current={active === id ? "true" : undefined}
+                className="border-b border-hairline py-[clamp(0.5rem,1.6svh,0.875rem)] font-display text-[clamp(1.75rem,5.4svh,2.75rem)] font-extrabold leading-tight tracking-[-0.035em] text-ink transition-colors active:text-accent aria-[current=true]:text-accent"
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              openAsk();
+            }}
+            className="glass mt-auto flex h-[58px] shrink-0 items-center gap-3 rounded-2xl px-[18px] text-left text-base text-ink-soft"
+          >
+            <Sparkles className="size-4 text-accent" aria-hidden />
+            Ask AI about Agrim
+          </button>
+        </div>
+      </Sheet>
     </header>
   );
 }

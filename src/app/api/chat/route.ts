@@ -8,21 +8,29 @@ const MAX_TOKENS = 600;
 const MAX_MESSAGE_LENGTH = 500;
 const MAX_HISTORY_TURNS = 6; // user+assistant pairs kept for context
 
-// Simple in-memory rate limit. Resets on cold start, which is fine for a
-// portfolio site — this isn't trying to be bulletproof, just to stop a
-// single client from hammering the endpoint and burning API credits.
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX_REQUESTS = 8;
+// Per-IP rate limit, to stop one visitor burning API credits. The window
+// slides: each message counts for ten minutes after it is sent.
+// ponytail: in memory, so each server instance counts on its own and a cold
+// start forgets; a Vercel Firewall rate-limit rule on /api/chat is the upgrade
+// if abuse ever gets past it. The monthly spend limit in the Claude Console is
+// the hard backstop.
+const RATE_LIMIT_WINDOW_MS = 10 * 60_000;
+const RATE_LIMIT_MAX_REQUESTS = 20;
 const requestLog = new Map<string, number[]>();
 
-function isRateLimited(ip: string): boolean {
+// Seconds until this IP may send again, or 0 if this message is allowed.
+function rateLimitWait(ip: string): number {
   const now = Date.now();
-  const timestamps = (requestLog.get(ip) ?? []).filter(
-    (t) => now - t < RATE_LIMIT_WINDOW_MS
-  );
-  timestamps.push(now);
-  requestLog.set(ip, timestamps);
-  return timestamps.length > RATE_LIMIT_MAX_REQUESTS;
+  const recent = (t: number) => now - t < RATE_LIMIT_WINDOW_MS;
+  for (const [key, times] of requestLog) {
+    if (!times.some(recent)) requestLog.delete(key);
+  }
+  const timestamps = (requestLog.get(ip) ?? []).filter(recent);
+  if (timestamps.length >= RATE_LIMIT_MAX_REQUESTS) {
+    return Math.ceil((timestamps[0] + RATE_LIMIT_WINDOW_MS - now) / 1000);
+  }
+  requestLog.set(ip, [...timestamps, now]);
+  return 0;
 }
 
 let cachedKnowledgeBase: string | null = null;
@@ -39,7 +47,7 @@ function loadKnowledgeBase(): string {
 }
 
 function buildSystemPrompt(knowledgeBase: string): string {
-  return `You are an AI assistant embedded on Agrim Sharma's personal portfolio website. You speak about Agrim in the third person (he/his). You are not pretending to be him, you are introducing him to recruiters, hiring managers, and visitors who want to know more without scrolling the whole page.
+  return `You are Aris, the AI assistant embedded on Agrim Sharma's personal portfolio website. If asked who you are, say you are Aris, Agrim's AI assistant. You speak about Agrim in the third person (he/his). You are not pretending to be him, you are introducing him to recruiters, hiring managers, and visitors who want to know more without scrolling the whole page.
 
 GROUND RULES, follow these exactly, no exceptions:
 
@@ -58,21 +66,31 @@ ${knowledgeBase}`;
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
+/* Logs a failure for the server's log: the message only, never the request,
+   and the API key redacted in case anything ever echoes it. */
+function logError(label: string, detail: unknown, apiKey: string) {
+  const text = detail instanceof Error ? `${detail.name}: ${detail.message}` : String(detail);
+  console.error(`${label}: ${text.replaceAll(apiKey, "[redacted]")}`);
+}
+
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const wait = rateLimitWait(ip);
+  if (wait) {
+    const minutes = Math.ceil(wait / 60);
+    return NextResponse.json(
+      {
+        error: `That's a lot of questions in a short time, so I'm taking a breather. Try again in ${minutes} minute${minutes === 1 ? "" : "s"}, or email Agrim at agrimsh22@gmail.com.`,
+      },
+      { status: 429, headers: { "Retry-After": String(wait) } }
+    );
+  }
+
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
       { error: "Assistant is not configured." },
       { status: 500 }
-    );
-  }
-
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  if (isRateLimited(ip)) {
-    return NextResponse.json(
-      { error: "Too many messages. Please wait a moment and try again." },
-      { status: 429 }
     );
   }
 
@@ -129,7 +147,7 @@ export async function POST(req: NextRequest) {
 
     if (!upstream.ok || !upstream.body) {
       const errText = await upstream.text().catch(() => "");
-      console.error("Anthropic API error:", upstream.status, errText);
+      logError("Anthropic API error", `${upstream.status} ${errText.slice(0, 500)}`, apiKey);
       return NextResponse.json(
         { error: "The assistant is having trouble responding right now." },
         { status: 502 }
@@ -175,7 +193,7 @@ export async function POST(req: NextRequest) {
             }
           }
         } catch (err) {
-          console.error("Chat stream error:", err);
+          logError("Chat stream error", err, apiKey);
           controller.error(err);
           return;
         }
@@ -191,7 +209,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err) {
-    console.error("Chat route error:", err);
+    logError("Chat route error", err, apiKey);
     return NextResponse.json(
       { error: "Something went wrong reaching the assistant." },
       { status: 500 }

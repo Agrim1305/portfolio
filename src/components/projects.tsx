@@ -1,268 +1,327 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import Link from "next/link";
-import { ArrowUpRight, ArrowRight } from "lucide-react";
-import { SectionHeading } from "@/components/section-heading";
-import { ProjectMediaView } from "@/components/project-media";
-import {
-  leadProjects,
-  otherProjects,
-  type Project,
-  type ProjectLink,
-} from "@/lib/projects";
+import { ArrowLeft, ArrowRight, Plus } from "lucide-react";
+import { CaseStudy, CaseStudyHero, COVER, Links, ProjectCover } from "@/components/case-study";
+import { Panel } from "@/components/panel";
+import { morphClose, morphOpen, morphSwitch } from "@/lib/morph";
+import { SkipLink } from "@/components/skip-link";
+import { useRow } from "@/lib/row";
+import { projects, type Project } from "@/lib/projects";
 
-// Wraps the first occurrence of each phrase in `className` so a skimming reader
-// lands on the numbers that matter. Gold (`hl`) is reserved for the strongest
-// claims; bright ink carries the rest without spending the accent.
-export function mark(text: string, phrases: string[], className: string) {
-  const hits = phrases
-    .map((phrase) => ({ phrase, at: text.indexOf(phrase) }))
-    .filter(({ at }) => at !== -1)
-    .sort((a, b) => a.at - b.at);
+const slugFromPath = () => window.location.pathname.match(/^\/projects\/([^/]+)/)?.[1];
 
-  const nodes: React.ReactNode[] = [];
-  let cursor = 0;
-  hits.forEach(({ phrase, at }, i) => {
-    if (at < cursor) return; // phrase overlaps an earlier one
-    nodes.push(text.slice(cursor, at));
-    nodes.push(
-      <span key={i} className={className}>
-        {phrase}
-      </span>,
-    );
-    cursor = at + phrase.length;
-  });
-  nodes.push(text.slice(cursor));
-  return <>{nodes}</>;
-}
-
-function StatusTag({ status }: { status: string }) {
-  return (
-    <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-ink-faint">
-      <span className="size-1.5 rounded-full bg-accent" />
-      {status}
-    </span>
-  );
-}
-
-export function StackLine({
-  stack,
-  className = "text-xs",
-}: {
-  stack: string[];
-  className?: string;
-}) {
-  return (
-    <p className={`font-mono text-ink-faint ${className}`}>
-      {stack.join(" · ")}
-    </p>
-  );
-}
-
-export function LinkRow({ links }: { links: ProjectLink[] }) {
-  return (
-    <p className="flex flex-wrap gap-x-6">
-      {links.map(({ label, url, accent }) => (
-        <a
-          key={label}
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`link-draw inline-flex min-h-11 items-center gap-1 text-[15px] ${
-            accent ? "text-accent" : "text-ink"
-          }`}
-        >
-          {label}
-          <ArrowUpRight className="size-4" aria-hidden />
-        </a>
-      ))}
-    </p>
-  );
-}
-
-function DetailBlock({
-  label,
-  className = "",
-  children,
-}: {
-  label: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className={className}>
-      <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-accent">
-        {label}
-      </p>
-      <div className="mt-2 space-y-3 text-[15px] leading-relaxed text-ink-muted">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-// The lead treatment: full Problem / Approach / Impact depth, in the same card
-// language as the others. The depth is the signal that these two matter most.
-// The title and status sit above `media` so a screenshot is never the first
-// thing a reader meets with no idea what they are looking at.
-function CaseStudyLink({ slug, title }: { slug: string; title: string }) {
-  return (
-    <Link
-      href={`/projects/${slug}`}
-      className="link-draw inline-flex min-h-11 items-center gap-1.5 text-[15px] text-accent"
-    >
-      Read the case study
-      <span className="sr-only"> for {title}</span>
-      <ArrowRight className="size-4" aria-hidden />
-    </Link>
-  );
-}
-
-function CaseStudyCard({
-  study,
-  media,
-}: {
-  study: Project;
-  media?: React.ReactNode;
-}) {
-  return (
-    <article className="group relative card-draft rounded-xl border border-hairline p-6 sm:p-8 transition-colors duration-300 hover:border-accent/60">
-      <span className="reg-tick reg-tl" aria-hidden />
-      <span className="reg-tick reg-tr" aria-hidden />
-      <span className="reg-tick reg-bl" aria-hidden />
-      <span className="reg-tick reg-br" aria-hidden />
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h3 className="font-serif text-2xl sm:text-3xl font-medium text-ink">
-          {study.title}
-        </h3>
-        <StatusTag status={study.status} />
-      </div>
-      {media && <div className="mt-5">{media}</div>}
-      {/* Approach is the long column, so it sits alongside Problem and Impact
-          rather than beside them in three rigid columns. Reading order stays
-          Problem, Approach, Impact, and stacks that way on small screens. */}
-      <div className="mt-6 grid gap-x-10 gap-y-6 lg:grid-cols-2">
-        <DetailBlock label="Problem" className="lg:col-start-1 lg:row-start-1">
-          <p>{study.problem}</p>
-        </DetailBlock>
-        <DetailBlock
-          label="Approach"
-          className="lg:col-start-2 lg:row-start-1 lg:row-span-2"
-        >
-          {study.approach.slice(0, 2).map((para, i) => (
-            <p key={i}>{para}</p>
-          ))}
-        </DetailBlock>
-        <DetailBlock label="Impact" className="lg:col-start-1 lg:row-start-2">
-          <p>{mark(study.impact, study.impactHighlights ?? [], "hl")}</p>
-        </DetailBlock>
-      </div>
-      <div className="mt-7 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-        <div className="flex flex-wrap gap-x-6">
-          <CaseStudyLink slug={study.slug} title={study.title} />
-          <LinkRow links={study.links} />
-        </div>
-        <StackLine stack={study.stack} />
-      </div>
-    </article>
-  );
-}
-
-function ProjectCard({
+function Card({
   project,
-  className = "",
+  index,
+  total,
+  onOpen,
 }: {
   project: Project;
-  className?: string;
+  index: number;
+  total: number;
+  onOpen: (card: HTMLElement) => void;
 }) {
+  const cover = COVER[project.slug];
+  const stat = project.metrics?.[0];
+
   return (
     <article
-      className={`group relative flex h-full flex-col rounded-xl border border-hairline card-draft p-7 transition duration-300 hover:-translate-y-0.5 hover:border-accent/60 ${className}`}
+      data-index={index}
+      data-stop
+      role="group"
+      aria-roledescription="slide"
+      aria-label={`${index + 1} of ${total}`}
+      // The whole card opens the case study for a pointer; the link inside is
+      // the keyboard and screen reader route to the same place.
+      onClick={(e) => {
+        if (!(e.target as Element).closest("a")) onOpen(e.currentTarget);
+      }}
+      // From md up one card takes the section: the content width less a 4%
+      // peek of the next card. Below lg it is as tall as the screen allows;
+      // from lg up the cover sets its height (see .cover-side) and the text
+      // may make it taller, never shorter.
+      className="group relative flex min-h-[460px] w-[calc(100vw-4.625rem)] max-w-[520px] shrink-0 cursor-pointer snap-start flex-col overflow-hidden rounded-3xl md:h-[min(40rem,calc(100svh-12rem))] md:min-h-[24rem] md:w-[calc(min(1200px,100vw-4rem)*0.96-1.5rem)] md:max-w-none md:rounded-[28px] lg:h-auto lg:min-h-0 lg:flex-row lg:bg-surface lg:bg-none [background:var(--cover)]"
+      style={{ "--cover": cover.bg } as React.CSSProperties}
     >
-      <span className="reg-tick reg-tl" aria-hidden />
-      <span className="reg-tick reg-tr" aria-hidden />
-      <span className="reg-tick reg-bl" aria-hidden />
-      <span className="reg-tick reg-br" aria-hidden />
-      {/* Status sits on its own line so the title never has to share a row
-          with it, which kept wrapping differently card to card. */}
-      <p className="font-mono text-[11px] uppercase tracking-wider text-ink-faint">
-        {project.status}
-      </p>
-      <h3 className="mt-1.5 text-xl font-semibold leading-snug text-ink">
-        {project.title}
-      </h3>
-      <p className="mt-4 text-[17px] leading-relaxed text-ink-muted">
-        {mark(project.oneLiner, [project.emphasis], "font-medium text-ink")}
-      </p>
-      <p className="mt-3 text-[15px] leading-relaxed text-ink-faint">
-        {project.summary}
-      </p>
-      {/* Metadata band, pinned to the bottom so it lines up across the row. The
-          stack matches the 11px status line above, which also keeps it on one
-          line so the rule sits at the same height on every card. */}
-      <div className="mt-auto space-y-2 border-t border-hairline pt-5">
-        <StackLine stack={project.stack} className="text-[11px]" />
-        <div className="flex flex-wrap gap-x-6">
-          <CaseStudyLink slug={project.slug} title={project.title} />
-          <LinkRow links={project.links} />
+      {/* Stacked, the cover takes the height the text doesn't need, so when
+          the card is short the screenshot gives way, never the text. Side by
+          side it takes 68% of the width and the stage's height, less the
+          heading (--cap). */}
+      <ProjectCover
+        project={project}
+        sizes="(min-width: 1280px) 750px, (min-width: 1024px) 68vw, (min-width: 768px) 75vw, 90vw"
+        corner={false}
+        className="cover-side aspect-[16/11] shrink-0 [--cap:calc(100svh-var(--nav-height)-var(--corner-clear)-5.5rem)] [--w:calc(min(1200px,100vw-4rem)*0.96-1.5rem)] md:aspect-auto md:min-h-0 md:flex-1 lg:w-[68%] lg:flex-none"
+      />
+
+      {/* Stacked, a slim band on a fade over the cover, below the
+          screenshot, never on it; its padding gives way on short screens
+          before the cover does. Side by side, a column on the card's solid
+          dark side with Open case study at its foot. */}
+      <div className="flex shrink-0 flex-col gap-2 bg-[linear-gradient(180deg,rgb(23_23_27/0),rgb(23_23_27/0.96)_1rem)] px-[22px] pb-[22px] pt-8 lg:w-[32%] lg:gap-0 lg:bg-surface lg:bg-none lg:p-7">
+        <div className="flex max-w-[760px] flex-col gap-2">
+          <p className="font-mono text-[11px] text-accent-soft lg:text-xs">{project.status}</p>
+          <h3 className="font-display text-[28px] font-extrabold leading-[1.05] tracking-[-0.015em] text-ink lg:text-[clamp(1.75rem,0.9rem+1.3vw,2.25rem)] lg:leading-none">
+            {project.title}
+          </h3>
+          <p className="text-[15px] leading-[1.45] text-ink-soft lg:text-[15px] xl:text-base xl:leading-normal">
+            {project.summary}
+          </p>
         </div>
-        {project.privateNote && (
-          <p className="text-[12px] text-ink-faint">{project.privateNote}</p>
+        {stat && (
+          <p className="flex items-baseline gap-2 lg:mt-5 lg:flex-col lg:gap-1">
+            <span className="font-display text-2xl font-extrabold leading-none text-ink lg:text-3xl">
+              {stat.value}
+            </span>
+            <span className="text-xs text-ink-muted lg:text-[13px]">{stat.label}</span>
+          </p>
         )}
+        {/* One row: the case study first, then the project's own links, all
+            one height; it wraps only when the column is too narrow. A link
+            opens in a new tab, never the case study too. */}
+        <div
+          className="mt-1 flex flex-wrap items-center gap-2 lg:mt-auto lg:pt-5"
+          onClick={(e) => (e.target as Element).closest("a:not([data-expand])") && e.stopPropagation()}
+        >
+          <Link
+            href={`/projects/${project.slug}`}
+            // The card opens the case study in place; the route itself is only
+            // for new tabs and shared links, so there is nothing to prefetch.
+            prefetch={false}
+            data-expand
+            onClick={(e) => {
+              // Let new-tab and new-window clicks through to the real page.
+              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+              e.preventDefault();
+              onOpen(e.currentTarget.closest("article")!);
+            }}
+            className="lift inline-flex h-10 items-center gap-1.5 whitespace-nowrap rounded-full bg-accent pl-4 pr-3.5 text-sm font-semibold text-paper hover:bg-accent-soft"
+          >
+            Open case study
+            <span className="sr-only"> for {project.title}</span>
+            <Plus className="size-[18px]" aria-hidden />
+          </Link>
+          <Links project={project} compact />
+        </div>
       </div>
     </article>
   );
 }
 
 export function Projects() {
+  const total = projects.length;
+  const { ref: trackRef, active, ends, go, step } = useRow();
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState<number | null>(null);
+  // Whether the open case study added a history entry that Back should undo.
+  const pushed = useRef(false);
+  const openRef = useRef(open);
+  useEffect(() => {
+    openRef.current = open;
+  }, [open]);
+  const cardAt = (i: number) => trackRef.current?.querySelector<HTMLElement>(`[data-index="${i}"]`);
+  // Shrinks the panel into card `i`, the one in view. Focus goes to that
+  // card's link rather than back to wherever the panel first opened from,
+  // which could send the carousel back to an older card.
+  const shrink = (i: number) =>
+    morphClose(cardAt(i), () => {
+      flushSync(() => setOpen(null));
+      cardAt(i)?.querySelector<HTMLElement>("[data-expand]")?.focus({ preventScroll: true });
+    });
+
+  // Back and Forward move between the home page and an open case study. The
+  // sheet shrinks back into its card on the way out.
+  useEffect(() => {
+    const onPop = () => {
+      const i = projects.findIndex((p) => p.slug === slugFromPath());
+      pushed.current = i >= 0;
+      if (i >= 0) return setOpen(i);
+      const current = openRef.current;
+      if (current !== null) shrink(current);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+    // shrink only reads refs and sets state.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // The address bar shows the case study's own URL while it is open, so it can
+  // be shared, and a reload lands on the full page.
+  function openCase(i: number, card: HTMLElement) {
+    window.history.pushState(null, "", `/projects/${projects[i].slug}`);
+    pushed.current = true;
+    morphOpen(card, () => flushSync(() => setOpen(i)));
+  }
+
+  // The carousel behind moves to the new project too, so closing shrinks
+  // the panel into the card that is now in view.
+  function switchCase(i: number) {
+    if (open === null) return;
+    window.history.replaceState(null, "", `/projects/${projects[i].slug}`);
+    go(i, true);
+    morphSwitch(i > open ? 1 : -1, bodyRef.current, () => {
+      flushSync(() => setOpen(i));
+      bodyRef.current?.scrollTo({ top: 0 });
+    });
+  }
+
+  function closeCase() {
+    if (pushed.current) {
+      pushed.current = false;
+      window.history.back(); // the popstate handler closes the sheet
+    } else if (open !== null) {
+      shrink(open);
+    }
+  }
+
+  const current = open === null ? null : projects[open];
+  const prev = open !== null && open > 0 ? open - 1 : null;
+  const next = open !== null && open < total - 1 ? open + 1 : null;
+
   return (
-    <section id="projects" className="scroll-mt-24 pb-24 sm:pb-36">
-      <SectionHeading
-        number="01"
-        title="Projects"
-        caption="Problem, approach, and impact. The stack comes second."
-      />
-
-      {leadProjects.map((study, i) => (
-        <div
-          key={study.slug}
-          className={`rise ${i > 0 ? "mt-16" : ""}`}
-          style={{ "--rise-delay": `${0.24 + i * 0.06}s` } as React.CSSProperties}
-        >
-          <CaseStudyCard
-            study={study}
-            media={
-              study.media && (
-                <ProjectMediaView media={study.media} priority={i === 0} />
-              )
-            }
-          />
-          {study.gallery && (
-            <div className="mt-4 grid gap-4 sm:grid-cols-3">
-              {study.gallery.map((g) => (
-                <ProjectMediaView key={g.src} media={g} small />
-              ))}
+    <section
+      id="projects"
+      // The card in view, for the assistant's question about it (see
+      // lib/section-questions.ts).
+      data-active={active}
+      className="py-20 lg:py-28"
+    >
+      <SkipLink to="leadership" />
+      <div className="wrap">
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
+          {/* From xl up the line sits beside the heading, so the card gets
+              its height. */}
+          <div className="xl:flex xl:items-end xl:gap-6">
+            <h2 className="font-display text-[3.75rem] font-extrabold uppercase leading-[0.9] tracking-[-0.03em] text-ink md:text-[clamp(3rem,1.2rem+3.1vw,4rem)]">
+              <span className="block md:inline">Selected</span>{" "}
+              {/* The reference ghosts this word almost into the page; this is the
+                  faintest grey that still clears 3:1 for large text. */}
+              <span className="block text-[#636167] md:inline">work</span>
+            </h2>
+            <p className="mt-4 text-[15px] text-ink-muted md:mt-1 lg:text-base xl:mt-0 xl:max-w-[15rem] xl:pb-0.5 xl:text-[15px] xl:leading-snug">
+              Problem, approach, and impact. The stack comes second.
+            </p>
+          </div>
+          <div className="hidden items-center gap-5 md:flex">
+            <div aria-hidden className="h-[3px] w-[220px] overflow-hidden rounded-full bg-ink/12 xl:w-[140px]">
+              <div
+                className="h-full rounded-full bg-accent transition-[width] duration-500 motion-reduce:transition-none"
+                style={{ width: `${((active + 1) / total) * 100}%` }}
+              />
             </div>
-          )}
+            <span aria-hidden className="min-w-14 font-mono text-sm text-ink-faint">
+              {active + 1} / {total}
+            </span>
+            {[
+              { label: "Previous project", by: -1, Icon: ArrowLeft },
+              { label: "Next project", by: 1, Icon: ArrowRight },
+            ].map(({ label, by, Icon }) => (
+              <button
+                key={label}
+                type="button"
+                aria-label={label}
+                disabled={by < 0 ? ends.start : ends.end}
+                onClick={() => step(by)}
+                className="flex size-14 items-center justify-center rounded-full border border-ink/25 text-ink transition-colors duration-300 hover:border-accent hover:bg-accent hover:text-paper disabled:pointer-events-none disabled:opacity-30"
+              >
+                <Icon className="size-5" aria-hidden />
+              </button>
+            ))}
+          </div>
         </div>
-      ))}
+      </div>
 
-      {/* The rest: tight one-liner-plus-supporting cards, each with its own
-          case study page for anyone who wants the depth. */}
       <div
-        className="rise mt-16 grid gap-5 md:grid-cols-2 lg:grid-cols-3"
-        style={{ "--rise-delay": "0.36s" } as React.CSSProperties}
+        role="region"
+        aria-roledescription="carousel"
+        aria-label="Selected work"
+        tabIndex={0}
+        // The region doesn't scroll, so the arrows have nothing of their
+        // own to do here; from a link inside a card they are the link's.
+        onKeyDown={(e) => {
+          if (e.target !== e.currentTarget) return;
+          if (e.key === "ArrowRight") step(1);
+          if (e.key === "ArrowLeft") step(-1);
+        }}
+        className="mt-10"
       >
-        {otherProjects.map((project, i) => {
-          const isOddLast =
-            i === otherProjects.length - 1 && otherProjects.length % 2 === 1;
-          return (
-            <ProjectCard
+        <div
+          ref={trackRef}
+          // Sideways input is the row's own; vertical is the page's.
+          data-lenis-prevent-horizontal
+          className="flex snap-x snap-mandatory gap-3 overflow-x-auto overflow-y-hidden overscroll-x-contain px-5 [scroll-padding-inline:1.25rem] [scrollbar-width:none] sm:px-8 sm:[scroll-padding-inline:2rem] md:gap-6 lg:px-[max(2rem,calc(50vw-600px))] lg:[scroll-padding-inline:max(2rem,calc(50vw-600px))] [&::-webkit-scrollbar]:hidden"
+        >
+          {projects.map((project, i) => (
+            <Card
               key={project.slug}
               project={project}
-              className={isOddLast ? "md:col-span-2 lg:col-span-1" : ""}
+              index={i}
+              total={total}
+              onOpen={(card) => openCase(i, card)}
             />
-          );
-        })}
+          ))}
+        </div>
       </div>
+
+      <div aria-hidden className="wrap mt-5 flex gap-1.5 md:hidden">
+        {projects.map((p, i) => (
+          <span
+            key={p.slug}
+            className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ${
+              i === active ? "w-[22px] bg-accent" : "w-1.5 bg-ink/25"
+            }`}
+          />
+        ))}
+      </div>
+
+      <Panel
+        open={current !== null}
+        onClose={closeCase}
+        closeLabel="Close case study"
+        labelledBy="case-study-title"
+        prev={prev === null ? null : { hint: "Previous: ", label: projects[prev].title, onClick: () => switchCase(prev) }}
+        next={next === null ? null : { hint: "Next: ", label: projects[next].title, onClick: () => switchCase(next) }}
+        bodyRef={bodyRef}
+        hero={current && <CaseStudyHero project={current} titleAs="h2" titleId="case-study-title" />}
+      >
+        {current && (
+          <article className="px-5 pb-12 pt-6 lg:px-[90px] lg:pb-20 lg:pt-8">
+            <CaseStudy project={current} titleAs="h2" />
+
+            <nav
+              aria-label="More projects"
+              className="mt-16 flex flex-col gap-3 border-t border-hairline pt-7 sm:flex-row sm:justify-between"
+            >
+              {prev !== null ? (
+                <button
+                  type="button"
+                  onClick={() => switchCase(prev)}
+                  className="glass lift flex min-h-14 items-center gap-2 rounded-full px-6 text-[15px] text-[#E4E1DB]"
+                >
+                  <ArrowLeft className="size-4" aria-hidden />
+                  <span className="sr-only">Previous: </span>
+                  {projects[prev].title}
+                </button>
+              ) : (
+                <span />
+              )}
+              {next !== null && (
+                <button
+                  type="button"
+                  onClick={() => switchCase(next)}
+                  className="lift flex min-h-14 items-center justify-center gap-2 rounded-full bg-accent px-6 text-[15px] font-semibold text-paper hover:bg-accent-soft"
+                >
+                  Next: {projects[next].title}
+                  <ArrowRight className="size-4" aria-hidden />
+                </button>
+              )}
+            </nav>
+          </article>
+        )}
+      </Panel>
     </section>
   );
 }

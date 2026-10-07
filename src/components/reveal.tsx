@@ -7,7 +7,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 const useIsoLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
-/* Wraps a section so its `.draw-line` and `.rise` descendants animate in as it
+/* Wraps a section so its `.rise` descendants animate in as it
    enters view. Content is fully visible without JS (the hidden state only
    applies once the root is "armed"), and anything already on screen at load is
    shown immediately without a flash. */
@@ -50,7 +50,10 @@ export function Reveal({
           io.disconnect();
         }
       },
-      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+      // Triggers once the top clears the bottom 12% of the screen. A share of
+      // the section's own area would never be reached by a section taller
+      // than the screen.
+      { threshold: 0, rootMargin: "0px 0px -12% 0px" }
     );
     io.observe(el);
     return () => io.disconnect();

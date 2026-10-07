@@ -1,55 +1,72 @@
-import {
-  Globe,
-  Blocks,
-  Target,
-  Code,
-  GraduationCap,
-  CircleDot,
-  MapPin,
-} from "lucide-react";
-import { SectionHeading } from "@/components/section-heading";
-import { TickFrame } from "@/components/tick-frame";
+import Image from "next/image";
 
 const facts = [
-  { icon: Code, value: "AI major", label: "Computer Science" },
-  { icon: GraduationCap, value: "Dec 2026", label: "Graduating" },
-  { icon: CircleDot, value: "15 years", label: "On court" },
-  { icon: MapPin, value: "Adelaide", label: "Based in Australia" },
+  { value: "AI major", label: "Computer Science" },
+  { value: "Dec 2026", label: "Graduating" },
+  { value: "15 years", label: "On court" },
+  { value: "Adelaide", label: "Based in Australia" },
 ];
 
 const principles = [
   {
-    icon: Globe,
-    lead: true,
     statement:
       "I would rather ship something real people use than perfect a prototype nobody sees.",
     evidence:
       "MetaPlay began as a group assignment. I took it the rest of the way on my own and put it in production, so today it is a live product instead of a repo I describe in interviews.",
   },
   {
-    icon: Blocks,
     statement: "I build so the next person can extend it without a rewrite.",
     evidence:
       "The Restaurant Simulator was designed around exactly that: adding a new kind of staff means adding a class, not editing the code that already works.",
   },
   {
-    icon: Target,
     statement: "I reach for the simplest thing that solves the real problem.",
     evidence:
       "Not the most impressive one. The point is the person on the other end, not the framework I get to use.",
   },
 ];
 
+const rise = (delay: number) => ({ "--rise-delay": `${delay}s` }) as React.CSSProperties;
+
 export function About() {
   return (
-    <section id="about" className="scroll-mt-24 pb-24 sm:pb-36">
-      <SectionHeading number="04" title="About" />
+    <section id="about" tabIndex={-1} className="outline-none wrap py-20 lg:py-28">
+      <h2 className="rise font-display text-[clamp(3rem,1.6rem+4.8vw,6rem)] font-extrabold leading-none tracking-[-0.04em] text-ink">
+        About
+      </h2>
 
-      <div
-        className="rise grid gap-8 lg:grid-cols-[1.6fr_1fr] lg:items-start"
-        style={{ "--rise-delay": "0.24s" } as React.CSSProperties}
-      >
-        <div className="max-w-2xl space-y-6 text-lg leading-relaxed text-ink-muted">
+      <div className="mt-10 grid gap-12 lg:mt-12 lg:grid-cols-[360px_minmax(0,1fr)] lg:gap-20">
+        <div className="rise mx-auto w-full max-w-[360px]" style={rise(0.08)}>
+          <div className="relative aspect-[360/400] overflow-hidden rounded-[22px]">
+            <Image
+              src="/headshot.jpg"
+              alt="Portrait of Agrim Sharma"
+              fill
+              sizes="360px"
+              className="object-cover object-[50%_20%]"
+            />
+          </div>
+          <dl className="mt-5 grid grid-cols-2 overflow-hidden rounded-[18px] border border-hairline">
+            {facts.map(({ value, label }, i) => (
+              <div
+                key={label}
+                className={`flex flex-col px-[18px] py-4 ${i < 2 ? "border-b border-hairline" : ""} ${
+                  i % 2 === 0 ? "border-r border-hairline" : ""
+                }`}
+              >
+                <dt className="order-last mt-0.5 text-[13px] text-ink-muted">{label}</dt>
+                <dd className="whitespace-nowrap font-display text-[22px] font-extrabold leading-tight text-ink">
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        <div
+          className="rise max-w-[760px] space-y-6 text-lg leading-[1.7] text-ink-soft lg:text-[19px]"
+          style={rise(0.16)}
+        >
           <p>
             I build the way I play tennis, which is to say I{" "}
             <span className="hl">care about the boring part</span>. Fifteen years
@@ -75,68 +92,32 @@ export function About() {
             to be where I do some of my best work.
           </p>
         </div>
-
-        <TickFrame
-          src="/tennis.jpg"
-          alt="Agrim Sharma playing a forehand"
-          sizes="(max-width: 1024px) 100vw, 360px"
-          caption="Match play · Adelaide"
-          objectPosition="center"
-          entrance="reveal"
-          className="aspect-[4/3] lg:aspect-[4/5]"
-        />
       </div>
 
-      <div
-        className="rise mt-12 max-w-3xl"
-        style={{ "--rise-delay": "0.32s" } as React.CSSProperties}
-      >
-        <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-accent">
+      <div className="rise mt-16 lg:mt-24" style={rise(0.24)}>
+        <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-accent-soft lg:text-[13px]">
           A few things I hold to, that my projects show
         </p>
-        <div className="mt-6 space-y-7">
-          {principles.map(({ icon: Icon, lead, statement, evidence }) => (
-            <div key={statement} className="flex gap-4">
-              <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-md border border-hairline bg-surface">
-                <Icon className="size-4 text-accent" aria-hidden />
+        <ol className="mt-5 border-b border-hairline">
+          {principles.map(({ statement, evidence }, i) => (
+            <li
+              key={statement}
+              className="grid gap-3 border-t border-hairline py-6 lg:grid-cols-[40px_520px_minmax(0,1fr)] lg:gap-10"
+            >
+              <span aria-hidden className="font-mono text-sm text-accent">
+                {String(i + 1).padStart(2, "0")}
               </span>
-              <div>
-                <p
-                  className={
-                    lead
-                      ? "font-serif text-xl sm:text-2xl font-medium leading-snug text-ink"
-                      : "text-lg font-medium text-ink"
-                  }
-                >
-                  {statement}
-                </p>
-                <p className="mt-2 text-[15px] leading-relaxed text-ink-muted">
-                  {evidence}
-                </p>
-              </div>
-            </div>
+              <p className="font-display text-xl font-bold leading-[1.25] text-ink lg:text-[22px]">{statement}</p>
+              <p className="text-[15px] leading-relaxed text-ink-muted">{evidence}</p>
+            </li>
           ))}
-        </div>
-        <p className="mt-8 text-lg leading-relaxed text-ink-muted">
+        </ol>
+        <p className="mt-10 max-w-3xl text-lg leading-relaxed text-ink-soft">
           Right now I am in my final semester, interning on a voice AI
           prototype at Aurivox, and finishing the website for the tennis
           academy I coach at. I graduate in December.
         </p>
       </div>
-
-      <dl className="rise mt-14 grid grid-cols-2 lg:grid-cols-4 gap-px overflow-hidden rounded-xl border border-hairline bg-hairline">
-        {facts.map(({ icon: Icon, value, label }) => (
-          <div key={label} className="bg-surface p-4 sm:p-6">
-            <Icon className="mb-3 size-4 text-ink-faint" aria-hidden />
-            <dd className="font-serif text-xl sm:text-2xl lg:text-[1.6rem] font-medium text-ink whitespace-nowrap">
-              {value}
-            </dd>
-            <dt className="mt-2 font-mono text-[11px] uppercase tracking-[0.15em] text-ink-faint">
-              {label}
-            </dt>
-          </div>
-        ))}
-      </dl>
     </section>
   );
 }
