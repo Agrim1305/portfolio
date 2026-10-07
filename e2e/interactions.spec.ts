@@ -394,18 +394,31 @@ test.describe("ask Agrim", () => {
     expect(await page.evaluate(() => window.scrollY)).toBe(pageY);
   });
 
-  test("a failed request shows the error and rolls back the question", async ({ page }) => {
-    await page.route("/api/chat", (route) =>
-      route.fulfill({ status: 429, contentType: "application/json", body: JSON.stringify({ error: "Too many messages. Please wait a moment and try again." }) }),
-    );
-    await page.goto("/");
-    await page.keyboard.press("ControlOrMeta+k");
-    const chat = page.getByRole("dialog", { name: "Aris" });
-    await chat.getByRole("textbox", { name: "Ask a question" }).fill("Hello?");
-    await chat.getByRole("button", { name: "Send message" }).click();
-    await expect(chat.getByRole("alert")).toHaveText("Too many messages. Please wait a moment and try again.");
-    await expect(chat.getByRole("log")).not.toContainText("Hello?");
-  });
+  // Out of credits (402), rate limited, the server down, or no connection
+  // at all: always the same note, never the raw error.
+  for (const [failure, answer] of [
+    ["402", { status: 402, contentType: "application/json", body: JSON.stringify({ error: "Your credit balance is too low" }) }],
+    ["429", { status: 429, contentType: "application/json", body: JSON.stringify({ error: "Too many messages." }) }],
+    ["500", { status: 500, contentType: "text/plain", body: "Internal Server Error" }],
+    ["a network failure", null],
+  ] as const) {
+    test(`on ${failure}, Aris says it is taking a break and gives Agrim's email`, async ({ page }) => {
+      await page.route("/api/chat", (route) => (answer ? route.fulfill(answer) : route.abort("internetdisconnected")));
+      await page.goto("/");
+      await page.keyboard.press("ControlOrMeta+k");
+      const chat = page.getByRole("dialog", { name: "Aris" });
+      const box = chat.getByRole("textbox", { name: "Ask a question" });
+      await box.fill("Hello?");
+      await chat.getByRole("button", { name: "Send message" }).click();
+      const note = chat.getByRole("alert");
+      await expect(note).toHaveText("Aris is taking a break right now. You can reach Agrim directly at agrimsh22@gmail.com.");
+      await expect(note.getByRole("link", { name: "agrimsh22@gmail.com" })).toHaveAttribute("href", "mailto:agrimsh22@gmail.com");
+      await expect(chat).not.toContainText(/credit|Too many|Internal Server Error|Failed to fetch/i);
+      // The question comes out of the log and back into the box.
+      await expect(chat.getByRole("log")).not.toContainText("Hello?");
+      await expect(box).toHaveValue("Hello?");
+    });
+  }
 
   test("the chat is a small window: the page behind stays scrollable and clickable", async ({ page, isMobile }) => {
     await page.goto("/");
@@ -671,6 +684,9 @@ test.describe("experience", () => {
     const ids = ["aurivox", "president", "coaching", "retail"];
     for (let i = 0; i < 4; i++) {
       await tabs.nth(i).click();
+      // Off the list, so no other role slides under the pointer as the page
+      // moves and takes over by hover.
+      await page.mouse.move(700, 5);
       const read = page.getByRole("tabpanel").getByRole("button", { name: "Read the full story" });
       // Playwright's own scroll into view glides under the page's smooth
       // scrolling and can give up on a moving target; jump instead.

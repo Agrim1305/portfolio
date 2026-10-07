@@ -164,7 +164,8 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
   const [messages, setMessages] = useState<Message[]>([INTRO_MESSAGE]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // The last question failed: Aris says it is taking a break.
+  const [failed, setFailed] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dockRef = useRef<HTMLButtonElement>(null);
@@ -239,8 +240,18 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
     const nextMessages: Message[] = [...messages, { role: "user", content: trimmed }];
     setMessages(nextMessages);
     setInput("");
-    setError(null);
+    setFailed(false);
     setLoading(true);
+
+    // Any failure, whatever the cause (out of credits, rate limited, the
+    // server down, no connection): the question and any half-answer come
+    // out of the log, the question goes back in the box, and Aris says it
+    // is taking a break. The details stay in the server's log.
+    const fail = () => {
+      setMessages((prev) => (prev.at(-1)?.role === "assistant" ? prev.slice(0, -2) : prev.slice(0, -1)));
+      setInput(trimmed);
+      setFailed(true);
+    };
 
     try {
       const res = await fetch("/api/chat", {
@@ -254,19 +265,7 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
         }),
       });
 
-      if (!res.ok || !res.body) {
-        // Error responses are JSON; success responses are a text stream.
-        let msg = "Something went wrong.";
-        try {
-          const data = await res.json();
-          msg = data?.error ?? msg;
-        } catch {
-          // response wasn't JSON, keep the default message
-        }
-        setError(msg);
-        setMessages((prev) => prev.slice(0, -1)); // roll back the user msg on hard failure
-        return;
-      }
+      if (!res.ok || !res.body) return fail();
 
       setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
       const reader = res.body.getReader();
@@ -288,24 +287,9 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
           return copy;
         });
       }
-      if (!received.trim()) {
-        setError("The assistant didn't return a response. Try again.");
-        setMessages((prev) => prev.slice(0, -2)); // drop empty assistant + user
-      }
+      if (!received.trim()) fail();
     } catch {
-      setError("Couldn't reach the assistant. Check your connection and try again.");
-      // Remove a trailing empty assistant bubble, then the user message.
-      setMessages((prev) => {
-        const copy = prev.slice();
-        if (
-          copy.length &&
-          copy[copy.length - 1].role === "assistant" &&
-          copy[copy.length - 1].content === ""
-        ) {
-          copy.pop();
-        }
-        return copy.slice(0, -1);
-      });
+      fail();
     } finally {
       setLoading(false);
     }
@@ -401,9 +385,16 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
               </div>
             )}
 
-            {error && (
-              <p role="alert" className="px-1 font-mono text-xs text-destructive">
-                {error}
+            {failed && (
+              <p
+                role="alert"
+                className="max-w-[88%] self-start rounded-[18px_18px_18px_6px] bg-surface-raised px-3.5 py-2.5 text-[15px] leading-relaxed text-[#E4E1DB] md:text-sm"
+              >
+                Aris is taking a break right now. You can reach Agrim directly at{" "}
+                <a href="mailto:agrimsh22@gmail.com" className="font-medium text-accent-soft underline underline-offset-2">
+                  agrimsh22@gmail.com
+                </a>
+                .
               </p>
             )}
           </div>

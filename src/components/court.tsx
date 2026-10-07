@@ -104,6 +104,11 @@ export function Court({ colours }: { colours: Record<string, string> }) {
             </button>
           </div>
         </div>
+        <p className="rise mt-5 max-w-[62ch] text-lg leading-relaxed text-ink-muted">
+          I&apos;ve competed since I was a kid in India, from a top-90 national junior ranking to the Rafa Nadal
+          Academy and university tennis in Australia. It taught me the habits I bring to work: training when no
+          one&apos;s watching, competing under pressure, and coaching others to get better.
+        </p>
 
         {/* Nothing in a stop takes focus, so the row itself does. */}
         <div className="rise relative mt-10 overflow-hidden rounded-[18px] bg-surface shadow-[inset_0_0_0_1px_rgb(241_239_234/0.08)] lg:rounded-[20px]">

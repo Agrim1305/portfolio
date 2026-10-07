@@ -40,6 +40,12 @@ Nepal. He now plays Premier League, the top grade in Tennis South
 Australia, and is Assistant Head Coach at Adelaide Rising Stars Tennis
 Academy, based at Tea Tree Gully Tennis Club.
 
+In his own words, opening the tennis section of the site: "I've competed
+since I was a kid in India, from a top-90 national junior ranking to the
+Rafa Nadal Academy and university tennis in Australia. It taught me the
+habits I bring to work: training when no one's watching, competing under
+pressure, and coaching others to get better."
+
 At the Rafa Nadal Academy he met Toni Nadal, played a night tournament
 match, and was on stage with Team India at the academy's inauguration
 ceremony. As a junior he won an AITA tournament. His first season in

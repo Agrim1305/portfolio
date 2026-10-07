@@ -131,23 +131,50 @@ test.describe("the merger beats", () => {
     expect((await read.boundingBox())!.x).toBeCloseTo(boxes[0].box.x, 0);
   });
 
-  test("the whole story holds every beat in full, in the same equal boxes", async ({ page, isMobile }) => {
+  test("the whole story stacks every beat in full, at the panel's width, 32px apart", async ({ page }) => {
     await page.goto("/");
     await page.locator("#leadership").getByRole("button", { name: "Read the whole story" }).click();
     const sheet = page.getByRole("dialog", { name: "President" });
     await expect(sheet).toBeVisible();
-    const boxes = await sheet.locator("ol > li").evaluateAll((els) =>
-      els.map((li) => {
+    const { list, boxes } = await sheet.locator("ol").evaluate((ol) => ({
+      list: ol.getBoundingClientRect().toJSON(),
+      boxes: [...ol.children].map((li) => {
         const p = li.querySelector("p")!;
         const r = li.getBoundingClientRect();
-        return { width: r.width, height: r.height, full: p.scrollHeight <= p.clientHeight + 1, fades: getComputedStyle(p).maskImage !== "none" };
+        const letter = li.querySelector("span[aria-hidden]")!.getBoundingClientRect();
+        return {
+          label: li.querySelector("h4")!.textContent,
+          left: r.left,
+          width: r.width,
+          top: r.top,
+          bottom: r.bottom,
+          letterRight: r.right - letter.right,
+          letterClear: letter.bottom <= p.getBoundingClientRect().top,
+          // The text's width in ch, the width of a "0" in its own font.
+          measure: (() => {
+            const zero = document.createElement("span");
+            zero.textContent = "0";
+            p.append(zero);
+            const ch = zero.getBoundingClientRect().width;
+            zero.remove();
+            return p.getBoundingClientRect().width / ch;
+          })(),
+          full: p.scrollHeight <= p.clientHeight + 1,
+          fades: getComputedStyle(p).maskImage !== "none",
+        };
       }),
-    );
-    for (const b of boxes) {
+    }));
+    expect(boxes.map((b) => b.label)).toEqual(["Setup", "What I did", "Result"]);
+    for (const [i, b] of boxes.entries()) {
+      // One column, the panel's width, in order, 32px apart.
+      expect(b.left).toBeCloseTo(list.left, 0);
+      expect(b.width).toBeCloseTo(list.width, 0);
+      if (i) expect(b.top - boxes[i - 1].bottom).toBeCloseTo(32, 0);
+      expect(b.letterClear).toBe(true);
+      // The text at a reading measure.
+      expect(b.measure).toBeLessThanOrEqual(70.5);
       expect(b.full).toBe(true);
       expect(b.fades).toBe(false);
-      expect(b.width).toBeCloseTo(boxes[0].width, 0);
-      if (!isMobile) expect(b.height).toBeCloseTo(boxes[0].height, 0);
     }
   });
 });

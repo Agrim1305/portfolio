@@ -121,6 +121,14 @@ test.describe("content lock", () => {
     });
   }
 
+  // Approved in the final round; locked word for word.
+  test("the tennis intro is the approved copy", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("#court p").first()).toHaveText(
+      "I've competed since I was a kid in India, from a top-90 national junior ranking to the Rafa Nadal Academy and university tennis in Australia. It taught me the habits I bring to work: training when no one's watching, competing under pressure, and coaching others to get better.",
+    );
+  });
+
   test("the hero name is unchanged", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Agrim Sharma");

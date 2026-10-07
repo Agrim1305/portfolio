@@ -66,6 +66,13 @@ ${knowledgeBase}`;
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
+/* Logs a failure for the server's log: the message only, never the request,
+   and the API key redacted in case anything ever echoes it. */
+function logError(label: string, detail: unknown, apiKey: string) {
+  const text = detail instanceof Error ? `${detail.name}: ${detail.message}` : String(detail);
+  console.error(`${label}: ${text.replaceAll(apiKey, "[redacted]")}`);
+}
+
 export async function POST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   const wait = rateLimitWait(ip);
@@ -140,7 +147,7 @@ export async function POST(req: NextRequest) {
 
     if (!upstream.ok || !upstream.body) {
       const errText = await upstream.text().catch(() => "");
-      console.error("Anthropic API error:", upstream.status, errText);
+      logError("Anthropic API error", `${upstream.status} ${errText.slice(0, 500)}`, apiKey);
       return NextResponse.json(
         { error: "The assistant is having trouble responding right now." },
         { status: 502 }
@@ -186,7 +193,7 @@ export async function POST(req: NextRequest) {
             }
           }
         } catch (err) {
-          console.error("Chat stream error:", err);
+          logError("Chat stream error", err, apiKey);
           controller.error(err);
           return;
         }
@@ -202,7 +209,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err) {
-    console.error("Chat route error:", err);
+    logError("Chat route error", err, apiKey);
     return NextResponse.json(
       { error: "Something went wrong reaching the assistant." },
       { status: 500 }
