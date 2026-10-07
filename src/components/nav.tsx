@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Sparkles, X } from "lucide-react";
 import { Sheet } from "@/components/sheet";
 import { openAsk } from "@/components/ask-agrim";
+import { scrollToElement } from "@/components/smooth-scroll";
 
 // In page order: the active-section highlight walks this list.
 const sections = [
@@ -77,7 +78,7 @@ export function Nav() {
     setOpen(false);
     if (!el) return;
     e.preventDefault();
-    requestAnimationFrame(() => el.scrollIntoView());
+    requestAnimationFrame(() => scrollToElement(el));
   }
 
   return (

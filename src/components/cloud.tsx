@@ -1,11 +1,57 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 /* What the cloud's face shows. Thinking and answering follow the chat
    stream; the rest are set by the dock (see dock.tsx). */
 export type Mood = "idle" | "thinking" | "answering" | "happy" | "surprised" | "sleepy" | "wink";
+
+// What the cloud is called wherever it is only a picture: in the hero.
+export const CLOUD_LABEL = "Aris, Agrim's AI assistant";
+
+// A click on the cloud in the hero runs through these faces, each landing
+// with the squash and stretch of a mood change; under reduced motion it
+// shows the first, still.
+const REACTION: Mood[] = ["happy", "wink", "surprised"];
+const REACTION_MS = 600;
+
+/* The cloud's reaction to a click or tap while it sits in the hero, where
+   it doesn't open the chat. Decoration only; clicks during a reaction are
+   ignored. */
+export function useReaction() {
+  const [face, setFace] = useState<Mood | null>(null);
+  const timers = useRef<number[]>([]);
+  useEffect(() => {
+    const pending = timers;
+    return () => pending.current.forEach(clearTimeout);
+  }, []);
+  function react() {
+    if (timers.current.length) return;
+    const faces = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? REACTION.slice(0, 1) : REACTION;
+    timers.current = [
+      ...faces.map((f, i) => window.setTimeout(() => setFace(f), i * REACTION_MS)),
+      window.setTimeout(() => {
+        setFace(null);
+        timers.current = [];
+      }, faces.length * REACTION_MS),
+    ];
+  }
+  return { face, react };
+}
+
+/* The hero's own cloud, where it shows: on phones, and on wide screens
+   under reduced motion (elsewhere the dock's cloud takes its place; see
+   dock.tsx). A picture, not a control: a click or tap only makes it react,
+   and the Ask card is the way into the chat. */
+export function HeroCloud() {
+  const { face, react } = useReaction();
+  return (
+    <span role="img" aria-label={CLOUD_LABEL} onClick={react} className="block">
+      <Cloud live mood={face ?? "idle"} />
+    </span>
+  );
+}
 
 // The eyes, in the cloud's own 395 x 340 box: each is 34 wide and 77 tall,
 // centred 57.5% of the way down, at 36% and 62% across.

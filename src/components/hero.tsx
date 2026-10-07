@@ -1,4 +1,4 @@
-import { Cloud } from "@/components/cloud";
+import { HeroCloud } from "@/components/cloud";
 import { AskCard } from "@/components/ask-agrim";
 import { SocialLinks } from "@/components/social-links";
 
@@ -93,17 +93,17 @@ export function Hero() {
 
           {/* The cloud perches on the Ask card's top edge, its lower third
               over the card, clear of the card's heading on the left. The
-              padding above the card is the cloud's other two thirds. It is
-              decorative. From md up with motion allowed, the chat's cloud
-              button takes its place and flies from here to the corner as the
-              page scrolls, taking the card with it (see dock.tsx). */}
+              padding above the card is the cloud's other two thirds. From md
+              up with motion allowed, the chat's cloud takes its place and
+              flies from here to the corner over the first 220px of scroll,
+              taking the card with it (see dock.tsx). */}
           <div className="relative pt-[80px] md:pt-[97px]">
             <div id="hero-cloud" className="hero-fade absolute right-6 top-0 z-10 w-[140px] md:right-8 md:w-[170px]">
               <div
                 aria-hidden
                 className="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[170%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgb(255_140_70/0.16),rgb(255_91_46/0)_65%)]"
               />
-              <Cloud live />
+              <HeroCloud />
             </div>
             {/* The card folds into the cloud as the cloud leaves for its dock
                 (see dock.tsx). A wrapper, because the card's entrance holds

@@ -166,7 +166,7 @@ export function Journey({ colours }: { colours: Record<string, string> }) {
             if (e.key === "ArrowLeft") step(-1);
           }}
         >
-          <div ref={track} className="journey-track">
+          <div ref={track} data-lenis-prevent-horizontal className="journey-track">
             {layout.map(({ chapter, columns }) => (
               <div key={chapter.label} className="contents">
                 <div data-stop className="journey-card">

@@ -75,8 +75,8 @@
    to, and anything focused, comes to rest below it. --corner-clear is the
    docked cloud's footprint from the bottom of the screen (its margin, its
    height and a gap), which a Selected work card keeps free so no text sits
-   under it. Scrolling is the browser's own; anchors glide unless motion is
-   reduced. */
+   under it. Anchors glide unless motion is reduced; with a mouse or a
+   trackpad, Lenis does the gliding (see smooth-scroll.tsx). */
 html {
   --nav-height: 4rem;
   --corner-clear: 6.75rem;
@@ -90,6 +90,9 @@ html {
 section[id],
 :focus {
   scroll-margin-top: var(--nav-height);
+}
+html.lenis {
+  scroll-behavior: auto;
 }
 
 /* Any open sheet locks the page behind it. */

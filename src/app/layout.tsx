@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Geist, Newsreader } from "next/font/google";
+import { SmoothScroll } from "@/components/smooth-scroll";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -60,6 +61,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${bricolage.variable} ${newsreader.variable} font-sans antialiased`}
       >
         {children}
+        <SmoothScroll />
       </body>
     </html>
   );

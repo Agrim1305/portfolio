@@ -116,6 +116,7 @@ export function Court({ colours }: { colours: Record<string, string> }) {
             aria-roledescription="carousel"
             aria-label="Built on court"
             tabIndex={0}
+            data-lenis-prevent-horizontal
             className="flex snap-x snap-mandatory gap-4 overflow-x-auto overflow-y-hidden overscroll-x-contain [scrollbar-width:none] lg:gap-10 [&::-webkit-scrollbar]:hidden"
           >
             {stops.map((s, i) => (

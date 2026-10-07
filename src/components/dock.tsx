@@ -2,17 +2,18 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type RefObject } from "react";
 import { Sparkle, X } from "lucide-react";
-import { Cloud, type Mood } from "@/components/cloud";
+import { CLOUD_LABEL, Cloud, useReaction, type Mood } from "@/components/cloud";
+import { onPageScroll } from "@/components/smooth-scroll";
 import { useSectionQuestion } from "@/lib/section-questions";
 
-// The cloud reaches its dock once the page has scrolled this share of the
-// hero's height. The Ask card has folded into it by this share of the way,
-// and under reduced motion the two swap a quarter of the way.
-const DOCKED_AT = 0.8;
-const CARD_GONE_AT = 0.75;
-const SWAP_AT = 0.25;
+// The cloud has flown from the hero to its dock, and the Ask card folded
+// into it, once the page has scrolled this far; under reduced motion the
+// two swap here instead.
+const DOCK_PX = 220;
 // The pill beside the docked cloud fades in from this share of the way.
 const PILL_FROM = 0.85;
+
+const easeInOut = (p: number) => (p < 0.5 ? 4 * p ** 3 : 1 - (2 - 2 * p) ** 3 / 2);
 
 // Where the cloud travels from the hero to the corner, and where it and the
 // card swap by fading instead.
@@ -62,18 +63,21 @@ function subscribeTravel(onChange: () => void) {
 }
 
 /* The cloud in the bottom-right corner is the chat's button. From md up with
-   motion allowed, the page's cloud starts in the hero: this button takes the
-   hero cloud's place (the hero's copy hides) and, as the hero scrolls away,
-   shrinks and glides down a gentle curve into the corner, and back up again
-   on the way up. It moves with transforms only, from a passive scroll
-   listener once a frame, so it keeps pace with the page, and the hero's Ask card folds into it on the
-   way: smaller, fainter and rounder, until only the cloud is left. Under
-   reduced motion nothing travels: from md up the card fades out and the
-   button fades in once the page is a little way down. On phones and on pages
-   without a hero, the button fades in once the hero is out of view, or from
-   the start. From md up a pill beside the cloud names it, and fades in as
-   the cloud lands; on phones a dot marks it until the chat has been opened.
-   The first time the cloud docks in a visit it says hello in a bubble. */
+   motion allowed, the page's cloud starts in the hero: this cloud takes the
+   hero cloud's place (the hero's copy hides) and, over the first 220px of
+   scroll, shrinks and glides down a gentle curve into the corner, eased in
+   and out by the scroll position, and back up again on the way up. It moves
+   with transforms only, from the page's scroll frame (Lenis's smoothed
+   position, see smooth-scroll.tsx), so it keeps pace with the page, and the
+   hero's Ask card folds into it over the same stretch, smaller and fainter,
+   until only the cloud is left. Until it has docked it is a picture, not a
+   button: a click only makes it react (see useReaction), and the Ask card is
+   the way in. Under reduced motion nothing travels: from md up the card
+   fades out and the cloud fades in at 220px. On phones and on pages without
+   a hero, the cloud fades in once the hero is out of view, or from the
+   start. From md up a pill beside the cloud names it, and fades in as the
+   cloud lands; on phones a dot marks it until the chat has been opened. The
+   first time the cloud docks in a visit it says hello in a bubble. */
 export function Dock({
   heroId,
   open,
@@ -96,11 +100,14 @@ export function Dock({
   // Travelling, whether the cloud has reached the corner.
   const [landed, setLanded] = useState(false);
   const docked = travels ? landed : heroGone || swapped;
+  const { face: reaction, react } = useReaction();
   const [hello, setHello] = useState(false);
   // Only while the cloud is in the corner: scrolled back up, it is the hero's.
   const greeting = hello && docked;
   const chatted = useSyncExternalStore(subscribeToNothing, chattedThisVisit, () => true);
   const pillRef = useRef<HTMLSpanElement>(null);
+  // What travels: the cloud, and once it has docked, the button around it.
+  const travelRef = useRef<HTMLDivElement>(null);
   const cornerRef = useRef<HTMLDivElement>(null);
   const bubbleRef = useRef<HTMLDivElement>(null);
   const [peek, setPeek] = useState(false);
@@ -153,7 +160,7 @@ export function Dock({
       for (const type of inputs) window.removeEventListener(type, wake);
     };
   }, []);
-  const face: Mood = mood !== "idle" ? mood : (beat ?? (sleepy ? "sleepy" : "idle"));
+  const face: Mood = reaction ?? (mood !== "idle" ? mood : (beat ?? (sleepy ? "sleepy" : "idle")));
 
   useEffect(() => {
     if (!open) return;
@@ -230,7 +237,7 @@ export function Dock({
     const still = window.matchMedia(STILL_QUERY);
     let was = false;
     const check = () => {
-      const now = still.matches && window.scrollY > hero.offsetHeight * DOCKED_AT * SWAP_AT;
+      const now = still.matches && window.scrollY >= DOCK_PX;
       if (now === was) return;
       was = now;
       setSwapped(now);
@@ -251,37 +258,30 @@ export function Dock({
   // Before paint, so the corner never shows the button untransformed and the
   // swap with the hero's copy is invisible.
   useLayoutEffect(() => {
-    const button = buttonRef.current;
+    const cloud = travelRef.current;
     const corner = cornerRef.current;
     const hero = heroId ? document.getElementById(heroId) : null;
     const slot = hero?.querySelector<HTMLElement>("#hero-cloud");
-    const heroCloud = slot?.querySelector<HTMLElement>(".cloud");
+    const heroCloud = slot?.querySelector<HTMLElement>("[role='img']");
     const card = hero?.querySelector<HTMLElement>("#ask-card");
-    const cardFace = card?.firstElementChild as HTMLElement | null | undefined;
     const pill = pillRef.current;
-    if (!travels || !button || !corner || !hero || !slot || !heroCloud || !card || !cardFace || !pill) return;
+    if (!travels || !cloud || !corner || !hero || !slot || !heroCloud || !card || !pill) return;
 
     // The cloud's centre and width at rest in the corner, from the corner's
     // layout box, which the cloud's transform never moves.
     let dock = { x: 0, y: 0, width: 1 };
-    const radius = parseFloat(getComputedStyle(cardFace).borderTopLeftRadius);
-    let round = radius;
     const measure = () => {
       const { offsetLeft, offsetTop, offsetWidth, offsetHeight } = corner;
       dock = { x: offsetLeft + offsetWidth / 2, y: offsetTop + offsetHeight / 2, width: offsetWidth };
-      // The card folds towards the hero cloud's centre, and ends as round as
-      // its height allows.
+      // The card folds towards the hero cloud's centre.
       card.style.transformOrigin = `${slot.offsetLeft + slot.offsetWidth / 2 - card.offsetLeft}px ${
         slot.offsetTop + slot.offsetHeight / 2 - card.offsetTop
       }px`;
-      round = cardFace.offsetHeight / 2;
     };
-    const place = () => {
+    const place = (scrollY: number) => {
       const s = slot.getBoundingClientRect();
-      const p = Math.min(1, Math.max(0, window.scrollY / (hero.offsetHeight * DOCKED_AT)));
-      // Eased out, so the cloud heads for the corner as soon as the page moves
-      // rather than riding up with the hero first.
-      const t = 1 - (1 - p) ** 2;
+      const p = Math.min(1, Math.max(0, scrollY / DOCK_PX));
+      const t = easeInOut(p);
       const from = { x: s.left + s.width / 2, y: s.top + s.height / 2 };
       // The curve's pull: mostly down first, then across into the corner.
       const via = { x: from.x + (dock.x - from.x) * 0.2, y: from.y + (dock.y - from.y) * 0.8 };
@@ -290,56 +290,44 @@ export function Dock({
       const scale = (s.width / dock.width) ** (1 - t);
       const x = along(from.x, via.x, dock.x);
       const y = along(from.y, via.y, dock.y);
-      button.style.transform = `translate(${x - dock.x}px, ${y - dock.y}px) scale(${scale})`;
-      button.style.setProperty("--scale", String(scale));
+      cloud.style.transform = `translate(${x - dock.x}px, ${y - dock.y}px) scale(${scale})`;
+      cloud.style.setProperty("--scale", String(scale));
       // The pill fades in over the last stretch, as the cloud lands.
       const shown = Math.min(1, Math.max(0, (p - PILL_FROM) / (1 - PILL_FROM)));
       pill.style.opacity = String(shown);
       pill.style.visibility = shown ? "" : "hidden";
       setLanded(p === 1);
 
-      // The card follows the cloud, shrinking, fading and rounding off. The
-      // radius is the one property here that repaints; nothing reflows.
-      const fold = Math.min(1, t / CARD_GONE_AT);
-      card.style.transform = fold ? `translate(${x - from.x}px, ${y - from.y}px) scale(${1 - 0.85 * fold})` : "";
-      card.style.opacity = fold ? String(1 - fold) : "";
-      card.style.visibility = fold === 1 ? "hidden" : "";
-      card.style.pointerEvents = fold > 0.5 ? "none" : "";
-      cardFace.style.borderRadius = fold ? `${radius + (round - radius) * fold}px` : "";
+      // The card follows the cloud over the same stretch, shrinking and
+      // fading.
+      card.style.transform = t ? `translate(${x - from.x}px, ${y - from.y}px) scale(${1 - 0.85 * t})` : "";
+      card.style.opacity = t ? String(1 - t) : "";
+      card.style.visibility = t === 1 ? "hidden" : "";
+      card.style.pointerEvents = t > 0.5 ? "none" : "";
     };
     const onResize = () => {
       measure();
-      place();
-    };
-
-    let frame = 0;
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(() => {
-        frame = 0;
-        place();
-      });
+      place(window.scrollY);
     };
 
     heroCloud.style.visibility = "hidden";
     measure();
-    place();
-    window.addEventListener("scroll", onScroll, { passive: true });
+    place(window.scrollY);
+    const offScroll = onPageScroll(place);
     window.addEventListener("resize", onResize, { passive: true });
     return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", onScroll);
+      offScroll();
       window.removeEventListener("resize", onResize);
-      button.style.transform = "";
-      button.style.removeProperty("--scale");
+      cloud.style.transform = "";
+      cloud.style.removeProperty("--scale");
       pill.style.opacity = "";
       pill.style.visibility = "";
       heroCloud.style.visibility = "";
       for (const prop of ["transform", "transform-origin", "opacity", "visibility", "pointer-events"]) {
         card.style.removeProperty(prop);
       }
-      cardFace.style.borderRadius = "";
     };
-  }, [travels, heroId, buttonRef]);
+  }, [travels, heroId]);
 
   const tooltip = Boolean(question && !fits);
   const bubbleShown = Boolean(question && (fits || peek));
@@ -403,39 +391,53 @@ export function Dock({
         buttonRef.current?.focus();
       }}
     >
-      <button
-        ref={buttonRef}
-        type="button"
-        onClick={onClick}
-        aria-label="Ask Aris, Agrim's AI assistant"
-        aria-keyshortcuts="Meta+K Control+K"
-        aria-expanded={open}
-        aria-controls="ask-agrim"
-        aria-describedby={tooltip ? "dock-question-text" : undefined}
-        className="dock pointer-events-auto relative block w-[76px] rounded-full md:w-[92px]"
+      {/* Up in the hero the cloud is a picture: the button inside is
+          hidden from assistive tech, out of the tab order, takes no focus
+          from a click, and a click only makes the cloud react. Docked, it
+          is the chat's button. */}
+      <div
+        ref={travelRef}
+        role={docked ? undefined : "img"}
+        aria-label={docked ? undefined : CLOUD_LABEL}
+        className="pointer-events-auto relative w-[76px] md:w-[92px]"
       >
-        {/* Outside the button's box, so the cloud's travel, which measures
-            the corner, is unchanged; the cloud sits over its right end. A
-            near-solid fill rather than glass, so the label stays legible over
-            a bright photo. */}
-        <span
-          id="dock-pill"
-          ref={pillRef}
-          className="absolute right-[calc(100%-12px)] top-[56%] hidden h-10 -translate-y-1/2 items-center gap-1.5 whitespace-nowrap rounded-full border border-white/12 bg-surface-raised/92 pl-3.5 pr-5 text-sm font-semibold text-ink shadow-[inset_0_1px_0_rgb(255_255_255/0.12),0_20px_50px_rgb(0_0_0/0.45)] backdrop-blur-xl md:flex"
+        <button
+          ref={buttonRef}
+          type="button"
+          onClick={docked ? onClick : react}
+          onMouseDown={(e) => !docked && e.preventDefault()}
+          tabIndex={docked ? undefined : -1}
+          aria-hidden={docked ? undefined : true}
+          aria-label="Ask Aris, Agrim's AI assistant"
+          aria-keyshortcuts="Meta+K Control+K"
+          aria-expanded={open}
+          aria-controls="ask-agrim"
+          aria-describedby={tooltip ? "dock-question-text" : undefined}
+          className="dock relative block w-full rounded-full"
         >
-          <Sparkle aria-hidden className="size-4 fill-accent text-accent" />
-          Ask Aris
-        </span>
-        <span className="hero-fade relative block">
-          <Cloud live mood={face} />
-        </span>
-        {(questionDot || phoneDot) && (
+          {/* Outside the button's box, so the cloud's travel, which measures
+              the corner, is unchanged; the cloud sits over its right end. A
+              near-solid fill rather than glass, so the label stays legible over
+              a bright photo. */}
           <span
-            aria-hidden
-            className={`absolute right-[10%] top-[8%] size-2 rounded-full bg-accent ring-2 ring-paper ${questionDot ? "" : "md:hidden"}`}
-          />
-        )}
-      </button>
+            id="dock-pill"
+            ref={pillRef}
+            className="absolute right-[calc(100%-12px)] top-[56%] hidden h-10 -translate-y-1/2 items-center gap-1.5 whitespace-nowrap rounded-full border border-white/12 bg-surface-raised/92 pl-3.5 pr-5 text-sm font-semibold text-ink shadow-[inset_0_1px_0_rgb(255_255_255/0.12),0_20px_50px_rgb(0_0_0/0.45)] backdrop-blur-xl md:flex"
+          >
+            <Sparkle aria-hidden className="size-4 fill-accent text-accent" />
+            Ask Aris
+          </span>
+          <span className="hero-fade relative block">
+            <Cloud live mood={face} />
+          </span>
+          {(questionDot || phoneDot) && (
+            <span
+              aria-hidden
+              className={`absolute right-[10%] top-[8%] size-2 rounded-full bg-accent ring-2 ring-paper ${questionDot ? "" : "md:hidden"}`}
+            />
+          )}
+        </button>
+      </div>
       {/* After the cloud, so Tab goes from the cloud to its bubble. */}
       {greeting && (
         <div id="dock-hello" className="pointer-events-auto absolute bottom-full right-0 w-[228px] pb-2.5">

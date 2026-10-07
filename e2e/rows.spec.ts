@@ -133,15 +133,15 @@ for (const row of rows) {
   });
 }
 
-/* Every wheel and touch listener on the page is passive, so none can hold
-   the scroll back, and nothing cancels a wheel, touch or scrolling key. */
-test("no non-passive wheel or touch listeners, and no cancelled scroll input", async ({ page, isMobile }) => {
-  test.skip(isMobile, "the wheel and keys are desktop inputs; the listener audit is the same page");
+/* Records every wheel and touch listener that can hold scrolling back,
+   and every wheel, touch or scrolling key that gets cancelled. */
+async function auditScrollInput(page: Page) {
   await page.addInitScript(() => {
-    const audit = { listeners: [] as { type: string; passive: unknown; on: string }[], cancelled: [] as string[] };
-    (window as unknown as { audit: typeof audit }).audit = audit;
-    // The events a listener can hold scrolling back with. (touchend and
-    // touchcancel can't, so whether they are passive doesn't matter.)
+    type Audit = { listeners: { type: string; passive: unknown; on: string }[]; cancelled: { type: string; dx: number; dy: number; shift: boolean; key: string }[] };
+    const audit: Audit = { listeners: [], cancelled: [] };
+    (window as unknown as { audit: Audit }).audit = audit;
+    // touchend and touchcancel can't hold a scroll back, so whether they are
+    // passive doesn't matter.
     const blocking = /^(wheel|mousewheel|touchstart|touchmove)$/;
     const add = EventTarget.prototype.addEventListener;
     EventTarget.prototype.addEventListener = function (type, listener, options) {
@@ -157,29 +157,112 @@ test("no non-passive wheel or touch listeners, and no cancelled scroll input", a
     const prevent = Event.prototype.preventDefault;
     Event.prototype.preventDefault = function () {
       if (watched.test(this.type) || (this.type === "keydown" && scrollKeys.test((this as KeyboardEvent).key))) {
-        audit.cancelled.push(`${this.type} ${(this as KeyboardEvent).key ?? ""}`.trim());
+        const e = this as WheelEvent & KeyboardEvent;
+        audit.cancelled.push({ type: this.type, dx: e.deltaX ?? 0, dy: e.deltaY ?? 0, shift: Boolean(e.shiftKey), key: e.key ?? "" });
       }
       return prevent.call(this);
     };
   });
-  await page.goto("/");
-  // Wheel, swipe and arrow keys over every row, and the page keys.
+}
+const readAudit = (page: Page) =>
+  page.evaluate(() => (window as unknown as { audit: { listeners: { type: string; passive: unknown; on: string }[]; cancelled: { type: string; dx: number; dy: number; shift: boolean; key: string }[] } }).audit);
+
+// Over every row: a vertical wheel, a sideways swipe (level and slightly
+// tilted), shift and the wheel, and the arrow keys; then the page keys.
+async function useEveryInput(page: Page) {
   for (const row of rows) {
     await toRow(page, row);
     await row.scroller(page).hover({ position: { x: 200, y: 100 } });
-    await page.mouse.wheel(0, 200);
     await page.mouse.wheel(300, 0);
+    // A trackpad's sideways swipe is rarely dead level.
+    await page.mouse.wheel(300, 40);
+    await page.keyboard.down("Shift");
+    await page.mouse.wheel(0, 200);
+    await page.keyboard.up("Shift");
     await row.region(page).focus();
     await page.keyboard.press("ArrowRight");
     await page.keyboard.press("ArrowLeft");
+    // Last, as the page glides away from under the pointer; then let the
+    // glide finish before the next row.
+    await row.scroller(page).hover({ position: { x: 200, y: 100 } });
+    await page.mouse.wheel(0, 200);
+    await page.waitForTimeout(900);
   }
   await page.locator("body").focus();
   for (const key of ["PageDown", "ArrowDown", "Space", "End", "Home"]) await page.keyboard.press(key);
-  const audit = await page.evaluate(() => (window as unknown as { audit: { listeners: { passive: unknown }[]; cancelled: string[] } }).audit);
-  // The audit saw the page's own listeners (React's, the cloud's).
+}
+
+/* With a mouse or trackpad and motion allowed, Lenis smooths the wheel: its
+   wheel listener is the one that is not passive, and the only input it ever
+   cancels is a vertical wheel without shift, which it then scrolls itself.
+   Sideways input and shift and the wheel stay the browser's, keys are never
+   touched, and nothing else holds a scroll back. */
+test("Lenis is the only thing that can hold a scroll back, and only a vertical wheel", async ({ page, isMobile }) => {
+  test.skip(isMobile, "phones don't run Lenis; see the next test");
+  await auditScrollInput(page);
+  await page.goto("/");
+  await expect(page.locator("html")).toHaveClass(/\blenis\b/);
+  await useEveryInput(page);
+  const audit = await readAudit(page);
+  // The audit saw the page's own listeners (React's, the cloud's) too.
+  expect(audit.listeners.filter((l) => l.passive === true).length).toBeGreaterThan(0);
+  // Lenis's, on the window: one wheel listener, and touch ones it never uses
+  // to cancel anything (touch stays native).
+  expect(audit.listeners.filter((l) => l.passive !== true)).toEqual(
+    ["wheel", "touchstart", "touchmove"].map((type) => ({ type, passive: false, on: "[object Window]" })),
+  );
+  expect(audit.cancelled.length).toBeGreaterThan(0);
+  for (const c of audit.cancelled) {
+    expect(c.type).toBe("wheel");
+    expect(c.shift).toBe(false);
+    expect(Math.abs(c.dy)).toBeGreaterThan(Math.abs(c.dx));
+  }
+});
+
+test("under reduced motion and on phones nothing can hold a scroll back, and nothing is cancelled", async ({ page, isMobile }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await auditScrollInput(page);
+  await page.goto("/");
+  await expect(page.locator("html")).not.toHaveClass(/\blenis\b/);
+  if (!isMobile) await useEveryInput(page);
+  const audit = await readAudit(page);
   expect(audit.listeners.length).toBeGreaterThan(0);
   expect(audit.listeners.filter((l) => l.passive !== true)).toEqual([]);
   expect(audit.cancelled).toEqual([]);
+});
+
+test("phones never run Lenis: touch is the browser's own", async ({ page, isMobile }) => {
+  test.skip(!isMobile, "the phone layout");
+  await auditScrollInput(page);
+  await page.goto("/");
+  await page.waitForTimeout(500);
+  await expect(page.locator("html")).not.toHaveClass(/\blenis\b/);
+  expect((await readAudit(page)).listeners.filter((l) => l.passive !== true)).toEqual([]);
+});
+
+test("Lenis glides the wheel: a notch moves the page over several frames, not at once", async ({ page, isMobile }) => {
+  test.skip(isMobile, "no wheel on touch");
+  await page.goto("/");
+  await page.mouse.move(700, 450);
+  await page.waitForTimeout(300);
+  const ys = await page.evaluate(
+    () =>
+      new Promise<number[]>((resolve) => {
+        const out: number[] = [];
+        window.dispatchEvent(new WheelEvent("wheel", { deltaY: 400, bubbles: true, cancelable: true }));
+        const tick = () => {
+          out.push(Math.round(window.scrollY));
+          if (out.length < 40) requestAnimationFrame(tick);
+          else resolve(out);
+        };
+        requestAnimationFrame(tick);
+      }),
+  );
+  // Some way along after a frame or two, still short of the end, and there
+  // by the end.
+  expect(ys[1]).toBeGreaterThan(0);
+  expect(ys[1]).toBeLessThan(300);
+  expect(ys.at(-1)!).toBeGreaterThan(380);
 });
 
 test("nav anchors land with the section's heading in full view below the nav", async ({ page, isMobile }) => {

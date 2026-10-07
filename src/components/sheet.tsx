@@ -51,6 +51,8 @@ export function Sheet({
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
+      // A wheel over the sheet is the sheet's, never Lenis's for the page.
+      data-lenis-prevent
       className={`sheet m-0 max-h-none max-w-none p-0 text-ink shadow-[0_60px_120px_rgb(0_0_0/0.6)] ${className}`}
     >
       {children}

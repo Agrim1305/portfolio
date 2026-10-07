@@ -67,11 +67,12 @@ test("the name runs on one line, and the cloud perches on the Ask card", async (
   expect(narrow.x + narrow.width).toBeLessThanOrEqual(320 - 16);
 });
 
-test("the cloud is decorative, and holds still under reduced motion", async ({ page }) => {
+test("the hero's cloud is a picture named for Aris, and holds still under reduced motion", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  const cloud = page.locator("#hero-cloud > span");
-  await expect(cloud).toHaveAttribute("aria-hidden", "true");
+  const cloud = page.locator("#hero-cloud").getByRole("img", { name: "Aris, Agrim's AI assistant" });
+  await expect(cloud).toBeVisible();
+  await expect(cloud.locator(".cloud")).toHaveAttribute("aria-hidden", "true");
   await expect(cloud.locator("img")).toHaveAttribute("src", "/images/cloud.svg");
   expect(await cloud.locator(".cloud-blink").first().evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
 });
@@ -113,25 +114,38 @@ test.describe("the docked cloud", () => {
     const card = page.locator("#ask-card");
     const cardAtTop = await box(page, "#ask-card");
 
-    await scroll(page, 150);
-    const midway = await box(page, "button.dock");
-    expect(midway.width).toBeLessThan(slot.width);
-    expect(midway.width).toBeGreaterThan(92);
-    // The Ask card folds into the cloud on the way: smaller, fainter, rounder.
+    // The whole flight is the first 220px of scroll, eased in and out: a
+    // quarter of the way in it has barely started, three quarters in it is
+    // nearly there. The width shrinks with it, so it measures the progress.
+    const progress = async () => {
+      const w = (await box(page, "button.dock")).width;
+      return Math.log(slot.width / w) / Math.log(slot.width / 92);
+    };
+    await scroll(page, 55);
+    expect(await progress()).toBeLessThan(0.15);
+    await scroll(page, 110);
+    const midway = await progress();
+    expect(midway).toBeGreaterThan(0.35);
+    expect(midway).toBeLessThan(0.65);
+    // The Ask card folds into the cloud over the same stretch: smaller and
+    // fainter, by transform and opacity only.
     const folding = await box(page, "#ask-card");
     expect(folding.width).toBeLessThan(cardAtTop.width);
     const opacity = Number(await card.evaluate((el) => getComputedStyle(el).opacity));
     expect(opacity).toBeGreaterThan(0);
     expect(opacity).toBeLessThan(1);
-    expect(parseFloat(await card.locator("> div").evaluate((el) => getComputedStyle(el).borderTopLeftRadius))).toBeGreaterThan(26);
+    await scroll(page, 165);
+    expect(await progress()).toBeGreaterThan(0.85);
 
-    await scroll(page, 2000);
+    await scroll(page, 220);
     const docked = await box(page, "button.dock");
     expect(docked.width).toBeCloseTo(92, 0);
     expect(docked.right).toBeCloseTo(24, 0);
     expect(docked.bottom).toBeCloseTo(24, 0);
     // By the dock only the cloud is left.
     await expect(card).toHaveCSS("visibility", "hidden");
+    await scroll(page, 2000);
+    expect(await box(page, "button.dock")).toEqual(docked);
 
     await scroll(page, 0);
     // The cloud moves on the frame after the scroll event, which can land a
@@ -156,18 +170,22 @@ test.describe("the docked cloud", () => {
     await expect.poll(() => box(page, "button.dock")).toMatchObject({ right: margin, bottom: margin });
   });
 
-  test("under reduced motion, a little way down the card fades out and the cloud fades in, with no travel", async ({ page, isMobile }) => {
+  test("under reduced motion, at 220px the card fades out and the cloud fades in, with no travel", async ({ page, isMobile }) => {
     test.skip(isMobile, "phones hand over once the hero is gone");
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
     const card = page.locator("#ask-card");
-    await scroll(page, 300);
+    await scroll(page, 219);
+    await page.waitForTimeout(400);
+    await expect(card).toHaveCSS("opacity", "1");
+    await expect(dock(page)).toBeHidden();
+    await scroll(page, 220);
     await expect(dock(page)).toBeVisible();
     await expect(card).toHaveCSS("opacity", "0");
     await expect(card).toHaveCSS("visibility", "hidden");
     expect(await card.evaluate((el) => getComputedStyle(el).transform)).toBe("none");
     // Read once the corner's fade has settled; under load it can still be running.
-    await expect.poll(() => dock(page).evaluate((el) => getComputedStyle(el.parentElement!).translate)).toBe("none");
+    await expect.poll(() => dock(page).evaluate((el) => getComputedStyle(el.closest(".fixed")!).translate)).toBe("none");
     await scroll(page, 0);
     await expect(card).toHaveCSS("opacity", "1");
     await expect(dock(page)).toBeHidden();

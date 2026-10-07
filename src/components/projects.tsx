@@ -250,6 +250,8 @@ export function Projects() {
       >
         <div
           ref={trackRef}
+          // Sideways input is the row's own; vertical is the page's.
+          data-lenis-prevent-horizontal
           className="flex snap-x snap-mandatory gap-3 overflow-x-auto overflow-y-hidden overscroll-x-contain px-5 [scroll-padding-inline:1.25rem] [scrollbar-width:none] sm:px-8 sm:[scroll-padding-inline:2rem] md:gap-6 lg:px-[max(2rem,calc(50vw-600px))] lg:[scroll-padding-inline:max(2rem,calc(50vw-600px))] [&::-webkit-scrollbar]:hidden"
         >
           {projects.map((project, i) => (

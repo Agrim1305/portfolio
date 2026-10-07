@@ -22,7 +22,7 @@ const cloud = (page: Page) => page.getByRole("button", { name: "Ask Aris, Agrim'
 // corner, measured independently of the page's own check.
 async function contentBoxes(page: Page) {
   return page.evaluate(() => {
-    const corner = document.querySelector("button.dock")!.parentElement!;
+    const corner = document.querySelector("button.dock")!.closest(".fixed")!;
     const boxes: { top: number; bottom: number; left: number; right: number }[] = [];
     const add = (r: DOMRect) => {
       if (r.width && r.height && r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth) boxes.push(r.toJSON());

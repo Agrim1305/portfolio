@@ -51,9 +51,8 @@ test.describe("the pill", () => {
     test.skip(isMobile, "the cloud travels on wide screens");
     await page.goto("/");
     await expect(page.locator("#hero-cloud .cloud")).toHaveCSS("visibility", "hidden");
-    const hero = await page.locator("#top").evaluate((el: HTMLElement) => el.offsetHeight);
-    // Docked at 80% of the hero; the pill fades in from 85% of that.
-    await scrollTo(page, hero * 0.8 * 0.925);
+    // Docked at 220px; the pill fades in from 85% of that.
+    await scrollTo(page, 220 * 0.925);
     await expect.poll(async () => Number(await pill(page).evaluate((el) => getComputedStyle(el).opacity))).toBeGreaterThan(0.2);
     expect(Number(await pill(page).evaluate((el) => getComputedStyle(el).opacity))).toBeLessThan(0.8);
   });
@@ -242,5 +241,78 @@ test.describe("idle glance", () => {
       await page.clock.runFor(1000);
       expect(await eyeX(page)).toBe("");
     }
+  });
+});
+
+test.describe("the cloud in the hero", () => {
+  const picture = (page: Page) => page.getByRole("img", { name: "Aris, Agrim's AI assistant" });
+  const mood = (page: Page) => picture(page).locator(".cloud").getAttribute("data-mood");
+
+  test("is a picture, not a way into the chat: a click or tap runs through three faces, and more meanwhile are ignored", async ({ page, isMobile }) => {
+    const press = () => (isMobile ? picture(page).tap() : picture(page).click());
+    await page.goto("/");
+    await expect(picture(page)).toBeVisible();
+    await expect(cloud(page)).toHaveCount(0);
+    // Up here the cloud never takes keyboard focus.
+    await expect(page.locator("button.dock")).toHaveAttribute("tabindex", "-1");
+    await press();
+    await expect.poll(() => mood(page)).toBe("happy");
+    await expect.poll(() => mood(page)).toBe("wink");
+    // A second one mid-reaction changes nothing.
+    await press();
+    await expect.poll(() => mood(page)).toBe("surprised");
+    await expect.poll(() => mood(page), { timeout: 2000 }).toBe("idle");
+    await page.waitForTimeout(700);
+    expect(await mood(page)).toBe("idle");
+    await expect(chat(page)).toBeHidden();
+  });
+
+  test("each face lands with a squash and stretch, about 600ms apart", async ({ page }) => {
+    // Every face change and every squash of the cloud's body, as they happen.
+    await page.addInitScript(() => {
+      const log: { what: string; at: number }[] = ((window as unknown as { faces: typeof log }).faces = []);
+      const animate = Element.prototype.animate;
+      Element.prototype.animate = function (...args: Parameters<Element["animate"]>) {
+        if (this.parentElement?.matches(".cloud")) log.push({ what: "squash", at: performance.now() });
+        return animate.apply(this, args);
+      };
+      new MutationObserver((records) => {
+        for (const r of records) {
+          const el = r.target as HTMLElement;
+          if (el.matches(".cloud") && el.checkVisibility()) log.push({ what: el.dataset.mood!, at: performance.now() });
+        }
+      }).observe(document, { subtree: true, attributeFilter: ["data-mood"] });
+    });
+    await page.goto("/");
+    await picture(page).click();
+    await page.waitForTimeout(2300);
+    const log = await page.evaluate(() => (window as unknown as { faces: { what: string; at: number }[] }).faces);
+    const faces = log.filter((l) => l.what !== "squash");
+    expect(faces.map((f) => f.what)).toEqual(["happy", "wink", "surprised", "idle"]);
+    for (let i = 1; i < faces.length; i++) expect(faces[i].at - faces[i - 1].at).toBeGreaterThan(500);
+    // A squash and stretch right after each face lands.
+    for (const f of faces) expect(log.some((l) => l.what === "squash" && l.at >= f.at && l.at - f.at < 300)).toBe(true);
+  });
+
+  test("under reduced motion a click swaps one face, still", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await picture(page).click();
+    await expect.poll(() => mood(page)).toBe("happy");
+    expect(await picture(page).locator(".cloud > span").evaluate((el) => el.getAnimations().length)).toBe(0);
+    await expect.poll(() => mood(page), { timeout: 2000 }).toBe("idle");
+    await page.waitForTimeout(700);
+    expect(await mood(page)).toBe("idle");
+    await expect(chat(page)).toBeHidden();
+  });
+
+  test("docked, it is the chat's button again", async ({ page }) => {
+    await page.goto("/");
+    await dock(page);
+    await expect(cloud(page)).toBeVisible();
+    await expect(cloud(page).locator("..")).not.toHaveAttribute("role", "img");
+    await expect(cloud(page)).not.toHaveAttribute("tabindex", "-1");
+    await cloud(page).click();
+    await expect(chat(page)).toBeVisible();
   });
 });

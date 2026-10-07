@@ -333,6 +333,8 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
         aria-modal="false"
         aria-labelledby="ask-agrim-title"
         hidden={!open}
+        // A wheel over the conversation scrolls the conversation.
+        data-lenis-prevent
         onKeyDown={(e) => {
           if (e.key === "Escape") {
             e.stopPropagation();
