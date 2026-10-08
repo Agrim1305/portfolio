@@ -27,7 +27,7 @@ export function Hero() {
         {/* Non-breaking spaces keep each separator with the word after it, so
             a narrow screen breaks before a dot instead of after one. */}
         <p className="hero-rise font-mono text-xs uppercase tracking-[0.2em] text-ink-faint lg:text-sm">
-          Software ·&nbsp;Applied&nbsp;AI ·&nbsp;Adelaide
+          Software&nbsp;Engineering ·&nbsp;Adelaide
         </p>
         {/* One line at every width: the size follows the viewport so the full
             name always fits. */}

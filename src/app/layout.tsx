@@ -27,7 +27,7 @@ const newsreader = Newsreader({
 
 // Both taken word for word from the hero: the name with its eyebrow line,
 // and the intro.
-const title = "Agrim Sharma | Software · Applied AI · Adelaide";
+const title = "Agrim Sharma | Software Engineering · Adelaide";
 const description =
   "Final-year Computer Science student at Adelaide University, majoring in Artificial Intelligence. I build software that solves problems, put AI to work inside them, and ship it so real people actually use it.";
 

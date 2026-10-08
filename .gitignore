@@ -48,3 +48,6 @@ CLAUDE.md
 /test-results/
 /playwright-report/
 /e2e/screenshots/
+
+# brag launch video output
+brag-output*/
