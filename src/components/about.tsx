@@ -15,14 +15,9 @@ const principles = [
       "MetaPlay began as a group assignment. I took it the rest of the way on my own and put it in production, so today it is a live product instead of a repo I describe in interviews.",
   },
   {
-    statement: "I build so the next person can extend it without a rewrite.",
-    evidence:
-      "The Restaurant Simulator was designed around exactly that: adding a new kind of staff means adding a class, not editing the code that already works.",
-  },
-  {
     statement: "I reach for the simplest thing that solves the real problem.",
     evidence:
-      "Not the most impressive one. The point is the person on the other end, not the framework I get to use.",
+      "At the hackathon we cut the village view so we could ship a demo that worked inside 44 hours. Appropriate technology beats impressive technology.",
   },
 ];
 

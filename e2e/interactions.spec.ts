@@ -484,7 +484,7 @@ test.describe("selected work", () => {
     const next = page.getByRole("button", { name: "Next project" });
     await expect(prev).toBeDisabled();
     await next.click();
-    await expect(page.getByText("2 / 8")).toBeVisible();
+    await expect(page.getByText("2 / 5")).toBeVisible();
     await expect(prev).toBeEnabled();
   });
 
@@ -495,10 +495,10 @@ test.describe("selected work", () => {
     await next.click();
     await next.click();
     await next.click();
-    await expect(page.getByText("4 / 8")).toBeVisible();
+    await expect(page.getByText("4 / 5")).toBeVisible();
     await page.getByRole("region", { name: "Selected work" }).focus();
     for (let i = 0; i < 6; i++) await page.keyboard.press("ArrowRight");
-    await expect(page.getByText("8 / 8")).toBeVisible();
+    await expect(page.getByText("5 / 5")).toBeVisible();
     await expect(next).toBeDisabled();
   });
 
@@ -508,15 +508,15 @@ test.describe("selected work", () => {
     const track = page.getByRole("region", { name: "Selected work" }).locator("> div");
     await track.scrollIntoViewIfNeeded();
     await track.evaluate((el) => el.scrollTo({ left: el.scrollWidth, behavior: "instant" }));
-    await expect(page.locator("#projects").getByRole("group", { name: "8 of 8" })).toBeInViewport({ ratio: 0.6 });
-    await expect(page.locator("#projects")).toHaveAttribute("data-active", "7");
+    await expect(page.locator("#projects").getByRole("group", { name: "5 of 5" })).toBeInViewport({ ratio: 0.6 });
+    await expect(page.locator("#projects")).toHaveAttribute("data-active", "4");
   });
 
   test("Tab onto an off-screen card brings it into view", async ({ page, isMobile }) => {
     test.skip(isMobile, "a keyboard is a desktop input");
     await page.goto("/");
-    await page.getByRole("link", { name: "Open case study for Pathfinder" }).focus();
-    await expect(page.locator("#projects").getByRole("group", { name: "7 of 8" })).toBeInViewport({ ratio: 0.6 });
+    await page.getByRole("link", { name: "Open case study for GPS Tracker Dashboard" }).focus();
+    await expect(page.locator("#projects").getByRole("group", { name: "5 of 5" })).toBeInViewport({ ratio: 0.6 });
   });
 
   test("the skip link jumps past the cards", async ({ page }) => {
@@ -608,7 +608,7 @@ test.describe("selected work", () => {
     await page.keyboard.press("Escape");
     await expect(page.getByRole("dialog")).toBeHidden();
     await expect(page).toHaveURL(/\/$/);
-    await expect(page.getByText("2 / 8")).toBeVisible();
+    await expect(page.getByText("2 / 5")).toBeVisible();
     await expect(page.getByRole("link", { name: "Open case study for MetaPlay" })).toBeFocused();
   });
 
@@ -630,12 +630,12 @@ test.describe("selected work", () => {
 
   test("Back closes an open case study", async ({ page }) => {
     await page.goto("/");
-    const link = page.getByRole("link", { name: "Open case study for Pathfinder" });
+    const link = page.getByRole("link", { name: "Open case study for GPS Tracker Dashboard" });
     await link.focus();
     await link.click();
-    await expect(page.getByRole("dialog", { name: "Pathfinder" })).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "GPS Tracker Dashboard" })).toBeVisible();
     await page.goBack();
-    await expect(page.getByRole("dialog", { name: "Pathfinder" })).toBeHidden();
+    await expect(page.getByRole("dialog", { name: "GPS Tracker Dashboard" })).toBeHidden();
     await expect(page.locator("#top")).toBeAttached();
   });
 });

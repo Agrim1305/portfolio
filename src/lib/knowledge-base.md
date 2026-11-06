@@ -82,8 +82,7 @@ A logic-based agent for the course's Wumpus World assignment. It builds a
 propositional knowledge base from what it senses, deduces which cells are
 safe, and takes a calculated risk only when forced. Scored 10/10 on every
 hidden autograder map. The code lives in a university harness that can't be
-published, so it isn't linked anywhere. Agrim's public Pathfinder repo is a
-different project (graph search algorithms).
+published, so it isn't linked anywhere.
 
 ---
 
@@ -200,8 +199,8 @@ a graduate role in Australia. Available for graduate roles from December
 **What kinds of problems interest you most?**
 Two threads run through Agrim's work. The first is applied AI inside real
 products: the Claude-powered recommendation engine he built for Pacific
-Village Explorer's village view (cut from the hackathon demo), speech-to-text
-work in his coursework, and now the Aurivox voice
+Village Explorer's village view (cut from the hackathon demo), and now the
+Aurivox voice
 AI internship. The second is turning messy data into something you can act
 on. He has run his own monthly budget tool in VBA since September 2025,
 tracking expenses, planning travel and thinking about investment, and uses

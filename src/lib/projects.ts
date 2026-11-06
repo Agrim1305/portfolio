@@ -321,30 +321,6 @@ export const projects: Project[] = [
     ],
   },
   {
-    slug: "speech-to-text-service",
-    title: "Concurrent Speech-to-Text Service",
-    status: "Java · 2026",
-    period: "Sep 2026",
-    role: "Solo coursework, Cloud and Concurrent Programming",
-    oneLiner:
-      "A Spring Boot web service that transcribes speech through OpenAI's API and passed all eleven automated functional tests.",
-    emphasis: "all eleven automated functional tests",
-    summary:
-      "Built for many requests at once: thread-safe request handling and usage stats, plus admin and stats REST endpoints implemented against an OpenAPI spec.",
-    problem:
-      "Build a web service that converts speech to text and stays correct when many users hit it at the same time, with admin and statistics endpoints defined by a fixed API specification.",
-    approach: [
-      "A Spring Boot application that accepts audio, sends it to OpenAI's transcription API, and returns the text. Admin and usage-statistics REST endpoints are implemented against an OpenAPI YAML spec, so the contract was fixed before the code.",
-      "Request handling and the shared statistics are designed to be thread-safe, since the whole point of the course is what happens when many requests land at once.",
-    ],
-    impact:
-      "Passed all 11 tests on the course's automated functional test suite. It pairs with my internship as hands-on speech-to-text experience.",
-    impactHighlights: ["Passed all 11 tests"],
-    stack: ["Java", "Spring Boot", "OpenAI API", "REST", "OpenAPI"],
-    links: [],
-    privateNote: "Private repo (coursework) · walkthrough on request",
-  },
-  {
     slug: "gps-tracker-dashboard",
     title: "GPS Tracker Dashboard",
     status: "Java · 2026",
@@ -383,93 +359,6 @@ export const projects: Project[] = [
       width: 2000,
       height: 1250,
     },
-  },
-  {
-    slug: "pathfinder",
-    title: "Pathfinder",
-    status: "Python · 2026",
-    period: "Mar 2026 to Jun 2026",
-    role: "Solo build",
-    oneLiner:
-      "BFS, uniform-cost search and A* from scratch on terrain where climbing costs more. A* expanded 41 nodes where BFS needed 112.",
-    emphasis: "A* expanded 41 nodes where BFS needed 112",
-    summary:
-      "Three classic search algorithms on elevation-aware grids, compared on the same maps to show exactly what a good heuristic buys you.",
-    problem:
-      "Shortest is not the same as cheapest. On terrain where moving uphill costs more, a route with fewer steps can be the expensive one, and a search that ignores cost will happily pick it.",
-    approach: [
-      "Implemented breadth-first search, uniform-cost search (Dijkstra) and A* from scratch in Python. Each grid cell has an elevation, moving costs 1 plus any climb, obstacles block movement, and moves are four-directional.",
-      "A* runs with two admissible heuristics, Euclidean and Manhattan distance, and every algorithm runs on the same set of test maps, from a small maze to a 20 by 20 random terrain, so the comparison is fair.",
-    ],
-    impact:
-      "On the same path, A* expanded 41 nodes against uniform-cost search's 75 and BFS's 112. On the 20 by 20 map, BFS's route cost 24% more than the optimal one, which is the whole argument for cost-aware search in one number.",
-    impactHighlights: ["41 nodes", "24% more"],
-    metrics: [
-      { value: "41", label: "nodes, A*" },
-      { value: "75", label: "nodes, UCS" },
-      { value: "112", label: "nodes, BFS" },
-      { value: "+24%", label: "BFS route cost" },
-    ],
-    stack: ["Python", "BFS", "Dijkstra", "A*"],
-    links: [{ label: "Source", url: "https://github.com/Agrim1305/Pathfinder" }],
-    media: {
-      kind: "photo",
-      src: "/images/projects/pathfinder/comparison.webp",
-      alt: "Terminal output of example.py on the 8 by 8 choice map: A* finds the 15-step path at cost 14 after visiting 41 nodes, and the comparison lists 112 nodes explored for BFS, 75 for UCS and 41 for A*",
-      width: 2000,
-      height: 1250,
-    },
-    screens: [
-      {
-        src: "/images/projects/pathfinder/astar-visits.webp",
-        alt: "Terminal output of pathfinder.py in debug mode with A* and the Manhattan heuristic on the choice map: the path marked with asterisks down the left edge and along the bottom, then grids of how often and in what order each cell was visited",
-        width: 2000,
-        height: 1431,
-      },
-    ],
-  },
-  {
-    slug: "virtual-restaurant-simulator",
-    title: "Virtual Restaurant Simulator",
-    status: "C++ · 2024",
-    period: "Jul 2024 to Oct 2024",
-    role: "Team project",
-    oneLiner:
-      "A restaurant simulation designed around clean class hierarchies, so new staff roles extend it without rewrites.",
-    emphasis: "without rewrites",
-    summary:
-      "Fourteen classes and 1,200+ lines of C++, with inheritance and virtual methods letting each staff role define its own behaviour through a shared interface.",
-    problem:
-      "Model a working restaurant, staff, menus, orders and inventory, and keep it maintainable as new staff types get added, instead of collapsing into one giant switch statement.",
-    approach: [
-      "A 14-class architecture using multi-level inheritance, abstract base classes and virtual methods, so each staff role defines its own behaviour through one shared interface. Adding a role means adding a class, not editing the code that already works.",
-      "Inventory, menu and order data persist to three separate files and reload on request, so a session can be saved and resumed. Input validation handles case-insensitive matching, stock caps and low-stock alerts, so malformed input cannot crash it.",
-    ],
-    impact:
-      "A command-line simulation that runs a full restaurant cycle and stays easy to extend. The project where I learned to think in class boundaries and polymorphism.",
-    impactHighlights: ["stays easy to extend"],
-    stack: ["C++", "OOP", "Makefile"],
-    links: [
-      {
-        label: "Source",
-        url: "https://github.com/Agrim1305/Virtual_Restaurant_Simulator",
-      },
-    ],
-    media: {
-      kind: "photo",
-      src: "/images/projects/virtual-restaurant-simulator/served.webp",
-      alt: "Terminal session of the restaurant simulator: an order of Pasta and Pizza totals $27.98, serving it frees table 4 for customer Maya, and the main menu waits for the next option",
-      width: 2000,
-      height: 1250,
-    },
-    screens: [
-      {
-        src: "/images/projects/virtual-restaurant-simulator/build-and-seat.webp",
-        alt: "Terminal output of make compiling the simulator's 15 source files with g++, then the simulator's main menu, with customer Maya seated at table 4",
-        width: 2000,
-        height: 1358,
-      },
-    ],
   },
 ];
 

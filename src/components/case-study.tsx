@@ -40,10 +40,7 @@ export const COVER: Record<string, { bg: string; ink: string }> = {
   },
   "adelaide-rising-stars": { bg: "#FF5B2E", ink: "#0F0F11" },
   "portfolio-ai-assistant": { bg: "#18181B", ink: "#F1EFEA" },
-  "speech-to-text-service": { bg: "#1C1C20", ink: "#F1EFEA" },
   "gps-tracker-dashboard": { bg: "linear-gradient(135deg, #2A2B31, #16171A)", ink: "#F1EFEA" },
-  pathfinder: { bg: "#1C1C20", ink: "#FF5B2E" },
-  "virtual-restaurant-simulator": { bg: "#18181B", ink: "#FF5B2E" },
 };
 
 const label = "font-mono text-[11px] uppercase tracking-[0.15em]";
