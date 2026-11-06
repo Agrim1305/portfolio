@@ -205,22 +205,23 @@ export const projects: Project[] = [
     problem:
       "Gamers track what they play across scattered notes, spreadsheets, and memory. Our brief was a single place to discover games, build a collection, and review them, backed by real game data rather than a static seed list.",
     approach: [
-      "I worked in a five-person team and owned the front-end and back-end integration. I built the authentication layer, with bcrypt-hashed email and password login plus Google sign-in through Passport, with two stored roles, admin and user, and guest access when signed out, and designed the nine-table relational schema behind collections, reviews, friends and groups.",
+      "I worked in a five-person team and owned the front-end and back-end integration. I built the authentication layer, with username and password login (passwords hashed with bcrypt) plus Google sign-in through Passport, with two stored roles, admin and user, and guest access when signed out, and designed the nine-table relational schema behind collections, reviews, friends and groups.",
       "When the course ended, so did everyone else's involvement. A year later I came back to it on my own, traced the broken OAuth and deployment configuration, wired it to live RAWG game data, and put it into production.",
-      "Then the original host's trial ran out and the database went with it. I moved the app to Render and migrated the data layer from MySQL to PostgreSQL, which taught me more about deployment than the first launch did.",
+      "It has moved twice since it first went live on Railway: to Render with Aiven MySQL when the Railway trial ended, then to Neon PostgreSQL when Aiven's free tier started powering the database off. That meant converting the schema and every query, and it taught me more about deployment than the first launch did.",
+      "Since then I have redesigned it and hardened its security, including a check that normalises every URL before the static file server sees it, so encoded or re-cased paths can no longer slip past the guards on protected pages.",
     ],
     impact:
-      "It runs live today with personal collections (wishlist, currently playing, completed), reviews, friends and groups, and an admin dashboard, pulling real-time data from the RAWG API. The deployed version of a team project that I took the rest of the way and shipped myself.",
+      "It runs live today with personal collections (wishlist, currently playing, completed), reviews, friends and groups, and an admin dashboard, pulling live RAWG data through the server, which caches it for an hour. The deployed version of a team project that I took the rest of the way and shipped myself.",
     impactHighlights: ["runs live today"],
     metrics: [
       { value: "Live", label: "publicly deployed" },
       { value: "9", label: "relational tables" },
       { value: "2", label: "stored roles" },
-      { value: "2", label: "hosting stacks" },
+      { value: "3", label: "hosting setups" },
     ],
     learned:
       "Deployment is part of the product, not the last step of it. Most of what broke on the way back to production was configuration nobody had looked at since the demo.",
-    stack: ["Node.js", "Express", "Vue.js", "PostgreSQL", "Passport.js", "RAWG API"],
+    stack: ["Node.js", "Express", "Vanilla JavaScript", "PostgreSQL", "Passport.js", "RAWG API"],
     links: [
       { label: "Source", url: "https://github.com/Agrim1305/Metaplay" },
       {
@@ -243,7 +244,7 @@ export const projects: Project[] = [
     slug: "adelaide-rising-stars",
     title: "Adelaide Rising Stars",
     status: "Live · Freelance, 2026",
-    period: "Jul 2026 to Sep 2026",
+    period: "Aug 2026 to Sep 2026",
     role: "Sole developer, from quote to delivery",
     oneLiner:
       "A mobile-first website and enquiry system for a tennis academy coaching 100+ players. My first paid client build.",
@@ -255,7 +256,7 @@ export const projects: Project[] = [
     approach: [
       "I scoped and quoted the job, then ran the design with the owners through several rounds, from a dark direction to the light theme they chose, built from the navy and lime of their existing posters.",
       "The most useful thing I did happened before any code: I talked them out of self-service booking. With squads already near capacity, open booking would have overfilled sessions, so the site is enquiry-only and the coaches stay in control of who joins.",
-      "It is a static Nuxt site. Squads, coaches and partners live in Nuxt Content collections, so adding a coach is a data change rather than a code change. Enquiries go through Netlify Forms and notify the owners straight away, and a sitemap and robots file get it indexed properly.",
+      "It is a static Nuxt site. Squads, coaches, mentors and results live in Nuxt Content collections and partners in the app config, so adding a coach is a data change rather than a code change. Enquiries go through Netlify Forms and notify the owners straight away, and a sitemap and robots file get it indexed properly.",
     ],
     impact:
       "Delivered in three weeks on a fixed quote: a multi-page site covering programs, coaches, venue partners and enquiries, built mobile-first because that is where parents find it.",
