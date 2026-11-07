@@ -26,7 +26,6 @@
   "alt: Agrim Sharma playing a forehand": "The Premier League slide's photo is now court/01 with its approved alt text (round ten, item 3)",
   "3": "MetaPlay's roles metric is now the approved 2 stored roles; Approved fact-check fix (round eleven, item 4)",
   "permission roles": "MetaPlay's roles metric label is now stored roles; Approved fact-check fix (round eleven, item 4)",
-  "I worked in a five-person team and owned the front-end and back-end integration. I built the authentication layer, with bcrypt-hashed email and password login plus Google sign-in through Passport, across separate admin, user and guest permissions, and designed the nine-table relational schema behind collections, reviews, friends and groups.": "MetaPlay now says two stored roles, admin and user, with guest access when signed out; Approved fact-check fix (round eleven, item 4)",
   "8/min": "The assistant's limit is the real one, 20 messages per IP every 10 minutes; Approved fact-check fix (round eleven, item 4)",
   "per-IP rate limit": "Relabelled with the real limit, messages per IP every 10 minutes; Approved fact-check fix (round eleven, item 4)",
   "The endpoint is hardened: a per-IP limit of 8 requests a minute, a 500-character input cap, a six-turn history window with malformed history dropped, and refusal of instructions that try to override the rules. The site itself sends a strict Content Security Policy, two-year HSTS with preload, and clickjacking protection.": "The rate limit now reads 20 messages every 10 minutes; Approved fact-check fix (round eleven, item 4)",
