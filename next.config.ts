@@ -44,7 +44,7 @@ const nextConfig: NextConfig = {
   // Projects taken off the site; their old case study links land on the home
   // page.
   async redirects() {
-    return ["pathfinder", "speech-to-text-service", "virtual-restaurant-simulator"].map((slug) => ({
+    return ["speech-to-text-service", "virtual-restaurant-simulator"].map((slug) => ({
       source: `/projects/${slug}`,
       destination: "/",
       permanent: true,

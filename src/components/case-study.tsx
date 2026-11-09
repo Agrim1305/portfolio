@@ -41,6 +41,7 @@ export const COVER: Record<string, { bg: string; ink: string }> = {
   "adelaide-rising-stars": { bg: "#FF5B2E", ink: "#0F0F11" },
   "portfolio-ai-assistant": { bg: "#18181B", ink: "#F1EFEA" },
   "gps-tracker-dashboard": { bg: "linear-gradient(135deg, #2A2B31, #16171A)", ink: "#F1EFEA" },
+  pathfinder: { bg: "#1C1C20", ink: "#FF5B2E" },
 };
 
 const label = "font-mono text-[11px] uppercase tracking-[0.15em]";
@@ -315,13 +316,16 @@ export function CaseStudy({ project, titleAs = "h1" }: { project: Project; title
         </div>
       )}
 
-      {/* More of the project running, each framed and whole. */}
+      {/* More of the project running, each framed and whole. A tall capture
+          is held to 720px high by narrowing its frame, centred, so it is
+          never cropped or letterboxed. */}
       {project.screens && (
         <div className="mt-14 flex flex-col gap-8">
           {project.screens.map((screen) => (
             <figure
               key={screen.src}
-              className="overflow-hidden rounded-xl border border-white/14 bg-paper shadow-[0_24px_48px_rgb(0_0_0/0.45)]"
+              className="mx-auto w-full overflow-hidden rounded-xl border border-white/14 bg-paper shadow-[0_24px_48px_rgb(0_0_0/0.45)]"
+              style={{ maxWidth: `${Math.round((720 * screen.width) / screen.height)}px` }}
             >
               <WindowBar />
               <Image
@@ -330,7 +334,7 @@ export function CaseStudy({ project, titleAs = "h1" }: { project: Project; title
                 width={screen.width}
                 height={screen.height}
                 sizes="(min-width: 1280px) 1020px, 100vw"
-                className="h-auto w-full"
+                className="h-auto w-full object-contain"
               />
             </figure>
           ))}

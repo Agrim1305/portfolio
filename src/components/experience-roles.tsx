@@ -51,7 +51,7 @@ const roles: Role[] = [
     org: "Adelaide University Tennis Club",
     dates: "Jul 2024 to Mar 2026",
     description:
-      "Led the club revival covered above: merger, constitution, committee, grants, and the award.",
+      "Turned a dormant club into Club of the Year 2025, growing active membership from about 10 to 100+ in 18 months and lifting regular participation by 75%, by recruiting and leading an 8-person committee, merging with the UniSA club and securing $7,000+ in grants.",
     stat: { value: "10 → 100+", label: "members" },
     photos: [awardPhoto, ...clubPhotos],
     beats: mergerStory,

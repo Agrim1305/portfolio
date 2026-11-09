@@ -10,6 +10,7 @@ const STACK = [
   ["React", "react"],
   ["Next.js", "nextjs"],
   ["Node.js", "nodejs"],
+  ["Python", "python"],
   ["Java", "java"],
   ["PostgreSQL", "postgresql"],
   ["Claude API", "claude"],

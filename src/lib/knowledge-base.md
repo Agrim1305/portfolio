@@ -29,7 +29,10 @@ area, deployed so anyone can use it.
 
 In his final semester he is interning on a voice AI prototype at Aurivox,
 and he recently delivered his first paid freelance project, a website and
-enquiry system for Adelaide Rising Stars Tennis Academy. He has also started
+enquiry system for Adelaide Rising Stars Tennis Academy, delivered in three
+weeks. As of November 2026 it brings in 50+ Google Search clicks a month,
+its Google Business Profile has 10 reviews, and it has helped win 10+ new
+clients. He has also started
 two side products, Baseline (voice session logging for tennis coaches) and
 Receipt Extractor (automatic GST extraction from receipts); both are early.
 
@@ -82,7 +85,8 @@ A logic-based agent for the course's Wumpus World assignment. It builds a
 propositional knowledge base from what it senses, deduces which cells are
 safe, and takes a calculated risk only when forced. Scored 10/10 on every
 hidden autograder map. The code lives in a university harness that can't be
-published, so it isn't linked anywhere.
+published, so it isn't linked anywhere. Agrim's public Pathfinder repo is a
+different project (graph search algorithms).
 
 ---
 
@@ -108,8 +112,8 @@ eight-member committee, and won grants for facility upgrades. The real
 challenge was getting two groups who didn't know each other to trust the
 process and work as one.
 
-Results: grew from around 10 to 100+ active members, secured $7,000+ in
-grants, merged two clubs into one, won Club of the Year 2025 (Jessop
+Results: grew from around 10 to 100+ active members in 18 months, lifted
+regular participation by 75%, secured $7,000+ in grants, merged two clubs into one, won Club of the Year 2025 (Jessop
 Shield). Skills: Leadership, Governance, Operations, Stakeholder
 Management.
 
@@ -215,7 +219,8 @@ did, which he then came back to alone, fixed end-to-end, connected to
 live external data (the RAWG API), and deployed to production. It's the
 clearest evidence of the difference between building for a grade and
 shipping because he wanted it to exist. Full auth with Google sign-in, a
-normalised 9-table relational schema, and an admin panel, all live today.
+normalised 9-table relational schema, 40+ API endpoints, and an admin
+panel, all live today.
 It was originally deployed on Railway, moved to Render with Aiven MySQL
 when the Railway trial ended, then to Neon PostgreSQL when Aiven's free
 tier started powering the database off, which gave him real experience

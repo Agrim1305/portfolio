@@ -73,8 +73,8 @@ export const projects: Project[] = [
     role: "Led the AI recommendation engine in a three-person team",
     lead: true,
     oneLiner:
-      "A climate adaptation planner that shows a Pacific village council its own coastline decades out, built in 44 hours and a top 12 finalist.",
-    emphasis: "top 12 finalist",
+      "Reached the top 12 of 75 submissions at the 2026 Humanitarian Innovation Hackathon by building, in 44 hours, a climate planner that shows a Pacific village council its own coastline out to 2100.",
+    emphasis: "the top 12 of 75 submissions",
     summary:
       "Drag a timeline from 2026 to 2100 and watch which ground floods as the sea rises, with planning layers for where to build, house, farm and adapt.",
     problem:
@@ -86,11 +86,8 @@ export const projects: Project[] = [
       "The call I am proudest of was 2D over a 3D digital twin. 86% of the Pacific has mobile coverage but only 27% use mobile internet, so the real constraint is usability, not connectivity.",
     ],
     impact:
-      "Top 12 of 75 submissions from 110 teams, and the only Adelaide University student to reach the Grand Final, where we pitched in Sydney on 19 August. Judged by a panel including Sir Peter Cosgrove, Canva, Commonwealth Bank's AI Scientist and the Pacific Region Infrastructure Facility. Under $500 per village against $10,000+ for the alternatives, on any phone from the last five years.",
-    impactHighlights: [
-      "Top 12 of 75 submissions",
-      "the only Adelaide University student to reach the Grand Final",
-    ],
+      "One of 12 Grand Finalists from 75 submissions (110 teams), and the only Adelaide University student to reach the final, by choosing a 2D map a village council can use without technical staff over a 3D digital twin. Under $500 per village, against over $10,000 per site for existing platforms.",
+    impactHighlights: ["One of 12 Grand Finalists", "the only Adelaide University student to reach the final"],
     metrics: [
       { value: "Top 12", label: "of 75 submissions" },
       { value: "44 hrs", label: "idea to demo" },
@@ -198,7 +195,7 @@ export const projects: Project[] = [
     role: "Front-end to back-end integration, auth and schema in a team of five",
     lead: true,
     oneLiner:
-      "A game tracking platform I took from a finished team assignment to a live product on my own.",
+      "Took a finished five-person team assignment to a live product on my own, and kept it running through two forced hosting moves.",
     emphasis: "a live product on my own",
     summary:
       "Search live game data, build collections, write reviews and connect with other players. Still running today.",
@@ -211,12 +208,12 @@ export const projects: Project[] = [
       "Since then I have redesigned it and hardened its security, including a check that normalises every URL before the static file server sees it, so encoded or re-cased paths can no longer slip past the guards on protected pages.",
     ],
     impact:
-      "It runs live today with personal collections (wishlist, currently playing, completed), reviews, friends and groups, and an admin dashboard, pulling live RAWG data through the server, which caches it for an hour. The deployed version of a team project that I took the rest of the way and shipped myself.",
-    impactHighlights: ["runs live today"],
+      "Live with collections, reviews, friends, groups and an admin dashboard, after I traced the broken OAuth and deployment config, moved the database across three hosting setups, and hardened access to protected pages.",
+    impactHighlights: ["traced the broken OAuth and deployment config"],
     metrics: [
       { value: "Live", label: "publicly deployed" },
       { value: "9", label: "relational tables" },
-      { value: "2", label: "stored roles" },
+      { value: "40+", label: "API endpoints" },
       { value: "3", label: "hosting setups" },
     ],
     learned:
@@ -247,8 +244,8 @@ export const projects: Project[] = [
     period: "Aug 2026 to Sep 2026",
     role: "Sole developer, from quote to delivery",
     oneLiner:
-      "A mobile-first website and enquiry system for a tennis academy coaching 100+ players. My first paid client build.",
-    emphasis: "My first paid client build",
+      "Took a 100+ player tennis academy from no website to 50+ Google Search clicks a month and 10+ new clients, with a site delivered in three weeks.",
+    emphasis: "50+ Google Search clicks a month and 10+ new clients",
     summary:
       "Freelance work for a local tennis academy. I built the site around what the business needed, to give it a proper presence online.",
     problem:
@@ -259,12 +256,13 @@ export const projects: Project[] = [
       "It is a static Nuxt site. Squads, coaches, mentors and results live in Nuxt Content collections and partners in the app config, so adding a coach is a data change rather than a code change. Enquiries go through Netlify Forms and notify the owners straight away, and a sitemap and robots file get it indexed properly.",
     ],
     impact:
-      "Delivered in three weeks on a fixed quote: a multi-page site covering programs, coaches, venue partners and enquiries, built mobile-first because that is where parents find it.",
-    impactHighlights: ["Delivered in three weeks on a fixed quote"],
+      "Delivered in three weeks on a fixed quote. The static Nuxt site scores 100 for SEO and 100 for accessibility in Lighthouse, and with on-page SEO, Search Console and a Google Business Profile that now has 10 reviews, it brings in 50+ Google Search clicks a month and has helped win 10+ new clients, as of November 2026.",
+    impactHighlights: ["50+ Google Search clicks a month", "10+ new clients"],
     metrics: [
       { value: "3 wks", label: "quote to delivery" },
-      { value: "100+", label: "players at the academy" },
-      { value: "0", label: "admin tools to maintain" },
+      { value: "50+/mo", label: "Google Search clicks" },
+      { value: "10+", label: "new clients" },
+      { value: "10", label: "Google reviews" },
     ],
     learned:
       "Scoping is engineering. Saying no to the booking feature did more for the client than anything I built.",
@@ -295,7 +293,7 @@ export const projects: Project[] = [
     period: "May 2026 to Jun 2026",
     role: "Solo build",
     oneLiner:
-      "The site you are on, and the assistant in the corner that only answers from a knowledge base I wrote.",
+      "Let recruiters ask my portfolio direct questions and get grounded answers in seconds, with an assistant that only answers from a knowledge base I wrote and says when it doesn't know.",
     emphasis: "only answers from a knowledge base I wrote",
     summary:
       "Streams answers from the Claude API through my own server route, so the key never reaches the browser, with rate limits and injection refusal on the endpoint.",
@@ -307,8 +305,8 @@ export const projects: Project[] = [
       "The endpoint is hardened: a per-IP limit of 20 messages every 10 minutes, a 500-character input cap, a six-turn history window with malformed history dropped, and refusal of instructions that try to override the rules. The site itself sends a strict Content Security Policy, two-year HSTS with preload, and clickjacking protection.",
     ],
     impact:
-      "A live, grounded assistant that answers recruiter questions in seconds and admits when it does not know, running on the same codebase as the portfolio it describes.",
-    impactHighlights: ["admits when it does not know"],
+      "Passes 17 automated WCAG 2.1 AA accessibility checks on desktop and mobile within a 257-test end-to-end suite, and keeps the API key off the browser behind a rate-limited, injection-resistant server route.",
+    impactHighlights: ["17 automated WCAG 2.1 AA accessibility checks"],
     metrics: [
       { value: "~5.7k", label: "lines of TypeScript" },
       { value: "20", label: "messages per IP every 10 minutes" },
@@ -328,8 +326,8 @@ export const projects: Project[] = [
     period: "Mar 2026 to May 2026",
     role: "Solo coursework, Cloud and Concurrent Programming",
     oneLiner:
-      "A real-time dashboard that merges ten live GPS streams without a single piece of shared mutable state.",
-    emphasis: "without a single piece of shared mutable state",
+      "Merged ten live GPS streams into one real-time dashboard with no shared mutable state, verified by 19 automated checks, by modelling the data flow with functional reactive programming.",
+    emphasis: "no shared mutable state",
     summary:
       "Built with functional reactive programming, so location updates flow through composable streams instead of event handlers mutating state. Covered by 19 automated checks.",
     problem:
@@ -360,6 +358,63 @@ export const projects: Project[] = [
       width: 2000,
       height: 1250,
     },
+  },
+  {
+    slug: "pathfinder",
+    title: "Pathfinder",
+    status: "Python · 2026",
+    period: "Mar 2026 to Jun 2026",
+    role: "Solo. Started as a university AI assignment, then extended with benchmarks, tests and a browser demo.",
+    oneLiner:
+      "Found the lowest-effort route across hilly terrain with A*, expanding 59% fewer nodes than Dijkstra, by building BFS, Dijkstra and A* from scratch in Python and benchmarking them on 6 maps.",
+    emphasis: "expanding 59% fewer nodes than Dijkstra",
+    summary:
+      "Three classic search algorithms on elevation-aware grids, compared on the same maps to show exactly what a good heuristic buys you.",
+    problem:
+      "Shortest is not the same as cheapest. On terrain where moving uphill costs more, a route with fewer steps can be the expensive one, and a search that ignores cost will happily pick it.",
+    approach: [
+      "I implemented BFS, Dijkstra (Uniform Cost Search) and A* from scratch in Python, with no external dependencies. Each grid cell has an elevation and some are blocked, and a move to a neighbouring cell costs 1 plus any climb, so the flat and downhill cost 1 and climbing costs extra.",
+      "Dijkstra and A* share a binary heap priority queue, so each push and pop is O(log n), with an insertion counter that breaks ties and keeps the order stable. A hash-set closed list makes checking whether a node was already expanded O(1).",
+      "Each node stores a parent pointer, the single node it came from, and the route is rebuilt once at the goal. An earlier version copied the whole partial path into every queue entry, which costs O(path length) memory per entry. Parent pointers keep it at O(V) overall, with identical output.",
+      "Every step costs at least 1, so the Manhattan heuristic never overestimates the remaining cost and A* stays optimal. Euclidean distance is provided as well.",
+    ],
+    impact:
+      "On the demo map, BFS (which only counts steps) walks over a hill and pays 35% more effort than the best route of the same length, while A* finds that best route expanding 59% fewer nodes than Dijkstra. A live browser demo races all three, and 13 tests plus a Python-to-JavaScript parity check run in CI on every push.",
+    impactHighlights: ["35% more effort", "59% fewer nodes"],
+    metrics: [
+      { value: "59%", label: "fewer nodes than Dijkstra" },
+      { value: "35%", label: "extra effort from BFS" },
+      { value: "13", label: "tests in CI" },
+      { value: "6", label: "benchmark maps" },
+    ],
+    stack: ["Python", "JavaScript", "GitHub Actions"],
+    links: [
+      { label: "Source", url: "https://github.com/Agrim1305/Pathfinder" },
+      { label: "Live demo", url: "https://agrim1305.github.io/Pathfinder/", accent: true },
+    ],
+    media: {
+      kind: "browser",
+      src: "/images/projects/pathfinder/race.webp",
+      alt: "Pathfinder Terrain Lab racing all three algorithms on hilly terrain: A* has found its route with 125 cells examined while BFS and Dijkstra are still searching, their examined cells marked with orange dots",
+      width: 2000,
+      height: 1250,
+      url: "agrim1305.github.io/Pathfinder",
+      href: "https://agrim1305.github.io/Pathfinder/",
+    },
+    screens: [
+      {
+        src: "/images/projects/pathfinder/routes.webp",
+        alt: "The demo map: both routes take 26 steps, but the BFS route in orange goes over the hill for an effort of 35, while the lowest-effort A* route in blue goes around it for 26",
+        width: 979,
+        height: 1146,
+      },
+      {
+        src: "/images/projects/pathfinder/explored.webp",
+        alt: "The choice map searched twice: Dijkstra expands 75 nodes, including cells on the hill, while A* with the Manhattan heuristic finds the same route expanding 41",
+        width: 1289,
+        height: 742,
+      },
+    ],
   },
 ];
 
