@@ -34,7 +34,26 @@ export type ProjectMedia =
    browser or a terminal, shown whole in the case study. */
 export type ProjectScreen = { src: string; alt: string; width: number; height: number };
 
-export type Project = {
+/* A piece of work told as Situation, Task, Action, Result. Case studies and
+   the role stories in Experience share the shape and its renderer. */
+export type Star = {
+  situation: string;
+  task: string;
+  actions: { title: string; detail: string }[];
+  result: string;
+  /** Phrases inside result lifted to gold. */
+  resultHighlights?: string[];
+  learned?: string;
+  /** One hard thing, told for an engineer. `code` is copied exactly from the
+      public repo, 20 lines at most, and `url` is that file at a pinned commit. */
+  deepDive?: {
+    title: string;
+    body: string[];
+    code?: { file: string; lang: string; source: string; url: string };
+  };
+};
+
+export type Project = Star & {
   slug: string;
   title: string;
   /** Short tag shown above the title, e.g. "Live · 2025". */
@@ -49,21 +68,7 @@ export type Project = {
   emphasis: string;
   /** Two or three sentences for the home page card. */
   summary: string;
-  situation: string;
-  task: string;
-  actions: { title: string; detail: string }[];
-  result: string;
-  /** Phrases inside result lifted to gold. */
-  resultHighlights?: string[];
-  /** One hard thing, told for an engineer. `code` is copied exactly from the
-      public repo, 20 lines at most, and `url` is that file at a pinned commit. */
-  deepDive?: {
-    title: string;
-    body: string[];
-    code?: { file: string; lang: string; source: string; url: string };
-  };
   metrics?: Metric[];
-  learned?: string;
   stack: string[];
   links: ProjectLink[];
   /** Shown instead of links when there is no public source. */
@@ -836,9 +841,25 @@ export function slugFromCaseStudyUrl(url: unknown, origin: string) {
   return projects.find((p) => parsed.href === origin + caseStudyPath(p.slug))?.slug;
 }
 
+/* Plain-text rendering of a Star for the chat assistant. */
+export function starAsKnowledge(s: Star): string[] {
+  const lines = [
+    `Situation: ${s.situation}`,
+    "",
+    `Task: ${s.task}`,
+    "",
+    `Actions: ${s.actions.map((a, i) => `${i + 1}. ${a.title} ${a.detail}`).join(" ")}`,
+    "",
+    `Result: ${s.result}`,
+  ];
+  if (s.deepDive) lines.push("", `Deep dive, ${s.deepDive.title}: ${s.deepDive.body.join(" ")}`);
+  if (s.learned) lines.push("", `What he learned: ${s.learned}`);
+  return lines;
+}
+
 /* Plain-text rendering of one project for the chat assistant. */
 export function projectAsKnowledge(p: Project): string {
-  const lines = [
+  return [
     `### ${p.title}`,
     "",
     `Status: ${p.status}. Period: ${p.period}. Role: ${p.role}.`,
@@ -849,17 +870,8 @@ export function projectAsKnowledge(p: Project): string {
     "",
     `Summary: ${p.oneLiner}`,
     "",
-    `Situation: ${p.situation}`,
-    "",
-    `Task: ${p.task}`,
-    "",
-    `Actions: ${p.actions.map((a, i) => `${i + 1}. ${a.title} ${a.detail}`).join(" ")}`,
-    "",
-    `Result: ${p.result}`,
-  ];
-  if (p.deepDive) lines.push("", `Deep dive, ${p.deepDive.title}: ${p.deepDive.body.join(" ")}`);
-  if (p.learned) lines.push("", `What he learned: ${p.learned}`);
-  return lines.join("\n");
+    ...starAsKnowledge(p),
+  ].join("\n");
 }
 
 /* Every project, for the chat assistant's knowledge base. */

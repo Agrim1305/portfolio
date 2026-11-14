@@ -7,77 +7,11 @@ import { ArrowRight } from "lucide-react";
 import { MergerBeats } from "@/components/merger-beats";
 import { Panel, PanelHero } from "@/components/panel";
 import { morphClose, morphOpen, morphSwitch } from "@/lib/morph";
-import {
-  COACHING_PHOTO_CONSENT,
-  STORY_EVENT,
-  awardPhoto,
-  clubPhotos,
-  coachingPhoto,
-  mergerStory,
-  type Photo,
-  type StoryRequest,
-} from "@/lib/stories";
+import { Metrics, StarStory } from "@/components/case-study";
+import { roles } from "@/lib/experience";
+import { STORY_EVENT, type Photo, type StoryRequest } from "@/lib/stories";
 
-type Role = {
-  /** Used in the story's address, #story-<id>. */
-  id: string;
-  role: string;
-  org: string;
-  dates: string;
-  description: string;
-  now?: boolean;
-  /** Only where the description itself states the number. */
-  stat?: { value: string; label: string };
-  photos: Photo[];
-  /** Told in beats instead of the description. */
-  beats?: typeof mergerStory;
-};
-
-const roles: Role[] = [
-  {
-    id: "aurivox",
-    role: "AI Software Engineering Intern",
-    org: "Aurivox · Viemo Capital & Consulting",
-    dates: "Aug 2026 to Nov 2026",
-    description:
-      "Chosen as one of four interns from eleven shortlisted students for a placement with a voice AI startup. I built a real-time meeting assistant on the Claude API that answers spoken questions in a median of 1.9 seconds, found and fixed the bug that froze its summaries, cut the cost of each summary by 17%, and designed its consent and privacy guardrails. It is now in internal use. The full case study is under Selected work.",
-    stat: { value: "1 of 4", label: "interns chosen from 11" },
-    photos: [],
-  },
-  {
-    id: "president",
-    role: "President",
-    org: "Adelaide University Tennis Club",
-    dates: "Jul 2024 to Mar 2026",
-    description:
-      "Turned a dormant club into Club of the Year 2025, growing active membership from about 10 to 100+ in 18 months and lifting regular participation by 75%, by recruiting and leading an 8-person committee, merging with the UniSA club and securing $7,000+ in grants.",
-    stat: { value: "10 → 100+", label: "members" },
-    photos: [awardPhoto, ...clubPhotos],
-    beats: mergerStory,
-  },
-  {
-    id: "coaching",
-    role: "Assistant Head Coach",
-    org: "Adelaide Rising Stars Tennis Academy",
-    dates: "Mar 2024 to Present",
-    description:
-      "I coach 10+ sessions a week at Tea Tree Gully Tennis Club for more than fifty clients, from juniors to adults, one-on-one and in groups. I run junior and performance squads of up to thirty players in a two-hour block, setting the drill plan and directing assistant coaches across four courts. It has made me good at explaining the same idea a few different ways until it clicks, and at keeping a big group moving on one plan.",
-    now: true,
-    stat: { value: "50+", label: "clients" },
-    photos: COACHING_PHOTO_CONSENT ? [coachingPhoto] : [],
-  },
-  {
-    id: "retail",
-    role: "Retail Assistant",
-    org: "IGA Supermarkets",
-    dates: "Feb 2024 to Oct 2024",
-    description:
-      "Part-time customer service across two stores while studying full-time. Busy retail floor, steady standards, and a lot of practice juggling work and study at the same time.",
-    photos: [],
-  },
-];
-
-// "Aurivox · Viemo Capital" reads as AV, "Adelaide Rising Stars" as AR.
+// "Viemo Capital" reads as VC, "Adelaide Rising Stars" as AR.
 const monogram = (org: string) =>
   org
     .replace("·", "")
@@ -90,15 +24,6 @@ const monogram = (org: string) =>
 const sentences = (text: string) => text.split(/(?<=\.)\s+/);
 
 const storyIndex = (hash: string) => roles.findIndex((r) => hash === `#story-${r.id}`);
-
-function NowBadge() {
-  return (
-    <span className="flex h-[26px] items-center gap-1.5 rounded-full bg-accent/16 px-2.5 text-xs font-semibold text-accent-soft">
-      <span aria-hidden className="size-1.5 rounded-full bg-accent" />
-      Now
-    </span>
-  );
-}
 
 /* The rest of a story's photos, after the story: tilted prints in two
    columns, each whole, so no shape is cropped to fit. */
@@ -339,13 +264,18 @@ export function ExperienceRoles() {
                 <span className="text-ink-soft">{r.org}</span>
                 <span className="text-ink-faint">{r.dates}</span>
               </p>
-              {r.now && <NowBadge />}
             </div>
             <h3 className="mt-6 font-display text-[32px] font-extrabold leading-[1.05] tracking-[-0.025em] text-ink lg:mt-7 lg:max-w-[380px] lg:text-[38px]">
               {r.role}
             </h3>
-            {/* Clear of the photo frame in the corner. */}
-            <ul className={`mt-5 flex flex-col gap-3 lg:mt-6 ${photo ? "lg:pr-40" : ""}`}>
+            {r.stats.length > 0 && (
+              <Metrics
+                small
+                metrics={r.stats}
+                className={`mt-6 grid-cols-2 ${r.stats.length > 4 ? "lg:grid-cols-3" : "lg:grid-cols-4"}`}
+              />
+            )}
+            <ul className="mt-6 flex flex-col gap-3">
               {sentences(r.description)
                 .slice(0, 3)
                 .map((s) => (
@@ -355,17 +285,7 @@ export function ExperienceRoles() {
                   </li>
                 ))}
             </ul>
-            <div className="mt-auto flex flex-col gap-4 border-t border-dashed border-ink/20 pt-5 sm:flex-row sm:items-center sm:justify-between lg:mt-8">
-              {r.stat ? (
-                <p className="flex items-baseline gap-3">
-                  <span className="whitespace-nowrap font-display text-[44px] font-extrabold leading-none tracking-[-0.03em] text-accent lg:text-[54px]">
-                    {r.stat.value}
-                  </span>
-                  <span className="max-w-[150px] text-sm leading-snug text-ink-muted">{r.stat.label}</span>
-                </p>
-              ) : (
-                <span />
-              )}
+            <div className="mt-auto flex border-t border-dashed border-ink/20 pt-5 sm:justify-end lg:mt-8">
               <button
                 type="button"
                 data-expand
@@ -416,11 +336,6 @@ export function ExperienceRoles() {
                 )
               }
             >
-              {current.now && (
-                <div className="mb-4 flex">
-                  <NowBadge />
-                </div>
-              )}
               <p className="flex flex-wrap gap-x-3 font-mono text-[11px] leading-relaxed lg:text-xs">
                 <span className="text-accent-soft">{current.org}</span>
                 <span className="text-ink-muted">{current.dates}</span>
@@ -440,13 +355,11 @@ export function ExperienceRoles() {
             {current.photos[0] && (
               <p className="mb-8 font-mono text-xs text-ink-faint">{current.photos[0].caption}</p>
             )}
-            {current.stat && (
-              <p className="mb-12 inline-flex flex-col gap-2 rounded-2xl border border-hairline bg-surface-raised px-5 py-4 lg:mb-14">
-                <span className="whitespace-nowrap font-display text-[32px] font-extrabold leading-none tracking-[-0.02em] text-accent">
-                  {current.stat.value}
-                </span>
-                <span className="text-[13px] text-ink-muted">{current.stat.label}</span>
-              </p>
+            {current.stats.length > 0 && (
+              <Metrics
+                metrics={current.stats}
+                className={`mb-12 grid-cols-2 lg:mb-14 ${current.stats.length > 4 ? "lg:grid-cols-3" : "lg:grid-cols-4"}`}
+              />
             )}
 
             {current.beats ? (
@@ -459,6 +372,8 @@ export function ExperienceRoles() {
                   <MergerBeats beats={current.beats} />
                 </div>
               </div>
+            ) : current.story ? (
+              <StarStory story={current.story} headingAs="h3" />
             ) : (
               <p className="max-w-[760px] text-lg leading-relaxed text-ink-soft lg:text-xl">{current.description}</p>
             )}

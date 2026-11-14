@@ -11,7 +11,7 @@ isn't answered here, the assistant says so honestly instead of guessing.
 Agrim Sharma is a final-year Computer Science student at Adelaide
 University, majoring in Artificial Intelligence, graduating December 2026.
 Based in Adelaide, South Australia. Completed an AI engineering
-internship at Aurivox (Viemo Capital & Consulting), Aug to Nov 2026, as part
+internship at Viemo Capital, Aug to Nov 2026, as part
 of his final semester. Available for graduate roles from December 2026. Looking for graduate
 roles in software engineering, AI, data, and analytics.
 
@@ -27,7 +27,7 @@ where people can search, track, and review games, built end to end
 including the database, login system with Google sign-in, and an admin
 area, deployed so anyone can use it.
 
-In his final semester he interned on a voice AI prototype at Aurivox,
+In his final semester he interned on a voice AI prototype at Viemo Capital,
 and he recently delivered his first paid freelance project, a website and
 enquiry system for Adelaide Rising Stars Tennis Academy, delivered in three
 weeks. As of November 2026 it brings in 50+ Google Search clicks a month,
@@ -92,11 +92,9 @@ different project (graph search algorithms).
 
 ## Experience
 
-### AI Software Engineering Intern, Aurivox, Viemo Capital and Consulting (Aug 2026 to Nov 2026)
+### AI Software Engineering Intern, Viemo Capital (Aug 2026 to Nov 2026)
 
-Chosen as one of four interns from eleven shortlisted students for a
-placement with a voice AI startup, working to an open brief from the
-founder. He built and owned a real-time voice assistant for live meetings
+Working to an open brief from the founder, he built and owned a real-time voice assistant for live meetings
 on the Claude API end to end: the voice pipeline, the data model, the
 debugging, and its cost and reliability. It answers spoken questions in a
 median of 1.9 seconds. He found and fixed the bug that froze its summaries
@@ -104,9 +102,9 @@ after about four minutes, cut the cost of each summary update by 17%, and
 designed its consent and privacy guardrails. Action items captured in
 summaries rose from 7 of 15 to 15 of 15 across three test meetings, and he
 shipped 31 merged pull requests over the placement. The assistant is in
-internal use. The full case study is the "Voice AI meeting assistant"
-project above. Further details of the product are confidential, so anything
-beyond that case study is something the assistant declines to discuss.
+internal use. The full story is under Experience on the site.
+Further details of the product are confidential, so anything beyond that
+story is something the assistant declines to discuss.
 Skills: TypeScript, React, Node.js, Express, Python, WebSockets, Claude API,
 Deepgram, Google TTS.
 
@@ -213,7 +211,7 @@ a graduate role in Australia. Available for graduate roles from December
 Two threads run through Agrim's work. The first is applied AI inside real
 products: the Claude-powered recommendation engine he built for Pacific
 Village Explorer's village view (cut from the hackathon demo), and the
-Aurivox voice AI internship he completed in November 2026. The second is turning messy data into something you can act
+Viemo Capital voice AI internship he completed in November 2026. The second is turning messy data into something you can act
 on. He has run his own monthly budget tool in VBA since September 2025,
 tracking expenses, planning travel and thinking about investment, and uses
 it as a real tool rather than a one-off assignment. He's most interested in
@@ -280,7 +278,7 @@ Yes, based in Adelaide, happy to relocate within Australia.
 
 **What's your availability / notice period / start date?**
 Graduating December 2026 with full working rights from 15 December 2026.
-He completed his internship at Aurivox in November 2026.
+He completed his internship at Viemo Capital in November 2026.
 Available for graduate roles from December 2026, and happy to start
 conversations before then.
 

@@ -760,7 +760,7 @@ test.describe("experience", () => {
     await page.goto("/");
     const tabs = page.getByRole("tablist", { name: "Roles" }).getByRole("tab");
     const names = ["AI Software Engineering Intern", "President", "Assistant Head Coach", "Retail Assistant"];
-    const ids = ["aurivox", "president", "coaching", "retail"];
+    const ids = ["internship", "president", "coaching", "retail"];
     for (let i = 0; i < 4; i++) {
       await tabs.nth(i).click();
       // Off the list, so no other role slides under the pointer as the page
@@ -784,7 +784,7 @@ test.describe("experience", () => {
     const read = page.getByRole("tabpanel").getByRole("button", { name: "Read the full story" });
     await read.click();
     const sheet = page.getByRole("dialog", { name: "AI Software Engineering Intern" });
-    await expect(sheet).toContainText("Chosen as one of four interns from eleven shortlisted students");
+    await expect(sheet).toContainText("Working to an open brief from the founder");
     await sheet.getByRole("button", { name: "Close" }).click();
     await expect(sheet).toBeHidden();
     await expect(page).toHaveURL(/\/$/);

@@ -108,7 +108,7 @@ export function About() {
           ))}
         </ol>
         <p className="mt-10 max-w-3xl text-lg leading-relaxed text-ink-soft">
-          This year I finished a voice AI internship at Aurivox and delivered
+          This year I finished a voice AI internship at Viemo Capital and delivered
           a website for a local tennis academy, and I am now in my final
           semester, graduating in December 2026.
         </p>

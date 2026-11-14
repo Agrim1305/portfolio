@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
-import type { Project } from "@/lib/projects";
+import type { Metric, Project, Star } from "@/lib/projects";
 
 // Wraps the first occurrence of each phrase in `className` so a skimming reader
 // lands on the numbers that matter. The `hl` stripe is reserved for the
@@ -236,6 +236,163 @@ function GalleryPhoto({ project, index }: { project: Project; index: number }) {
   );
 }
 
+/* A row or column of numbers, each over its label; a label with `proof`
+   links to where the number can be checked. One style for every case study,
+   role and section. The caller sets the grid. */
+export function Metrics({
+  metrics,
+  className,
+  small = false,
+}: {
+  metrics: Metric[];
+  className: string;
+  /** For a narrow column, where four numbers share a row. */
+  small?: boolean;
+}) {
+  return (
+    <dl className={`grid gap-x-6 gap-y-5 ${className}`}>
+      {metrics.map((m) => (
+        <div key={m.label} className="flex flex-col">
+          <dt className="order-last mt-1.5 text-sm leading-snug text-ink-muted">
+            {m.proof ? (
+              <a
+                href={m.proof.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline decoration-ink-faint underline-offset-4 hover:text-ink"
+              >
+                {m.label}
+                <span className="sr-only"> ({m.proof.label})</span>
+                <ArrowUpRight className="ml-0.5 inline size-3.5" aria-hidden />
+              </a>
+            ) : (
+              m.label
+            )}
+          </dt>
+          <dd className={`whitespace-nowrap font-display text-[1.75rem] font-extrabold leading-none tracking-[-0.03em] text-accent ${
+                small ? "" : "sm:text-[2rem] lg:text-[2.5rem]"
+              }`}>
+            {m.value}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+/* A Star told in order: Situation, Task, Action, Result, the deep dive,
+   then the lesson. The case studies and the role stories in Experience both
+   render through this. `aside` sits beside Situation and Task from lg up (a
+   case study's numbers); `photos` float beside Action and Result. */
+export function StarStory({
+  story,
+  headingAs: Sub,
+  aside,
+  photos,
+}: {
+  story: Star;
+  headingAs: "h2" | "h3";
+  aside?: React.ReactNode;
+  photos?: React.ReactNode[];
+}) {
+  return (
+    <>
+      <div className={`grid gap-10 ${aside ? "lg:grid-cols-[220px_minmax(0,1fr)]" : ""}`}>
+        {aside}
+        <div>
+          <section>
+            <Sub className={`${label} text-accent-soft`}>Situation</Sub>
+            <p className="mt-3.5 max-w-[720px] text-lg leading-[1.65] text-[#E4E1DB] first-letter:float-left first-letter:mr-3 first-letter:mt-1.5 first-letter:font-display first-letter:text-[4.75rem] first-letter:font-extrabold first-letter:leading-[0.8] first-letter:text-ink lg:text-[21px]">
+              {story.situation}
+            </p>
+          </section>
+          <section className="mt-10">
+            <Sub className={`${label} text-accent-soft`}>Task</Sub>
+            <p className={`mt-3.5 max-w-[720px] ${body}`}>{story.task}</p>
+          </section>
+        </div>
+      </div>
+
+      <section className="mt-14 flow-root">
+        {photos?.[0]}
+        <Sub className={`${label} text-accent-soft`}>Action</Sub>
+        {/* The number sits in the text's own column, so a photo floated
+            beside the list can never cover it. */}
+        <ol className={`mt-3.5 space-y-5 ${body}`}>
+          {story.actions.map(({ title, detail }, i) => (
+            <li key={title} className="flex gap-3.5">
+              <span aria-hidden className="w-5 shrink-0 font-mono text-sm leading-[inherit] text-ink-faint">
+                {i + 1}
+              </span>
+              <span>
+                <strong className="font-semibold text-ink">{title}</strong> {detail}
+              </span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="mt-14 flow-root">
+        {photos?.[1]}
+        <Sub className={`${label} text-accent-soft`}>Result</Sub>
+        <p className="mt-3.5 text-lg leading-[1.65] text-ink lg:text-[22px]">
+          {mark(story.result, story.resultHighlights ?? [], "hl")}
+        </p>
+      </section>
+
+      {story.deepDive && (
+        <section className="mt-14">
+          <p className={`${label} text-accent-soft`}>Deep dive</p>
+          <Sub className="mt-3 font-display text-2xl font-bold leading-tight text-ink lg:text-[1.75rem]">
+            {story.deepDive.title}
+          </Sub>
+          <div className={`mt-4 max-w-[720px] space-y-5 ${body}`}>
+            {story.deepDive.body.map((para) => (
+              <p key={para}>{para}</p>
+            ))}
+          </div>
+          {story.deepDive.code && (
+            <figure className="mt-7 overflow-hidden rounded-xl border border-white/14 bg-paper">
+              <figcaption className="flex items-center justify-between gap-4 border-b border-white/10 px-4 font-mono text-xs text-ink-muted">
+                {story.deepDive.code.file}
+                <a
+                  href={story.deepDive.code.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-11 shrink-0 items-center gap-1 text-ink hover:text-accent-soft"
+                >
+                  View in repo
+                  <ArrowUpRight className="size-3.5" aria-hidden />
+                </a>
+              </figcaption>
+              {/* Long lines scroll inside the block, never the page; it is
+                  focusable so the keyboard can scroll it too. */}
+              <pre
+                tabIndex={0}
+                role="region"
+                aria-label={`Code from ${story.deepDive.code.file}`}
+                data-lenis-prevent-horizontal
+                className="overflow-x-auto p-4 font-mono text-[13px] leading-[1.7] text-[#D6D3CD]"
+              >
+                <code>{story.deepDive.code.source}</code>
+              </pre>
+            </figure>
+          )}
+        </section>
+      )}
+
+      {story.learned && (
+        <blockquote className="mt-16 border-l-4 border-accent pl-6 lg:pl-9">
+          <p className="max-w-[860px] pb-1 font-serif text-[clamp(1.6rem,1rem+2vw,2.625rem)] italic leading-[1.25] text-ink">
+            {story.learned}
+          </p>
+          <footer className={`mt-4 ${label} text-ink-faint`}>What I took from it</footer>
+        </blockquote>
+      )}
+    </>
+  );
+}
+
 /* The body of the case study for one project, under CaseStudyHero, shared
    by the /projects/[slug] page and the panel the home page's cards open
    into, so the two can never differ. */
@@ -268,126 +425,23 @@ export function CaseStudy({ project, titleAs = "h1" }: { project: Project; title
         )}
       </div>
 
-      <div className="mt-14 grid gap-10 lg:grid-cols-[220px_minmax(0,1fr)]">
-        {project.metrics ? (
-          <dl className="grid grid-cols-2 gap-x-6 gap-y-5 lg:grid-cols-1 lg:content-start lg:pt-1.5">
-            {project.metrics.map((m) => (
-              <div key={m.label} className="flex flex-col">
-                <dt className="order-last mt-1.5 text-sm leading-snug text-ink-muted">
-                  {m.proof ? (
-                    <a
-                      href={m.proof.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline decoration-ink-faint underline-offset-4 hover:text-ink"
-                    >
-                      {m.label}
-                      <span className="sr-only"> ({m.proof.label})</span>
-                      <ArrowUpRight className="ml-0.5 inline size-3.5" aria-hidden />
-                    </a>
-                  ) : (
-                    m.label
-                  )}
-                </dt>
-                <dd className="whitespace-nowrap font-display text-[1.75rem] font-extrabold leading-none tracking-[-0.03em] text-accent sm:text-[2rem] lg:text-[2.5rem]">
-                  {m.value}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        ) : (
-          <span className="hidden lg:block" />
-        )}
-        <div>
-          <section>
-            <Sub className={`${label} text-accent-soft`}>Situation</Sub>
-            <p className="mt-3.5 max-w-[720px] text-lg leading-[1.65] text-[#E4E1DB] first-letter:float-left first-letter:mr-3 first-letter:mt-1.5 first-letter:font-display first-letter:text-[4.75rem] first-letter:font-extrabold first-letter:leading-[0.8] first-letter:text-ink lg:text-[21px]">
-              {project.situation}
-            </p>
-          </section>
-          <section className="mt-10">
-            <Sub className={`${label} text-accent-soft`}>Task</Sub>
-            <p className={`mt-3.5 max-w-[720px] ${body}`}>{project.task}</p>
-          </section>
-        </div>
+      <div className="mt-14">
+        <StarStory
+          story={project}
+          headingAs={Sub}
+          aside={
+            project.metrics ? (
+              <Metrics metrics={project.metrics} className="grid-cols-2 lg:grid-cols-1 lg:content-start lg:pt-1.5" />
+            ) : (
+              <span className="hidden lg:block" />
+            )
+          }
+          photos={[
+            <GalleryPhoto key={0} project={project} index={0} />,
+            <GalleryPhoto key={1} project={project} index={1} />,
+          ]}
+        />
       </div>
-
-      <section className="mt-14 flow-root">
-        <GalleryPhoto project={project} index={0} />
-        <Sub className={`${label} text-accent-soft`}>Action</Sub>
-        {/* The number sits in the text's own column, so a photo floated
-            beside the list can never cover it. */}
-        <ol className={`mt-3.5 space-y-5 ${body}`}>
-          {project.actions.map(({ title, detail }, i) => (
-            <li key={title} className="flex gap-3.5">
-              <span aria-hidden className="w-5 shrink-0 font-mono text-sm leading-[inherit] text-ink-faint">
-                {i + 1}
-              </span>
-              <span>
-                <strong className="font-semibold text-ink">{title}</strong> {detail}
-              </span>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <section className="mt-14 flow-root">
-        <GalleryPhoto project={project} index={1} />
-        <Sub className={`${label} text-accent-soft`}>Result</Sub>
-        <p className="mt-3.5 text-lg leading-[1.65] text-ink lg:text-[22px]">
-          {mark(project.result, project.resultHighlights ?? [], "hl")}
-        </p>
-      </section>
-
-      {project.deepDive && (
-        <section className="mt-14">
-          <p className={`${label} text-accent-soft`}>Deep dive</p>
-          <Sub className="mt-3 font-display text-2xl font-bold leading-tight text-ink lg:text-[1.75rem]">
-            {project.deepDive.title}
-          </Sub>
-          <div className={`mt-4 max-w-[720px] space-y-5 ${body}`}>
-            {project.deepDive.body.map((para) => (
-              <p key={para}>{para}</p>
-            ))}
-          </div>
-          {project.deepDive.code && (
-            <figure className="mt-7 overflow-hidden rounded-xl border border-white/14 bg-paper">
-              <figcaption className="flex items-center justify-between gap-4 border-b border-white/10 px-4 font-mono text-xs text-ink-muted">
-                {project.deepDive.code.file}
-                <a
-                  href={project.deepDive.code.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-11 shrink-0 items-center gap-1 text-ink hover:text-accent-soft"
-                >
-                  View in repo
-                  <ArrowUpRight className="size-3.5" aria-hidden />
-                </a>
-              </figcaption>
-              {/* Long lines scroll inside the block, never the page; it is
-                  focusable so the keyboard can scroll it too. */}
-              <pre
-                tabIndex={0}
-                role="region"
-                aria-label={`Code from ${project.deepDive.code.file}`}
-                data-lenis-prevent-horizontal
-                className="overflow-x-auto p-4 font-mono text-[13px] leading-[1.7] text-[#D6D3CD]"
-              >
-                <code>{project.deepDive.code.source}</code>
-              </pre>
-            </figure>
-          )}
-        </section>
-      )}
-
-      {project.learned && (
-        <blockquote className="mt-16 border-l-4 border-accent pl-6 lg:pl-9">
-          <p className="max-w-[860px] pb-1 font-serif text-[clamp(1.6rem,1rem+2vw,2.625rem)] italic leading-[1.25] text-ink">
-            {project.learned}
-          </p>
-          <footer className={`mt-4 ${label} text-ink-faint`}>What I took from it</footer>
-        </blockquote>
-      )}
 
       {project.gallery?.[2] && (
         <div className="mt-14">
