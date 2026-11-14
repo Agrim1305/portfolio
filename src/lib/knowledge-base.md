@@ -15,7 +15,7 @@ internship at Aurivox (Viemo Capital & Consulting), Aug to Nov 2026, as part
 of his final semester. Available for graduate roles from December 2026. Looking for graduate
 roles in software engineering, AI, data, and analytics.
 
-GPA: 5.35/7.0, holds a 15% International Merit Scholarship.
+Holds a 15% International Merit Scholarship.
 
 ---
 
@@ -92,16 +92,23 @@ different project (graph search algorithms).
 
 ## Experience
 
-### Software Engineering Intern (Voice AI), Aurivox, Viemo Capital & Consulting (Aug 2026 to Nov 2026)
+### AI Software Engineering Intern, Aurivox, Viemo Capital and Consulting (Aug 2026 to Nov 2026)
 
-Chosen as one of 4 interns from 11 shortlisted students for a 50-day
-placement with a startup building a voice AI product, based at Adelaide
-University's ThincLab. Worked across the speech-to-text, LLM and
-text-to-speech stack of a voice-first meeting assistant, reporting to the
-founder and taking an open brief through to a working prototype. Taken for
-course credit in place of his capstone. Details of the product itself are
-confidential. Skills: TypeScript, React, Node.js, WebSockets, speech-to-text,
-LLM integration, text-to-speech.
+Chosen as one of four interns from eleven shortlisted students for a
+placement with a voice AI startup, working to an open brief from the
+founder. He built and owned a real-time voice assistant for live meetings
+on the Claude API end to end: the voice pipeline, the data model, the
+debugging, and its cost and reliability. It answers spoken questions in a
+median of 1.9 seconds. He found and fixed the bug that froze its summaries
+after about four minutes, cut the cost of each summary update by 17%, and
+designed its consent and privacy guardrails. Action items captured in
+summaries rose from 7 of 15 to 15 of 15 across three test meetings, and he
+shipped 31 merged pull requests over the placement. The assistant is in
+internal use. The full case study is the "Voice AI meeting assistant"
+project above. Further details of the product are confidential, so anything
+beyond that case study is something the assistant declines to discuss.
+Skills: TypeScript, React, Node.js, Express, Python, WebSockets, Claude API,
+Deepgram, Google TTS.
 
 ### President, Adelaide University Tennis Club (Jul 2024 to Mar 2026)
 
@@ -114,7 +121,9 @@ process and work as one.
 
 Results: grew from around 10 to 100+ active members in 18 months, lifted
 regular participation by 75%, secured $7,000+ in grants, merged two clubs into one, won Club of the Year 2025 (Jessop
-Shield). Skills: Leadership, Governance, Operations, Stakeholder
+Shield). The grants came from four applications and paid for new fencing,
+nets and poles. He ran an annual budget of about $10,000 to $11,000, and
+the club's orientation week drew about 78 people. Skills: Leadership, Governance, Operations, Stakeholder
 Management.
 
 ### Assistant Head Coach, Adelaide Rising Stars Tennis Academy (Mar 2024 to Present)
@@ -218,8 +227,9 @@ did, which he then came back to alone, fixed end-to-end, connected to
 live external data (the RAWG API), and deployed to production. It's the
 clearest evidence of the difference between building for a grade and
 shipping because he wanted it to exist. Full auth with Google sign-in, a
-normalised 9-table relational schema, 40+ API endpoints, and an admin
-panel, all live today.
+normalised 9-table relational schema, 43 API routes (38 from the team
+build and 5 from his redesign), and an admin panel, all live since June
+2026.
 It was originally deployed on Railway, moved to Render with Aiven MySQL
 when the Railway trial ended, then to Neon PostgreSQL when Aiven's free
 tier started powering the database off, which gave him real experience
@@ -243,16 +253,15 @@ Graduate roles in software engineering, AI, data, and analytics. Ideally somewhe
 quickly, not a long ramp-up before touching anything that matters.
 
 **What's a time you failed and what did you learn?**
-Agrim failed an advanced statistics course in second year, the first
-subject he'd ever failed. It genuinely rattled him. He'd never had to
-reckon with falling short academically, and as an international student
-the stakes felt higher than they probably were. What he took from it
-wasn't really about statistics. It was that his study approach, cramming
-close to the deadline, worked fine for subjects he found intuitive but
-broke down under real difficulty. Since then he plans study time earlier
-and spreads it out rather than relying on a late push, and treats "this
-is harder than I expected" as a signal to adjust early rather than push
-through with the same method for longer.
+During his internship Agrim pushed straight to the main branch of the
+team's shared repository without pulling first. A teammate had restructured
+the project at the same time, so the two histories diverged and the merge
+had to be resolved by hand, file by file. Nothing was lost, but it cost the
+team time that a thirty-second pull would have saved. What he does
+differently now: he confirms with everyone affected before he changes
+shared code, and he does not move forward until he has that confirmation.
+In practice that means pulling first, working on a branch, opening a pull
+request, and waiting for a review before anything merges.
 
 **How do you use AI tools in your work, and where do you draw the line on
 relying on them?**
