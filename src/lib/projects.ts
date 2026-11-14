@@ -430,29 +430,50 @@ export function adjacentProjects(slug: string) {
   };
 }
 
-/* Plain-text rendering for the chat assistant's knowledge base. */
+/* The path of a project's case study page. */
+export function caseStudyPath(slug: string) {
+  return `/projects/${slug}`;
+}
+
+/* The slug behind a case study URL, or undefined unless the URL is exactly a
+   listed project's page on `origin`. The chat uses this before it opens
+   anything, so no other address can ever be navigated to. */
+export function slugFromCaseStudyUrl(url: unknown, origin: string) {
+  if (typeof url !== "string") return undefined;
+  let parsed: URL;
+  try {
+    parsed = new URL(url, origin);
+  } catch {
+    return undefined;
+  }
+  if (parsed.origin !== origin) return undefined;
+  return projects.find((p) => parsed.href === origin + caseStudyPath(p.slug))?.slug;
+}
+
+/* Plain-text rendering of one project for the chat assistant. */
+export function projectAsKnowledge(p: Project): string {
+  const lines = [
+    `### ${p.title}`,
+    "",
+    `Status: ${p.status}. Period: ${p.period}. Role: ${p.role}.`,
+    `Stack: ${p.stack.join(", ")}.`,
+    ...p.links.map((l) => `${l.label}: ${l.url}`),
+    ...(p.privateNote ? [`Source: ${p.privateNote}.`] : []),
+    `Case study page: https://agrimsharma.com/projects/${p.slug}`,
+    "",
+    `Summary: ${p.oneLiner}`,
+    "",
+    `Problem: ${p.problem}`,
+    "",
+    `Approach: ${p.approach.join(" ")}`,
+    "",
+    `Impact: ${p.impact}`,
+  ];
+  if (p.learned) lines.push("", `What he learned: ${p.learned}`);
+  return lines.join("\n");
+}
+
+/* Every project, for the chat assistant's knowledge base. */
 export function projectsAsKnowledge(): string {
-  return projects
-    .map((p) => {
-      const lines = [
-        `### ${p.title}`,
-        "",
-        `Status: ${p.status}. Period: ${p.period}. Role: ${p.role}.`,
-        `Stack: ${p.stack.join(", ")}.`,
-        ...p.links.map((l) => `${l.label}: ${l.url}`),
-        ...(p.privateNote ? [`Source: ${p.privateNote}.`] : []),
-        `Case study page: https://agrimsharma.com/projects/${p.slug}`,
-        "",
-        `Summary: ${p.oneLiner}`,
-        "",
-        `Problem: ${p.problem}`,
-        "",
-        `Approach: ${p.approach.join(" ")}`,
-        "",
-        `Impact: ${p.impact}`,
-      ];
-      if (p.learned) lines.push("", `What he learned: ${p.learned}`);
-      return lines.join("\n");
-    })
-    .join("\n\n");
+  return projects.map(projectAsKnowledge).join("\n\n");
 }

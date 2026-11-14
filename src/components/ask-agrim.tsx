@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowUp, X } from "lucide-react";
 import { Cloud } from "@/components/cloud";
 import { Dock } from "@/components/dock";
+import { caseStudyPath, slugFromCaseStudyUrl } from "@/lib/projects";
 
 // Small models sometimes emit **bold** or __underline__ despite the prompt
 // forbidding it; strip the wrappers so a slip renders as plain text.
@@ -98,6 +100,11 @@ export function openAsk(message?: string) {
   window.dispatchEvent(new CustomEvent<string | undefined>(OPEN_EVENT, { detail: message }));
 }
 
+/* Aris asks the page to open a case study. The home page's Selected work
+   listens, cancels the event and opens its panel; where nothing does, the
+   chat goes to the case study's own page. */
+export const OPEN_CASE_EVENT = "ask:open-case";
+
 /* The hero's open Ask card, under the cloud: the assistant's header, the
    suggested questions and an input. A question or a submitted message opens
    the chat window and sends it there. */
@@ -160,6 +167,7 @@ export function AskCard({ className = "" }: { className?: string }) {
    where the cloud starts (see dock.tsx); without one it is docked from the
    start. */
 export function AskAgrim({ heroId }: { heroId?: string }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([INTRO_MESSAGE]);
   const [input, setInput] = useState("");
@@ -270,24 +278,45 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
       setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
+      let buffer = "";
       let received = "";
+      let openSlug: string | undefined;
+      const setAnswer = (content: (soFar: string) => string) =>
+        setMessages((prev) => [...prev.slice(0, -1), { role: "assistant", content: content(prev.at(-1)!.content) }]);
 
+      // One JSON event a line: text, reset or action (see lib/aris-tools.ts).
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        received += chunk;
-        setMessages((prev) => {
-          const copy = prev.slice();
-          const last = copy[copy.length - 1];
-          copy[copy.length - 1] = {
-            role: "assistant",
-            content: last.content + chunk,
-          };
-          return copy;
-        });
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+        for (const line of lines) {
+          let event;
+          try {
+            event = JSON.parse(line);
+          } catch {
+            continue;
+          }
+          if (event?.type === "text" && typeof event.text === "string") {
+            const { text } = event;
+            received += text;
+            setAnswer((soFar) => soFar + text);
+          } else if (event?.type === "reset") {
+            received = "";
+            setAnswer(() => "");
+          } else if (event?.type === "action" && event.action === "open") {
+            // Only a listed project's own page on this site; anything else
+            // is dropped here and never navigated to.
+            openSlug = slugFromCaseStudyUrl(event.url, window.location.origin) ?? openSlug;
+          }
+        }
       }
-      if (!received.trim()) fail();
+      if (!received.trim()) return fail();
+      if (openSlug) {
+        const opened = !window.dispatchEvent(new CustomEvent(OPEN_CASE_EVENT, { detail: openSlug, cancelable: true }));
+        if (!opened) router.push(caseStudyPath(openSlug));
+      }
     } catch {
       fail();
     } finally {
