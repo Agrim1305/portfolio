@@ -222,7 +222,7 @@ export function Projects() {
               <span className="block text-[#636167] md:inline">work</span>
             </h2>
             <p className="mt-4 text-[15px] text-ink-muted md:mt-1 lg:text-base xl:mt-0 xl:max-w-[15rem] xl:pb-0.5 xl:text-[15px] xl:leading-snug">
-              Problem, approach, and impact. The stack comes second.
+              What I owned, what I did, what changed. The stack comes second.
             </p>
           </div>
           <div className="hidden items-center gap-5 md:flex">
