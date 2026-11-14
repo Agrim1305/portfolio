@@ -36,11 +36,11 @@ type Role = {
 const roles: Role[] = [
   {
     id: "aurivox",
-    role: "Software Engineering Intern, Voice AI",
+    role: "AI Software Engineering Intern",
     org: "Aurivox · Viemo Capital & Consulting",
     dates: "Aug 2026 to Nov 2026",
     description:
-      "Chosen as one of four interns from eleven shortlisted students for a 50-day placement with a startup building a voice AI product. I worked across the speech-to-text, language model and text-to-speech stack of a voice-first meeting assistant, reporting to the founder and taking an open brief through to a working prototype. It was the first time I had shipped AI features against a founder's brief rather than a marking rubric.",
+      "Chosen as one of four interns from eleven shortlisted students for a placement with a voice AI startup. I built a real-time meeting assistant on the Claude API that answers spoken questions in a median of 1.9 seconds, found and fixed the bug that froze its summaries, cut the cost of each summary by 17%, and designed its consent and privacy guardrails. It is now in internal use. The full case study is under Selected work.",
     stat: { value: "1 of 4", label: "interns chosen from 11" },
     photos: [],
   },
