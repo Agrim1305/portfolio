@@ -278,7 +278,7 @@ test.describe("Selected work buttons", () => {
   test("a link opens in a new tab and never the case study; Open case study still opens it", async ({ page, context }) => {
     await context.route(/github\.com|sydney\.edu\.au|onrender\.com|arstennisacademy/, (route) => route.fulfill({ body: "ok" }));
     await page.goto("/");
-    // The first card with a link of its own; the two before it are private.
+    // Off to the side until focus brings it into view.
     const card = cards(page).nth(projects.findIndex((p) => p.slug === "pacific-village-explorer"));
     await card.getByRole("link", { name: /Open case study/ }).focus();
     const [tab] = await Promise.all([context.waitForEvent("page"), card.getByRole("link", { name: "Source" }).click()]);
@@ -294,11 +294,7 @@ test.describe("Selected work buttons", () => {
     await page.goto("/");
     await page.getByRole("region", { name: "Selected work" }).focus();
     await page.keyboard.press("Tab");
-    await expect(cards(page).first().getByRole("link", { name: /Open case study/ })).toBeFocused();
-    // On to the first card with a link of its own; the two before it are private.
-    await page.keyboard.press("Tab");
-    await page.keyboard.press("Tab");
-    const card = cards(page).nth(projects.findIndex((p) => p.slug === "pacific-village-explorer"));
+    const card = cards(page).first();
     await expect(card.getByRole("link", { name: /Open case study/ })).toBeFocused();
     await page.keyboard.press("Tab");
     const source = card.getByRole("link", { name: "Source" });

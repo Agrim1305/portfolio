@@ -15,7 +15,8 @@ test.beforeEach(async ({ page }) => {
    (run once, against the pre-redesign build). The normal run checks that each
    recorded item is still reachable: on the page, or inside a sheet opened by
    an element marked `data-expand`. Deliberate removals go in the allowlist,
-   each with a reason. */
+   each with a reason; one that holds on a single page only (a neighbouring
+   project's link, say) is keyed "<route> > <item>". */
 
 const BASELINE = path.join(__dirname, "content-baseline.json");
 const ALLOWLIST = path.join(__dirname, "content-allowlist.json");
@@ -117,7 +118,8 @@ test.describe("content lock", () => {
         ...baseline[route].text.filter((t) => !hay.includes(t)),
         ...baseline[route].alts.filter((a) => !now.alts.includes(a)).map((a) => `alt: ${a}`),
         ...baseline[route].hrefs.filter((h) => !now.hrefs.includes(h)).map((h) => `href: ${h}`),
-      ].filter((m) => !(m in allow));
+        // An entry is for the whole site, or for one page as "<route> > <item>".
+      ].filter((m) => !(m in allow) && !(`${route} > ${m}` in allow));
       expect(missing, "copy, alt text or links missing from the page").toEqual([]);
     });
   }

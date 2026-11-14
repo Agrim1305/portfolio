@@ -559,7 +559,7 @@ test.describe("selected work", () => {
     const next = page.getByRole("button", { name: "Next project" });
     await expect(prev).toBeDisabled();
     await next.click();
-    await expect(page.getByText("2 / 8")).toBeVisible();
+    await expect(page.getByText("2 / 7")).toBeVisible();
     await expect(prev).toBeEnabled();
   });
 
@@ -570,10 +570,10 @@ test.describe("selected work", () => {
     await next.click();
     await next.click();
     await next.click();
-    await expect(page.getByText("4 / 8")).toBeVisible();
+    await expect(page.getByText("4 / 7")).toBeVisible();
     await page.getByRole("region", { name: "Selected work" }).focus();
-    for (let i = 0; i < 8; i++) await page.keyboard.press("ArrowRight");
-    await expect(page.getByText("8 / 8")).toBeVisible();
+    for (let i = 0; i < 7; i++) await page.keyboard.press("ArrowRight");
+    await expect(page.getByText("7 / 7")).toBeVisible();
     await expect(next).toBeDisabled();
   });
 
@@ -583,15 +583,15 @@ test.describe("selected work", () => {
     const track = page.getByRole("region", { name: "Selected work" }).locator("> div");
     await track.scrollIntoViewIfNeeded();
     await track.evaluate((el) => el.scrollTo({ left: el.scrollWidth, behavior: "instant" }));
-    await expect(page.locator("#projects").getByRole("group", { name: "8 of 8" })).toBeInViewport({ ratio: 0.6 });
-    await expect(page.locator("#projects")).toHaveAttribute("data-active", "7");
+    await expect(page.locator("#projects").getByRole("group", { name: "7 of 7" })).toBeInViewport({ ratio: 0.6 });
+    await expect(page.locator("#projects")).toHaveAttribute("data-active", "6");
   });
 
   test("Tab onto an off-screen card brings it into view", async ({ page, isMobile }) => {
     test.skip(isMobile, "a keyboard is a desktop input");
     await page.goto("/");
     await page.getByRole("link", { name: "Open case study for GPS Tracker Dashboard" }).focus();
-    await expect(page.locator("#projects").getByRole("group", { name: "8 of 8" })).toBeInViewport({ ratio: 0.6 });
+    await expect(page.locator("#projects").getByRole("group", { name: "7 of 7" })).toBeInViewport({ ratio: 0.6 });
   });
 
   test("the skip link jumps past the cards", async ({ page }) => {
@@ -672,23 +672,23 @@ test.describe("selected work", () => {
   test("arrow keys slide between projects, the address follows, and closing lands on that card", async ({ page, isMobile }) => {
     test.skip(isMobile, "arrow keys are a desktop control");
     await page.goto("/");
-    const open = page.getByRole("link", { name: "Open case study for Pacific Village Explorer" });
+    const open = page.getByRole("link", { name: "Open case study for MetaPlay" });
     await open.focus();
     await page.keyboard.press("Enter");
-    await expect(page.getByRole("dialog", { name: "Pacific Village Explorer" })).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "MetaPlay" })).toBeVisible();
     await page.keyboard.press("ArrowRight");
-    await expect(page.getByRole("dialog", { name: "MetaPlay" })).toBeVisible();
-    await expect(page).toHaveURL(/\/projects\/metaplay$/);
-    await page.keyboard.press("ArrowLeft");
     await expect(page.getByRole("dialog", { name: "Pacific Village Explorer" })).toBeVisible();
-    await page.getByRole("dialog").getByRole("button", { name: "Next: MetaPlay" }).first().click();
+    await expect(page).toHaveURL(/\/projects\/pacific-village-explorer$/);
+    await page.keyboard.press("ArrowLeft");
     await expect(page.getByRole("dialog", { name: "MetaPlay" })).toBeVisible();
+    await page.getByRole("dialog").getByRole("button", { name: "Next: Pacific Village Explorer" }).first().click();
+    await expect(page.getByRole("dialog", { name: "Pacific Village Explorer" })).toBeVisible();
 
     await page.keyboard.press("Escape");
     await expect(page.getByRole("dialog")).toBeHidden();
     await expect(page).toHaveURL(/\/$/);
-    await expect(page.getByText("4 / 8")).toBeVisible();
-    await expect(page.getByRole("link", { name: "Open case study for MetaPlay" })).toBeFocused();
+    await expect(page.getByText("4 / 7")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Open case study for Pacific Village Explorer" })).toBeFocused();
   });
 
   test("a wheel over an open case study scrolls the panel, not the page behind", async ({ page, isMobile }) => {

@@ -30,7 +30,6 @@ export function mark(text: string, phrases: string[], className: string) {
 /* Card and cover treatment per project: a background, and for projects with
    no screenshot, the colour of the big cover word (the first stack item). */
 export const COVER: Record<string, { bg: string; ink: string }> = {
-  "aurivox-voice-assistant": { bg: "linear-gradient(135deg, #2A2B31, #16171A)", ink: "#F1EFEA" },
   "concurrent-video-player": { bg: "#1C1C20", ink: "#FF5B2E" },
   "pacific-village-explorer": {
     bg: "radial-gradient(circle at 30% 10%, #FF7A4F 0%, #B53A17 40%, #2A120B 100%)",
@@ -49,7 +48,8 @@ export const COVER: Record<string, { bg: string; ink: string }> = {
 const label = "font-mono text-[11px] uppercase tracking-[0.15em]";
 const body = "text-[17px] leading-[1.75] text-[#D6D3CD] lg:text-lg";
 
-/* The project's links as pills (or, with no public link, its private note),
+/* The project's links as pills (or, on a card with no public link, its
+   private note; the case study puts that note on its own line),
    opening in a new tab, in the order the data gives them: Source, then a
    live link. In the case study a live link is the primary, filled; on a
    card the case study is, so the pills are all secondary, one height with
@@ -72,7 +72,7 @@ export function Links({ project, compact = false }: { project: Project; compact?
           <ArrowUpRight className={compact ? "size-3.5" : "size-4"} aria-hidden />
         </a>
       ))}
-      {project.privateNote && (
+      {compact && project.privateNote && (
         <p className="text-sm text-ink-muted">{project.privateNote}</p>
       )}
     </div>
@@ -249,7 +249,7 @@ export function CaseStudy({ project, titleAs = "h1" }: { project: Project; title
         {mark(project.oneLiner, [project.emphasis], "text-ink")}
       </p>
 
-      <div className="mt-9 grid gap-6 border-y border-hairline py-6 lg:grid-cols-[repeat(3,minmax(0,1fr))_auto] lg:items-end lg:gap-7">
+      <div className="mt-9 grid gap-6 border-y border-hairline py-6 lg:grid-cols-[repeat(3,minmax(0,1fr))_auto] lg:items-start lg:gap-7">
         <dl className="contents">
           {[
             { term: "When", value: project.period },
@@ -262,7 +262,10 @@ export function CaseStudy({ project, titleAs = "h1" }: { project: Project; title
             </div>
           ))}
         </dl>
-        <Links project={project} />
+        {project.links.length > 0 && <Links project={project} />}
+        {project.privateNote && (
+          <p className="text-sm text-ink-muted lg:col-span-full">{project.privateNote}</p>
+        )}
       </div>
 
       <div className="mt-14 grid gap-10 lg:grid-cols-[220px_minmax(0,1fr)]">

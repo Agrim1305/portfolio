@@ -153,12 +153,12 @@ test.describe("section questions", () => {
     await page.goto("/");
     await restOn(page, "projects");
     await page.getByRole("button", { name: "Next project" }).click();
-    await expect(page.getByText("2 / 8")).toBeVisible();
+    await expect(page.getByText("2 / 7")).toBeVisible();
     await page.getByRole("button", { name: "Next project" }).click();
-    await expect(page.getByText("3 / 8")).toBeVisible();
+    await expect(page.getByText("3 / 7")).toBeVisible();
     await page.mouse.move(10, 10);
     await page.waitForTimeout(1500);
-    await expect(bubble(page)).toContainText("How was Pacific Village Explorer built?");
+    await expect(bubble(page)).toContainText("How was MetaPlay built?");
   });
 
   test("dismissed stays dismissed, and nothing shows while the chat is open or the page moves", async ({ page }) => {

@@ -76,88 +76,106 @@ export type Project = {
 
 export const projects: Project[] = [
   {
-    slug: "aurivox-voice-assistant",
-    title: "Voice AI meeting assistant",
-    status: "Internship · In internal use · 2026",
-    period: "Aug 2026 to Nov 2026",
-    role:
-      "AI Software Engineering Intern at Viemo Capital and Consulting, one of four chosen from eleven",
+    slug: "portfolio-ai-assistant",
+    title: "Aris, the portfolio AI assistant",
+    status: "Live · v1 May 2026, rebuilt Oct 2026",
+    period: "May 2026 to Nov 2026",
+    role: "Solo build",
     oneLiner:
-      "Built a voice assistant that answers spoken questions in a live meeting in a median of 1.9 seconds, and proved its accuracy, cost and safety with an evaluation harness I wrote.",
-    emphasis: "a median of 1.9 seconds",
+      "Let recruiters ask my portfolio direct questions and get grounded answers in seconds, with an assistant that only answers from a knowledge base I wrote and says when it doesn't know.",
+    emphasis: "only answers from a knowledge base I wrote",
     summary:
-      "A real-time voice assistant for live meetings on the Claude API. I built the voice pipeline, found the bug that froze summaries, cut cost by 17%, and designed the consent and privacy guardrails.",
+      "An assistant that answers only from a knowledge base I wrote, behind my own rate-limited server route, covered by a 362-test suite.",
     situation:
-      "An assistant that listens to a live meeting has to do four hard things at once. It has to answer out loud fast enough to feel like conversation. It must not mistake its own voice for a question. Its summaries have to keep working as the meeting gets longer. And it is handling people's private conversations, so nothing can be processed or sent without their say.",
+      "Recruiters skim. An assistant that answers their questions directly is only worth having if it never invents a date, a number or a claim about me. A public endpoint that calls a paid model is also something people will try to abuse, through cost or through prompt injection.",
     task:
-      "I was one of four interns, working to an open brief from the founder. I built and owned the assistant end to end: the voice pipeline, the data model, the debugging, and its cost and reliability.",
+      "A solo build with two requirements I set myself: every answer traces back to something I wrote, and the API key and the budget stay safe on a public site.",
     actions: [
       {
-        title: "Built the real-time voice pipeline.",
+        title: "Gave the assistant one source of truth.",
         detail:
-          "Deepgram speech-to-text streams into the Claude API, and Google TTS reads the reply aloud, all over WebSockets. Spoken answers arrive in a median of 1.9 seconds, and a dropped connection recovers in 2.8 seconds.",
+          "Its only permitted source is one knowledge base file, and its instructions tell it to say it does not know instead of inferring. Project facts are generated from the same data file that renders this page, so the site and the assistant cannot drift apart.",
       },
       {
-        title: "Found the silent bug that froze every summary after about four minutes.",
+        title: "Kept the model provider behind my own server.",
         detail:
-          "I built a Python evaluation harness that replays scripted meetings, and traced the failure to replies being cut off at the 1,500-token output cap. Size budgets and a stop-reason check fixed it.",
+          "The browser never talks to the Claude API. A server route calls it, parses the streamed events, and re-streams only the text, so answers appear as they generate and the key stays on the server.",
       },
       {
-        title: "Kept the model's input bounded as meetings grow.",
+        title: "Hardened the endpoint.",
         detail:
-          "Incremental summarisation sends only a size-capped previous summary and the new transcript. Each summary update costs 17% less and runs 23% faster, at equal accuracy.",
+          "A per-IP limit of 20 messages every 10 minutes, a 500-character input cap, a six-turn history window with malformed history dropped, and refusal of instructions that try to override the rules.",
       },
       {
-        title: "Gave the model context, not tools.",
+        title: "Let the assistant act, without trusting it.",
         detail:
-          "The assistant works from live meeting text, recent summaries, and drafts that a person approves. No action is ever sent without human approval.",
+          "Aris can look a project up or open its case study through Claude tool calling. Both tools are read-only. The model only ever supplies a project slug. The server checks it against the list of real projects and builds the URL itself, and the browser checks again. A cap of three tool rounds means one visitor message can never cost more than four API calls.",
       },
       {
-        title: "Made consent fail closed.",
+        title: "Planned for failure.",
         detail:
-          "Every AI endpoint checks, in the browser and on the server, that all participants have consented to overseas processing, and blocks the request if not. Attendee names are pseudonymised in the browser before the model sees them, in a TypeScript layer covered by 25 unit tests.",
+          "If the model call fails for any reason, the visitor sees a plain note with my email address instead of a raw error, and their question goes back in the box.",
       },
       {
-        title: "Made capture crash-safe.",
+        title: "Secured and tested the site around it.",
         detail:
-          "All 54 transcript lines survived a mid-meeting browser crash that used to lose the whole meeting. The 7-entity data model I designed was adopted company-wide.",
-      },
-      {
-        title: "Measured instead of guessing.",
-        detail:
-          "The harness plays scripted meetings in synthetic voices and scores accuracy, latency and cost, so every change was measured before release. Across 20 spoken tests the assistant never mistook its own speech for a user's question.",
+          "A strict Content Security Policy, two-year HSTS with preload, and clickjacking protection. A 362-test end-to-end suite runs against the production build, including 17 automated WCAG 2.1 AA accessibility scans, each run on desktop and mobile.",
       },
     ],
     result:
-      "The assistant is in internal use. Action items captured in summaries rose from 7 of 15 to 15 of 15 across three test meetings. Over the placement I shipped 31 merged pull requests to a 22,000-line TypeScript and React codebase.",
-    resultHighlights: ["7 of 15 to 15 of 15", "31 merged pull requests"],
+      "Live on agrimsharma.com. The end-to-end suite passes, including all 17 accessibility checks, and the API key has never reached the browser. The worst a successful prompt injection can do is open one of my own project pages.",
+    resultHighlights: ["all 17 accessibility checks", "open one of my own project pages"],
     metrics: [
-      { value: "1.9 s", label: "median spoken answer" },
-      { value: "15 of 15", label: "action items captured, up from 7" },
-      { value: "17%", label: "lower cost per summary" },
-      { value: "31", label: "merged pull requests" },
+      {
+        value: "362",
+        label: "end-to-end tests",
+        proof: { label: "e2e folder in the portfolio repo", url: "https://github.com/Agrim1305/portfolio/tree/main/e2e" },
+      },
+      { value: "20", label: "messages per IP every 10 minutes" },
+      { value: "1", label: "source of truth" },
     ],
-    learned:
-      "A silent failure is worse than a loud one. Nothing crashed when the summaries froze. I only found it because I had built something that could replay a whole meeting and count what came out.",
     deepDive: {
-      title: "The summary that froze at four minutes",
+      title: "Why the model never writes a URL",
       body: [
-        "The summary of a meeting stopped updating after about four minutes. Nothing crashed. It simply stopped changing, so in a short test everything looked fine.",
-        "To see it at all I needed meetings I could run again and again. I built a harness in Python that replays scripted meetings and counts what comes out: which action items and decisions the summary caught.",
-        "The replays showed the cause: the model's replies were being cut off at the 1,500-token output cap. The fix was size budgets and a check on the stop reason of every reply, so a cut-off is caught instead of ignored.",
+        "Aris can open a case study on your screen. The obvious way to build that is to let the model return a link. Then a visitor can ask it to open any address on the internet, and the only defence is whether the model refuses. Models can be talked into things, so that is the wrong place for the guarantee.",
+        "Instead the model can only name a project by its slug. The server looks the slug up in the same data file that builds the site, and writes the URL itself. An unknown slug comes back to the model as an error. The browser then checks again that the address is exactly a listed project page on this site before it opens anything.",
+        "Both tools are read-only, and a cap of three tool rounds bounds the cost of every message. So the worst a successful prompt injection can do is open one of my own project pages.",
       ],
+      code: {
+        file: "src/lib/aris-tools.ts",
+        lang: "ts",
+        source: [
+          "/* Runs one tool call. The slug must be a listed project's; anything else is",
+          "   an error result for the model to read, never an exception. */",
+          "export function runTool(name: string, input: unknown): ToolOutcome {",
+          "  const slug = (input as { slug?: unknown } | null)?.slug;",
+          "  const project = typeof slug === \"string\" ? getProject(slug) : undefined;",
+          "  if (!project) return { content: \"Unknown project. Use one of the listed slugs.\", is_error: true };",
+          "  if (name === \"get_project\") return { content: projectAsKnowledge(project) };",
+          "  if (name === \"open_case_study\") {",
+          "    // Built here from the site's own data, never from the model's text.",
+          "    const action = { action: \"open\" as const, url: caseStudyPath(project.slug) };",
+          "    return { content: JSON.stringify(action), action };",
+          "  }",
+          "  return { content: \"Unknown tool.\", is_error: true };",
+          "}",
+        ].join("\n"),
+        url: "https://github.com/Agrim1305/portfolio/blob/8212a810174ac60e342f568c39195f42b720df1b/src/lib/aris-tools.ts#L53-L66",
+      },
     },
-    stack: ["TypeScript", "React", "Node.js", "Express", "Python", "WebSockets", "Claude API", "Deepgram", "Google TTS"],
-    links: [],
-    privateNote: "Built under a confidentiality agreement, so the source is private",
+    stack: ["Next.js", "TypeScript", "Tailwind", "Claude API", "Vercel"],
+    links: [
+      { label: "Source", url: "https://github.com/Agrim1305/portfolio" },
+      // The v1 branch's own deployment, kept as it shipped.
+      { label: "Try v1", url: "https://portfolio-git-v1-agrimsharma.vercel.app", accent: true },
+    ],
   },
   {
     slug: "concurrent-video-player",
     title: "Concurrent Video Player",
     status: "Java · 2026",
     period: "Oct 2026",
-    role:
-      "Individual coursework, Cloud and Concurrent Programming. Built with Claude Code, with every change reviewed and checked against the tests.",
+    role: "Individual coursework, Cloud and Concurrent Programming",
     oneLiner:
       "Made a single-threaded Java video player 3.7 times faster on the course's 8-core benchmark, with frame-identical output, by redesigning it as a decoder thread feeding a worker pool.",
     emphasis: "3.7 times faster",
@@ -166,7 +184,7 @@ export const projects: Project[] = [
     situation:
       "The course supplied a single-threaded video player. Every frame was decoded, run through its chain of effects and shown on one thread.",
     task:
-      "Individual coursework. Re-engineer the player to process frames on several threads without changing a single pixel of the output, and keep seeking and playback correct while frames finish out of order.",
+      "Individual coursework. Re-engineer the player to process frames on several threads without changing a single pixel of the output, and keep seeking and playback correct while frames finish out of order. Built with Claude Code, with every change reviewed and checked against the tests.",
     actions: [
       {
         title: "Split decoding from processing.",
@@ -216,6 +234,118 @@ export const projects: Project[] = [
     stack: ["Java", "JavaFX", "Maven", "java.util.concurrent"],
     links: [],
     privateNote: "University coursework, so the source is private. Benchmark output on request",
+  },
+  {
+    slug: "metaplay",
+    title: "MetaPlay",
+    status: "Live · Built 2025, deployed 2026",
+    period: "Mar 2025 to Jun 2025, deployed to production Jun 2026",
+    role: "Front-end to back-end integration, auth and schema in a team of five",
+    lead: true,
+    oneLiner:
+      "Took a finished five-person team assignment to a live product on my own, and kept it running through two forced hosting moves.",
+    emphasis: "a live product on my own",
+    summary:
+      "A team assignment I took to production alone a year after the course ended. Live game data, collections, reviews and friends, running since June 2026.",
+    situation:
+      "MetaPlay started as a five-person university project: one place to discover games, build a collection and review them, backed by real game data instead of a static seed list. When the course ended, so did everyone's involvement. A year later it was not deployed anywhere, and the sign-in and deployment configuration no longer worked.",
+    task:
+      "In the team I owned the front-end to back-end integration, the authentication layer and the database schema. Afterwards, nobody asked me to do anything. I decided the project should be live, which made getting it there, and keeping it there, mine alone.",
+    actions: [
+      {
+        title: "Built authentication with three levels of access.",
+        detail:
+          "Username and password login with bcrypt-hashed passwords, plus Google sign-in through Passport. Two stored roles, admin and user, and guest access when signed out.",
+      },
+      {
+        title: "Designed the nine-table relational schema.",
+        detail:
+          "It sits behind collections, reviews, friends and groups.",
+      },
+      {
+        title: "Took it to production on my own.",
+        detail:
+          "I traced the broken OAuth and deployment configuration, wired the app to live RAWG game data, and deployed it in June 2026.",
+      },
+      {
+        title: "Kept it alive through two forced hosting moves.",
+        detail:
+          "From Railway to Render with Aiven MySQL when the Railway trial ended, then to Neon PostgreSQL when Aiven's free tier started powering the database off. The second move meant converting the schema and every query from MySQL to PostgreSQL.",
+      },
+      {
+        title: "Hardened access to protected pages.",
+        detail:
+          "A check normalises every URL before the static file server sees it, so encoded or re-cased paths can no longer slip past the guards.",
+      },
+      {
+        title: "Redesigned it and removed a framework.",
+        detail:
+          "The team build used Vue 2 on the profile and reviews pages. My redesign replaced it with vanilla JavaScript and added five endpoints: trending games, game screenshots, friends on a game, your stats and the friend activity feed.",
+      },
+    ],
+    result:
+      "Live since June 2026 with collections, reviews, friends, groups and an admin dashboard. The app has 43 API routes, 38 from the team build and 5 from my redesign, on 9 relational tables, and it has come through three hosting setups and one full database migration.",
+    resultHighlights: ["Live since June 2026", "three hosting setups and one full database migration"],
+    metrics: [
+      { value: "Live", label: "publicly deployed" },
+      { value: "9", label: "relational tables" },
+      {
+        value: "43",
+        label: "API routes",
+        proof: { label: "routes folder in the MetaPlay repo", url: "https://github.com/Agrim1305/Metaplay/tree/main/routes" },
+      },
+      { value: "3", label: "hosting setups" },
+    ],
+    learned:
+      "Deployment is part of the product, not the last step of it. Most of what broke on the way back to production was configuration nobody had looked at since the demo.",
+    deepDive: {
+      title: "A guard you could walk around",
+      body: [
+        "Protected pages were guarded by checking the path of each request. The static file server was more forgiving than the guard: an encoded or re-cased version of the same path still resolved to the same file. So a request could miss the guard and still be served the page.",
+        "The fix was not a longer list of patterns. Before the static file server is allowed to serve anything, the path is decoded, normalised and lowercased the same way the server itself resolves it. If the result is a protected page, the request goes to the guarded route. An encoded or re-cased path can no longer reach the raw file.",
+      ],
+      code: {
+        file: "app.js",
+        lang: "js",
+        source: [
+          "// STATIC \"PUBLIC\" FOLDER (CSS, JS, images, etc.)",
+          "// Served before session/auth middleware so static assets skip that work.",
+          "// Guarded pages (protectedRoutes above) are skipped so their ensureAuth/",
+          "// ensureAdmin routes handle them. The path is decoded, normalized and",
+          "// lowercased like serve-static resolves it, so /pages/%64ashboard.html or",
+          "// /pages/DASHBOARD.html can't reach the raw file either.",
+          "const serveStatic = express.static(path.resolve(__dirname, 'public'));",
+          "app.use((req, res, next) => {",
+          "  try {",
+          "    const file = path.posix.normalize(decodeURIComponent(req.path)).toLowerCase();",
+          "    if (file in protectedRoutes) return next();",
+          "  } catch (err) {",
+          "    // Malformed escape: leave it to serve-static, as before.",
+          "  }",
+          "  return serveStatic(req, res, next);",
+          "});",
+        ].join("\n"),
+        url: "https://github.com/Agrim1305/Metaplay/blob/c0adf1fa841e1a4c4168dd886380706bd8dbba61/app.js#L63-L78",
+      },
+    },
+    stack: ["Node.js", "Express", "Vanilla JavaScript", "PostgreSQL", "Passport.js", "RAWG API"],
+    links: [
+      { label: "Source", url: "https://github.com/Agrim1305/Metaplay" },
+      {
+        label: "Live demo",
+        url: "https://metaplay-g2q7.onrender.com/",
+        accent: true,
+      },
+    ],
+    media: {
+      kind: "browser",
+      src: "/images/projects/metaplay/landing.webp",
+      width: 2000,
+      height: 1250,
+      alt: "MetaPlay landing page: the headline Your whole game life, on one shelf, with Start your shelf and Continue with Google buttons beside a grid of game covers.",
+      url: "metaplay-g2q7.onrender.com",
+      href: "https://metaplay-g2q7.onrender.com/",
+    },
   },
   {
     slug: "pacific-village-explorer",
@@ -393,293 +523,6 @@ export const projects: Project[] = [
     ],
   },
   {
-    slug: "metaplay",
-    title: "MetaPlay",
-    status: "Live · Built 2025, deployed 2026",
-    period: "Mar 2025 to Jun 2025, deployed to production Jun 2026",
-    role: "Front-end to back-end integration, auth and schema in a team of five",
-    lead: true,
-    oneLiner:
-      "Took a finished five-person team assignment to a live product on my own, and kept it running through two forced hosting moves.",
-    emphasis: "a live product on my own",
-    summary:
-      "A team assignment I took to production alone a year after the course ended. Live game data, collections, reviews and friends, running since June 2026.",
-    situation:
-      "MetaPlay started as a five-person university project: one place to discover games, build a collection and review them, backed by real game data instead of a static seed list. When the course ended, so did everyone's involvement. A year later it was not deployed anywhere, and the sign-in and deployment configuration no longer worked.",
-    task:
-      "In the team I owned the front-end to back-end integration, the authentication layer and the database schema. Afterwards, nobody asked me to do anything. I decided the project should be live, which made getting it there, and keeping it there, mine alone.",
-    actions: [
-      {
-        title: "Built authentication with three levels of access.",
-        detail:
-          "Username and password login with bcrypt-hashed passwords, plus Google sign-in through Passport. Two stored roles, admin and user, and guest access when signed out.",
-      },
-      {
-        title: "Designed the nine-table relational schema.",
-        detail:
-          "It sits behind collections, reviews, friends and groups.",
-      },
-      {
-        title: "Took it to production on my own.",
-        detail:
-          "I traced the broken OAuth and deployment configuration, wired the app to live RAWG game data, and deployed it in June 2026.",
-      },
-      {
-        title: "Kept it alive through two forced hosting moves.",
-        detail:
-          "From Railway to Render with Aiven MySQL when the Railway trial ended, then to Neon PostgreSQL when Aiven's free tier started powering the database off. The second move meant converting the schema and every query from MySQL to PostgreSQL.",
-      },
-      {
-        title: "Hardened access to protected pages.",
-        detail:
-          "A check normalises every URL before the static file server sees it, so encoded or re-cased paths can no longer slip past the guards.",
-      },
-      {
-        title: "Redesigned it and removed a framework.",
-        detail:
-          "The team build used Vue 2 on the profile and reviews pages. My redesign replaced it with vanilla JavaScript and added five endpoints: trending games, game screenshots, friends on a game, your stats and the friend activity feed.",
-      },
-    ],
-    result:
-      "Live since June 2026 with collections, reviews, friends, groups and an admin dashboard. The app has 43 API routes, 38 from the team build and 5 from my redesign, on 9 relational tables, and it has come through three hosting setups and one full database migration.",
-    resultHighlights: ["Live since June 2026", "three hosting setups and one full database migration"],
-    metrics: [
-      { value: "Live", label: "publicly deployed" },
-      { value: "9", label: "relational tables" },
-      {
-        value: "43",
-        label: "API routes",
-        proof: { label: "routes folder in the MetaPlay repo", url: "https://github.com/Agrim1305/Metaplay/tree/main/routes" },
-      },
-      { value: "3", label: "hosting setups" },
-    ],
-    learned:
-      "Deployment is part of the product, not the last step of it. Most of what broke on the way back to production was configuration nobody had looked at since the demo.",
-    deepDive: {
-      title: "A guard you could walk around",
-      body: [
-        "Protected pages were guarded by checking the path of each request. The static file server was more forgiving than the guard: an encoded or re-cased version of the same path still resolved to the same file. So a request could miss the guard and still be served the page.",
-        "The fix was not a longer list of patterns. Before the static file server is allowed to serve anything, the path is decoded, normalised and lowercased the same way the server itself resolves it. If the result is a protected page, the request goes to the guarded route. An encoded or re-cased path can no longer reach the raw file.",
-      ],
-      code: {
-        file: "app.js",
-        lang: "js",
-        source: [
-          "// STATIC \"PUBLIC\" FOLDER (CSS, JS, images, etc.)",
-          "// Served before session/auth middleware so static assets skip that work.",
-          "// Guarded pages (protectedRoutes above) are skipped so their ensureAuth/",
-          "// ensureAdmin routes handle them. The path is decoded, normalized and",
-          "// lowercased like serve-static resolves it, so /pages/%64ashboard.html or",
-          "// /pages/DASHBOARD.html can't reach the raw file either.",
-          "const serveStatic = express.static(path.resolve(__dirname, 'public'));",
-          "app.use((req, res, next) => {",
-          "  try {",
-          "    const file = path.posix.normalize(decodeURIComponent(req.path)).toLowerCase();",
-          "    if (file in protectedRoutes) return next();",
-          "  } catch (err) {",
-          "    // Malformed escape: leave it to serve-static, as before.",
-          "  }",
-          "  return serveStatic(req, res, next);",
-          "});",
-        ].join("\n"),
-        url: "https://github.com/Agrim1305/Metaplay/blob/c0adf1fa841e1a4c4168dd886380706bd8dbba61/app.js#L63-L78",
-      },
-    },
-    stack: ["Node.js", "Express", "Vanilla JavaScript", "PostgreSQL", "Passport.js", "RAWG API"],
-    links: [
-      { label: "Source", url: "https://github.com/Agrim1305/Metaplay" },
-      {
-        label: "Live demo",
-        url: "https://metaplay-g2q7.onrender.com/",
-        accent: true,
-      },
-    ],
-    media: {
-      kind: "browser",
-      src: "/images/projects/metaplay/landing.webp",
-      width: 2000,
-      height: 1250,
-      alt: "MetaPlay landing page: the headline Your whole game life, on one shelf, with Start your shelf and Continue with Google buttons beside a grid of game covers.",
-      url: "metaplay-g2q7.onrender.com",
-      href: "https://metaplay-g2q7.onrender.com/",
-    },
-  },
-  {
-    slug: "adelaide-rising-stars",
-    title: "Adelaide Rising Stars",
-    status: "Live · Freelance, 2026",
-    period: "Aug 2026 to Sep 2026",
-    role: "Sole developer, from quote to delivery",
-    oneLiner:
-      "Took a 100+ player tennis academy from no website to 50+ Google Search clicks a month and 10+ new clients, with a site delivered in three weeks.",
-    emphasis: "50+ Google Search clicks a month and 10+ new clients",
-    summary:
-      "My first paid client. A fixed quote, three weeks, and a site that now brings a 100+ player academy 50+ Google Search clicks a month and has helped win 10+ new clients.",
-    situation:
-      "A tennis academy coaching 100+ players was advertising mostly through a WhatsApp group. The owners wanted a professional online presence that brings in new players, without taking on software they would have to run themselves.",
-    task:
-      "I was the sole developer on a fixed quote, responsible for everything from scoping and price to design, build and launch, in three weeks.",
-    actions: [
-      {
-        title: "Talked the client out of self-service booking.",
-        detail:
-          "They asked for it. With squads already near capacity, open booking would have overfilled sessions. The site is enquiry-only, so the coaches stay in control of who joins. This happened before any code, and it was the most useful thing I did.",
-      },
-      {
-        title: "Ran the design with the owners over several rounds.",
-        detail:
-          "From a dark direction to the light theme they chose, built from the navy and lime of their existing posters.",
-      },
-      {
-        title: "Built it so the owners never need a developer for content.",
-        detail:
-          "A static Nuxt site. Squads, coaches, mentors and results live in Nuxt Content collections and partners in the app config, so adding a coach is a data change, not a code change.",
-      },
-      {
-        title: "Made enquiries reach the owners straight away.",
-        detail:
-          "Netlify Forms sends each enquiry to them as it arrives.",
-      },
-      {
-        title: "Set it up to be found.",
-        detail:
-          "On-page SEO, a sitemap and robots file, Search Console and a Google Business Profile.",
-      },
-    ],
-    result:
-      "Delivered in three weeks on the fixed quote. The site scores 100 for SEO and 100 for accessibility in Lighthouse. As of November 2026 it brings in 50+ Google Search clicks a month, the Google Business Profile has 10 reviews, and it has helped win 10+ new clients.",
-    resultHighlights: ["50+ Google Search clicks a month", "10+ new clients"],
-    metrics: [
-      { value: "3 wks", label: "quote to delivery" },
-      { value: "50+/mo", label: "Google Search clicks" },
-      { value: "10+", label: "new clients" },
-      { value: "10", label: "Google reviews" },
-    ],
-    learned:
-      "Scoping is engineering. Saying no to the booking feature did more for the client than anything I built.",
-    deepDive: {
-      title: "Adding a coach without a developer",
-      body: [
-        "The owners did not want software to run. So nothing about the academy is written into a page. Squads, coaches, mentors and results are entries in content collections, and each page is built from them.",
-        "Adding a coach is one new entry. The page, the order and the layout follow from the data.",
-      ],
-    },
-    stack: ["Nuxt", "Tailwind", "Nuxt Content", "Netlify Forms"],
-    links: [{ label: "Live site", url: "https://arstennisacademy.com.au", accent: true }],
-    media: {
-      kind: "browser",
-      src: "/images/projects/adelaide-rising-stars/home.webp",
-      width: 2000,
-      height: 1250,
-      alt: "Adelaide Rising Stars home page: a night-time squad photo on court, with the headline Where Stars Are Made and Enquire about a squad and See session times buttons across its foot.",
-      url: "arstennisacademy.com.au",
-      href: "https://arstennisacademy.com.au",
-    },
-    screens: [
-      {
-        src: "/images/projects/adelaide-rising-stars/squads.webp",
-        alt: "Adelaide Rising Stars squads page: the Squads and Session Times heading, a note that places are limited and grouped by level, and three squad photos",
-        width: 2000,
-        height: 1250,
-      },
-    ],
-  },
-  {
-    slug: "portfolio-ai-assistant",
-    title: "Aris, the portfolio AI assistant",
-    status: "Live · v1 May 2026, rebuilt Oct 2026",
-    period: "May 2026 to Nov 2026",
-    role: "Solo build",
-    oneLiner:
-      "Let recruiters ask my portfolio direct questions and get grounded answers in seconds, with an assistant that only answers from a knowledge base I wrote and says when it doesn't know.",
-    emphasis: "only answers from a knowledge base I wrote",
-    summary:
-      "An assistant that answers only from a knowledge base I wrote, behind my own rate-limited server route, covered by a 362-test suite.",
-    situation:
-      "Recruiters skim. An assistant that answers their questions directly is only worth having if it never invents a date, a number or a claim about me. A public endpoint that calls a paid model is also something people will try to abuse, through cost or through prompt injection.",
-    task:
-      "A solo build with two requirements I set myself: every answer traces back to something I wrote, and the API key and the budget stay safe on a public site.",
-    actions: [
-      {
-        title: "Gave the assistant one source of truth.",
-        detail:
-          "Its only permitted source is one knowledge base file, and its instructions tell it to say it does not know instead of inferring. Project facts are generated from the same data file that renders this page, so the site and the assistant cannot drift apart.",
-      },
-      {
-        title: "Kept the model provider behind my own server.",
-        detail:
-          "The browser never talks to the Claude API. A server route calls it, parses the streamed events, and re-streams only the text, so answers appear as they generate and the key stays on the server.",
-      },
-      {
-        title: "Hardened the endpoint.",
-        detail:
-          "A per-IP limit of 20 messages every 10 minutes, a 500-character input cap, a six-turn history window with malformed history dropped, and refusal of instructions that try to override the rules.",
-      },
-      {
-        title: "Let the assistant act, without trusting it.",
-        detail:
-          "Aris can look a project up or open its case study through Claude tool calling. Both tools are read-only. The model only ever supplies a project slug. The server checks it against the list of real projects and builds the URL itself, and the browser checks again. A cap of three tool rounds means one visitor message can never cost more than four API calls.",
-      },
-      {
-        title: "Planned for failure.",
-        detail:
-          "If the model call fails for any reason, the visitor sees a plain note with my email address instead of a raw error, and their question goes back in the box.",
-      },
-      {
-        title: "Secured and tested the site around it.",
-        detail:
-          "A strict Content Security Policy, two-year HSTS with preload, and clickjacking protection. A 362-test end-to-end suite runs against the production build, including 17 automated WCAG 2.1 AA accessibility scans, each run on desktop and mobile.",
-      },
-    ],
-    result:
-      "Live on agrimsharma.com. The end-to-end suite passes, including all 17 accessibility checks, and the API key has never reached the browser. The worst a successful prompt injection can do is open one of my own project pages.",
-    resultHighlights: ["all 17 accessibility checks", "open one of my own project pages"],
-    metrics: [
-      {
-        value: "362",
-        label: "end-to-end tests",
-        proof: { label: "e2e folder in the portfolio repo", url: "https://github.com/Agrim1305/portfolio/tree/main/e2e" },
-      },
-      { value: "20", label: "messages per IP every 10 minutes" },
-      { value: "1", label: "source of truth" },
-    ],
-    deepDive: {
-      title: "Why the model never writes a URL",
-      body: [
-        "Aris can open a case study on your screen. The obvious way to build that is to let the model return a link. Then a visitor can ask it to open any address on the internet, and the only defence is whether the model refuses. Models can be talked into things, so that is the wrong place for the guarantee.",
-        "Instead the model can only name a project by its slug. The server looks the slug up in the same data file that builds the site, and writes the URL itself. An unknown slug comes back to the model as an error. The browser then checks again that the address is exactly a listed project page on this site before it opens anything.",
-        "Both tools are read-only, and a cap of three tool rounds bounds the cost of every message. So the worst a successful prompt injection can do is open one of my own project pages.",
-      ],
-      code: {
-        file: "src/lib/aris-tools.ts",
-        lang: "ts",
-        source: [
-          "/* Runs one tool call. The slug must be a listed project's; anything else is",
-          "   an error result for the model to read, never an exception. */",
-          "export function runTool(name: string, input: unknown): ToolOutcome {",
-          "  const slug = (input as { slug?: unknown } | null)?.slug;",
-          "  const project = typeof slug === \"string\" ? getProject(slug) : undefined;",
-          "  if (!project) return { content: \"Unknown project. Use one of the listed slugs.\", is_error: true };",
-          "  if (name === \"get_project\") return { content: projectAsKnowledge(project) };",
-          "  if (name === \"open_case_study\") {",
-          "    // Built here from the site's own data, never from the model's text.",
-          "    const action = { action: \"open\" as const, url: caseStudyPath(project.slug) };",
-          "    return { content: JSON.stringify(action), action };",
-          "  }",
-          "  return { content: \"Unknown tool.\", is_error: true };",
-          "}",
-        ].join("\n"),
-        url: "https://github.com/Agrim1305/portfolio/blob/8212a810174ac60e342f568c39195f42b720df1b/src/lib/aris-tools.ts#L53-L66",
-      },
-    },
-    stack: ["Next.js", "TypeScript", "Tailwind", "Claude API", "Vercel"],
-    links: [
-      { label: "Source", url: "https://github.com/Agrim1305/portfolio" },
-      // The v1 branch's own deployment, kept as it shipped.
-      { label: "Try v1", url: "https://portfolio-git-v1-agrimsharma.vercel.app", accent: true },
-    ],
-  },
-  {
     slug: "pathfinder",
     title: "Pathfinder",
     status: "Python · 2026",
@@ -790,6 +633,86 @@ export const projects: Project[] = [
         alt: "The choice map searched twice: Dijkstra expands 75 nodes, including cells on the hill, while A* with the Manhattan heuristic finds the same route expanding 41",
         width: 1289,
         height: 742,
+      },
+    ],
+  },
+  {
+    slug: "adelaide-rising-stars",
+    title: "Adelaide Rising Stars",
+    status: "Live · Freelance, 2026",
+    period: "Aug 2026 to Sep 2026",
+    role: "Sole developer, from quote to delivery",
+    oneLiner:
+      "Took a 100+ player tennis academy from no website to 50+ Google Search clicks a month and 10+ new clients, with a site delivered in three weeks.",
+    emphasis: "50+ Google Search clicks a month and 10+ new clients",
+    summary:
+      "My first paid client. A fixed quote, three weeks, and a site that now brings a 100+ player academy 50+ Google Search clicks a month and has helped win 10+ new clients.",
+    situation:
+      "A tennis academy coaching 100+ players was advertising mostly through a WhatsApp group. The owners wanted a professional online presence that brings in new players, without taking on software they would have to run themselves.",
+    task:
+      "I was the sole developer on a fixed quote, responsible for everything from scoping and price to design, build and launch, in three weeks.",
+    actions: [
+      {
+        title: "Talked the client out of self-service booking.",
+        detail:
+          "They asked for it. With squads already near capacity, open booking would have overfilled sessions. The site is enquiry-only, so the coaches stay in control of who joins. This happened before any code, and it was the most useful thing I did.",
+      },
+      {
+        title: "Ran the design with the owners over several rounds.",
+        detail:
+          "From a dark direction to the light theme they chose, built from the navy and lime of their existing posters.",
+      },
+      {
+        title: "Built it so the owners never need a developer for content.",
+        detail:
+          "A static Nuxt site. Squads, coaches, mentors and results live in Nuxt Content collections and partners in the app config, so adding a coach is a data change, not a code change.",
+      },
+      {
+        title: "Made enquiries reach the owners straight away.",
+        detail:
+          "Netlify Forms sends each enquiry to them as it arrives.",
+      },
+      {
+        title: "Set it up to be found.",
+        detail:
+          "On-page SEO, a sitemap and robots file, Search Console and a Google Business Profile.",
+      },
+    ],
+    result:
+      "Delivered in three weeks on the fixed quote. The site scores 100 for SEO and 100 for accessibility in Lighthouse. As of November 2026 it brings in 50+ Google Search clicks a month, the Google Business Profile has 10 reviews, and it has helped win 10+ new clients.",
+    resultHighlights: ["50+ Google Search clicks a month", "10+ new clients"],
+    metrics: [
+      { value: "3 wks", label: "quote to delivery" },
+      { value: "50+/mo", label: "Google Search clicks" },
+      { value: "10+", label: "new clients" },
+      { value: "10", label: "Google reviews" },
+    ],
+    learned:
+      "Scoping is engineering. Saying no to the booking feature did more for the client than anything I built.",
+    deepDive: {
+      title: "Adding a coach without a developer",
+      body: [
+        "The owners did not want software to run. So nothing about the academy is written into a page. Squads, coaches, mentors and results are entries in content collections, and each page is built from them.",
+        "Adding a coach is one new entry. The page, the order and the layout follow from the data.",
+      ],
+    },
+    stack: ["Nuxt", "Tailwind", "Nuxt Content", "Netlify Forms"],
+    links: [{ label: "Live site", url: "https://arstennisacademy.com.au", accent: true }],
+    media: {
+      kind: "browser",
+      src: "/images/projects/adelaide-rising-stars/home.webp",
+      width: 2000,
+      height: 1250,
+      alt: "Adelaide Rising Stars home page: a night-time squad photo on court, with the headline Where Stars Are Made and Enquire about a squad and See session times buttons across its foot.",
+      url: "arstennisacademy.com.au",
+      href: "https://arstennisacademy.com.au",
+    },
+    screens: [
+      {
+        src: "/images/projects/adelaide-rising-stars/squads.webp",
+        alt: "Adelaide Rising Stars squads page: the Squads and Session Times heading, a note that places are limited and grouped by level, and three squad photos",
+        width: 2000,
+        height: 1250,
       },
     ],
   },
