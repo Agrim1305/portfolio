@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Plus } from "lucide-react";
 import { CaseStudy, CaseStudyHero, COVER, Links, ProjectCover } from "@/components/case-study";
+import { OPEN_CASE_EVENT } from "@/components/ask-agrim";
 import { Panel } from "@/components/panel";
 import { morphClose, morphOpen, morphSwitch } from "@/lib/morph";
 import { SkipLink } from "@/components/skip-link";
@@ -150,7 +151,7 @@ export function Projects() {
 
   // The address bar shows the case study's own URL while it is open, so it can
   // be shared, and a reload lands on the full page.
-  function openCase(i: number, card: HTMLElement) {
+  function openCase(i: number, card: HTMLElement | null | undefined) {
     window.history.pushState(null, "", `/projects/${projects[i].slug}`);
     pushed.current = true;
     morphOpen(card, () => flushSync(() => setOpen(i)));
@@ -167,6 +168,25 @@ export function Projects() {
       bodyRef.current?.scrollTo({ top: 0 });
     });
   }
+
+  // Aris opens a case study the way its card does, with the carousel moved
+  // to that card so closing shrinks the panel into it.
+  const onAskOpen = useEffectEvent((e: Event) => {
+    const i = projects.findIndex((p) => p.slug === (e as CustomEvent<string>).detail);
+    if (i < 0) return;
+    e.preventDefault();
+    if (open === null) {
+      go(i, true);
+      openCase(i, cardAt(i));
+    } else if (i !== open) {
+      switchCase(i);
+    }
+  });
+  useEffect(() => {
+    const onOpen = (e: Event) => onAskOpen(e);
+    window.addEventListener(OPEN_CASE_EVENT, onOpen);
+    return () => window.removeEventListener(OPEN_CASE_EVENT, onOpen);
+  }, []);
 
   function closeCase() {
     if (pushed.current) {

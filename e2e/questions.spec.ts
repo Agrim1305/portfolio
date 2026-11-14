@@ -105,7 +105,11 @@ test.describe("section questions", () => {
 
   test.beforeEach(async ({ page }) => {
     await page.route("/api/chat", (route) =>
-      route.fulfill({ status: 200, contentType: "text/plain; charset=utf-8", body: "Yes, from December 2026." }),
+      route.fulfill({
+        status: 200,
+        contentType: "application/x-ndjson; charset=utf-8",
+        body: JSON.stringify({ type: "text", text: "Yes, from December 2026." }) + "\n",
+      }),
     );
   });
 
