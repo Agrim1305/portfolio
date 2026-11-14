@@ -10,9 +10,9 @@ isn't answered here, the assistant says so honestly instead of guessing.
 
 Agrim Sharma is a final-year Computer Science student at Adelaide
 University, majoring in Artificial Intelligence, graduating December 2026.
-Based in Adelaide, South Australia. Currently completing an AI engineering
-internship at Aurivox (Viemo Capital & Consulting) as part of his final
-semester. Available for graduate roles from December 2026. Looking for graduate
+Based in Adelaide, South Australia. Completed an AI engineering
+internship at Aurivox (Viemo Capital & Consulting), Aug to Nov 2026, as part
+of his final semester. Available for graduate roles from December 2026. Looking for graduate
 roles in software engineering, AI, data, and analytics.
 
 GPA: 5.35/7.0, holds a 15% International Merit Scholarship.
@@ -27,7 +27,7 @@ where people can search, track, and review games, built end to end
 including the database, login system with Google sign-in, and an admin
 area, deployed so anyone can use it.
 
-In his final semester he is interning on a voice AI prototype at Aurivox,
+In his final semester he interned on a voice AI prototype at Aurivox,
 and he recently delivered his first paid freelance project, a website and
 enquiry system for Adelaide Rising Stars Tennis Academy, delivered in three
 weeks. As of November 2026 it brings in 50+ Google Search clicks a month,
@@ -96,7 +96,7 @@ different project (graph search algorithms).
 
 Chosen as one of 4 interns from 11 shortlisted students for a 50-day
 placement with a startup building a voice AI product, based at Adelaide
-University's ThincLab. Works across the speech-to-text, LLM and
+University's ThincLab. Worked across the speech-to-text, LLM and
 text-to-speech stack of a voice-first meeting assistant, reporting to the
 founder and taking an open brief through to a working prototype. Taken for
 course credit in place of his capstone. Details of the product itself are
@@ -203,9 +203,8 @@ a graduate role in Australia. Available for graduate roles from December
 **What kinds of problems interest you most?**
 Two threads run through Agrim's work. The first is applied AI inside real
 products: the Claude-powered recommendation engine he built for Pacific
-Village Explorer's village view (cut from the hackathon demo), and now the
-Aurivox voice
-AI internship. The second is turning messy data into something you can act
+Village Explorer's village view (cut from the hackathon demo), and the
+Aurivox voice AI internship he completed in November 2026. The second is turning messy data into something you can act
 on. He has run his own monthly budget tool in VBA since September 2025,
 tracking expenses, planning travel and thinking about investment, and uses
 it as a real tool rather than a one-off assignment. He's most interested in
@@ -272,7 +271,7 @@ Yes, based in Adelaide, happy to relocate within Australia.
 
 **What's your availability / notice period / start date?**
 Graduating December 2026 with full working rights from 15 December 2026.
-Currently completing his internship at Aurivox (through November 2026).
+He completed his internship at Aurivox in November 2026.
 Available for graduate roles from December 2026, and happy to start
 conversations before then.
 

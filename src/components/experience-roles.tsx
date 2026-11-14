@@ -40,8 +40,7 @@ const roles: Role[] = [
     org: "Aurivox · Viemo Capital & Consulting",
     dates: "Aug 2026 to Nov 2026",
     description:
-      "Chosen as one of four interns from eleven shortlisted students for a 50-day placement with a startup building a voice AI product. I work across the speech-to-text, language model and text-to-speech stack of a voice-first meeting assistant, reporting to the founder and taking an open brief through to a working prototype. It is the first time I have shipped AI features against a founder's brief rather than a marking rubric.",
-    now: true,
+      "Chosen as one of four interns from eleven shortlisted students for a 50-day placement with a startup building a voice AI product. I worked across the speech-to-text, language model and text-to-speech stack of a voice-first meeting assistant, reporting to the founder and taking an open brief through to a working prototype. It was the first time I had shipped AI features against a founder's brief rather than a marking rubric.",
     stat: { value: "1 of 4", label: "interns chosen from 11" },
     photos: [],
   },

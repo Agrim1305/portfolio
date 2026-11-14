@@ -129,19 +129,19 @@ test.describe("section questions", () => {
 
     await cloud(page).focus();
     await expect(bubble(page)).toBeVisible();
-    await expect(cloud(page)).toHaveAccessibleDescription("What does Agrim do at Aurivox?");
+    await expect(cloud(page)).toHaveAccessibleDescription("What did Agrim do at Aurivox?");
     // Tab goes from the cloud into its question, and the tooltip stays.
     await page.keyboard.press("Tab");
-    await expect(bubble(page).getByRole("button", { name: "What does Agrim do at Aurivox?" })).toBeFocused();
+    await expect(bubble(page).getByRole("button", { name: "What did Agrim do at Aurivox?" })).toBeFocused();
     await expect(bubble(page)).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(bubble(page)).toBeHidden();
     await expect(cloud(page)).toBeFocused();
 
     await cloud(page).hover();
-    await bubble(page).getByRole("button", { name: "What does Agrim do at Aurivox?" }).click();
+    await bubble(page).getByRole("button", { name: "What did Agrim do at Aurivox?" }).click();
     await expect(page.getByRole("dialog", { name: "Aris" }).getByRole("log")).toContainText(
-      "What does Agrim do at Aurivox?",
+      "What did Agrim do at Aurivox?",
     );
   });
 
