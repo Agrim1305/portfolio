@@ -48,7 +48,7 @@ test("the name runs on one line, and the cloud perches on the Ask card", async (
   const h1 = page.getByRole("heading", { level: 1 });
   const lineHeight = await h1.evaluate((el) => parseFloat(getComputedStyle(el).fontSize) * 0.9);
   expect((await h1.boundingBox())!.height).toBeLessThan(lineHeight * 1.5);
-  const heading = page.locator("#top").getByText("Ask Aris");
+  const heading = page.locator("#top").getByText("Ask Aris", { exact: true });
   const [cloud, card, titleEnd] = await Promise.all([
     page.locator("#hero-cloud").boundingBox(),
     heading.locator("..").boundingBox(),
@@ -559,7 +559,7 @@ test.describe("selected work", () => {
     const next = page.getByRole("button", { name: "Next project" });
     await expect(prev).toBeDisabled();
     await next.click();
-    await expect(page.getByText("2 / 6")).toBeVisible();
+    await expect(page.getByText("2 / 8")).toBeVisible();
     await expect(prev).toBeEnabled();
   });
 
@@ -570,10 +570,10 @@ test.describe("selected work", () => {
     await next.click();
     await next.click();
     await next.click();
-    await expect(page.getByText("4 / 6")).toBeVisible();
+    await expect(page.getByText("4 / 8")).toBeVisible();
     await page.getByRole("region", { name: "Selected work" }).focus();
-    for (let i = 0; i < 6; i++) await page.keyboard.press("ArrowRight");
-    await expect(page.getByText("6 / 6")).toBeVisible();
+    for (let i = 0; i < 8; i++) await page.keyboard.press("ArrowRight");
+    await expect(page.getByText("8 / 8")).toBeVisible();
     await expect(next).toBeDisabled();
   });
 
@@ -583,15 +583,15 @@ test.describe("selected work", () => {
     const track = page.getByRole("region", { name: "Selected work" }).locator("> div");
     await track.scrollIntoViewIfNeeded();
     await track.evaluate((el) => el.scrollTo({ left: el.scrollWidth, behavior: "instant" }));
-    await expect(page.locator("#projects").getByRole("group", { name: "6 of 6" })).toBeInViewport({ ratio: 0.6 });
-    await expect(page.locator("#projects")).toHaveAttribute("data-active", "5");
+    await expect(page.locator("#projects").getByRole("group", { name: "8 of 8" })).toBeInViewport({ ratio: 0.6 });
+    await expect(page.locator("#projects")).toHaveAttribute("data-active", "7");
   });
 
   test("Tab onto an off-screen card brings it into view", async ({ page, isMobile }) => {
     test.skip(isMobile, "a keyboard is a desktop input");
     await page.goto("/");
     await page.getByRole("link", { name: "Open case study for GPS Tracker Dashboard" }).focus();
-    await expect(page.locator("#projects").getByRole("group", { name: "5 of 6" })).toBeInViewport({ ratio: 0.6 });
+    await expect(page.locator("#projects").getByRole("group", { name: "8 of 8" })).toBeInViewport({ ratio: 0.6 });
   });
 
   test("the skip link jumps past the cards", async ({ page }) => {
@@ -619,7 +619,7 @@ test.describe("selected work", () => {
 
   test("a card opens its case study in place, with the page's own URL", async ({ page }) => {
     await page.goto("/");
-    // The second card sits off to the side until focus brings it into view.
+    // The card sits off to the side until focus brings it into view.
     const open = page.getByRole("link", { name: "Open case study for MetaPlay" });
     await open.focus();
     await expect(open).toBeInViewport();
@@ -627,7 +627,7 @@ test.describe("selected work", () => {
     const sheet = page.getByRole("dialog", { name: "MetaPlay" });
     await expect(sheet).toBeVisible();
     await expect(page).toHaveURL(/\/projects\/metaplay$/);
-    await expect(sheet).toContainText("Gamers track what they play across scattered notes");
+    await expect(sheet).toContainText("MetaPlay started as a five-person university project");
 
     await sheet.getByRole("button", { name: "Close case study" }).click();
     await expect(sheet).toBeHidden();
@@ -661,8 +661,12 @@ test.describe("selected work", () => {
         return [Math.round(r.width), Math.round(r.height), Math.round(r.left - (innerWidth - r.right))];
       }))
       .toEqual([1100, 828, 0]);
-    for (let i = 0; i < 25; i++) await page.keyboard.press("Tab");
-    expect(await panel.evaluate((el) => el.contains(document.activeElement))).toBe(true);
+    // A modal dialog's Tab order passes through the browser's own controls
+    // (the body, to the page), never anything on the page behind.
+    for (let i = 0; i < 25; i++) {
+      await page.keyboard.press("Tab");
+      expect(await panel.evaluate((el) => el.contains(document.activeElement) || document.activeElement === document.body)).toBe(true);
+    }
   });
 
   test("arrow keys slide between projects, the address follows, and closing lands on that card", async ({ page, isMobile }) => {
@@ -683,7 +687,7 @@ test.describe("selected work", () => {
     await page.keyboard.press("Escape");
     await expect(page.getByRole("dialog")).toBeHidden();
     await expect(page).toHaveURL(/\/$/);
-    await expect(page.getByText("2 / 6")).toBeVisible();
+    await expect(page.getByText("4 / 8")).toBeVisible();
     await expect(page.getByRole("link", { name: "Open case study for MetaPlay" })).toBeFocused();
   });
 
@@ -755,7 +759,7 @@ test.describe("experience", () => {
   test("every role opens its full story, and Back closes it", async ({ page }) => {
     await page.goto("/");
     const tabs = page.getByRole("tablist", { name: "Roles" }).getByRole("tab");
-    const names = ["Software Engineering Intern, Voice AI", "President", "Assistant Head Coach", "Retail Assistant"];
+    const names = ["AI Software Engineering Intern", "President", "Assistant Head Coach", "Retail Assistant"];
     const ids = ["aurivox", "president", "coaching", "retail"];
     for (let i = 0; i < 4; i++) {
       await tabs.nth(i).click();
@@ -779,7 +783,7 @@ test.describe("experience", () => {
     await page.goto("/");
     const read = page.getByRole("tabpanel").getByRole("button", { name: "Read the full story" });
     await read.click();
-    const sheet = page.getByRole("dialog", { name: "Software Engineering Intern, Voice AI" });
+    const sheet = page.getByRole("dialog", { name: "AI Software Engineering Intern" });
     await expect(sheet).toContainText("Chosen as one of four interns from eleven shortlisted students");
     await sheet.getByRole("button", { name: "Close" }).click();
     await expect(sheet).toBeHidden();
@@ -795,7 +799,7 @@ test.describe("experience", () => {
     await expect(page.getByRole("dialog", { name: "President" })).toBeVisible();
     await expect(page).toHaveURL(/#story-president$/);
     await page.getByRole("button", { name: "Previous role" }).click();
-    await expect(page.getByRole("dialog", { name: "Software Engineering Intern, Voice AI" })).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "AI Software Engineering Intern" })).toBeVisible();
   });
 
   test("next role and the arrow keys move between stories, and closing lands on that role", async ({ page }) => {
@@ -803,7 +807,7 @@ test.describe("experience", () => {
     const read = page.getByRole("button", { name: "Read the full story" }).filter({ visible: true }).first();
     await read.scrollIntoViewIfNeeded();
     await read.click();
-    const story = page.getByRole("dialog", { name: "Software Engineering Intern, Voice AI" });
+    const story = page.getByRole("dialog", { name: "AI Software Engineering Intern" });
     await expect(story).toBeVisible();
     await page.keyboard.press("ArrowRight");
     await expect(page.getByRole("dialog", { name: "President" })).toBeVisible();

@@ -108,7 +108,8 @@ test.describe("content lock", () => {
   const baseline: Record<string, Snapshot> = JSON.parse(fs.readFileSync(BASELINE, "utf8"));
   const allow: Record<string, string> = JSON.parse(fs.readFileSync(ALLOWLIST, "utf8"));
 
-  for (const route of routes) {
+  // A page added after the baseline was captured has nothing to lock.
+  for (const route of routes.filter((r) => r in baseline)) {
     test(`nothing removed from ${route}`, async ({ page }) => {
       const now = await reachable(page, route);
       const hay = now.haystack.join(" \n ");

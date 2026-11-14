@@ -164,7 +164,7 @@ test.describe("the merger beats", () => {
         };
       }),
     }));
-    expect(boxes.map((b) => b.label)).toEqual(["Setup", "What I did", "Result"]);
+    expect(boxes.map((b) => b.label)).toEqual(["Situation and task", "What I did", "Result"]);
     for (const [i, b] of boxes.entries()) {
       // One column, the panel's width, in order, 32px apart.
       expect(b.left).toBeCloseTo(list.left, 0);
@@ -278,7 +278,9 @@ test.describe("Selected work buttons", () => {
   test("a link opens in a new tab and never the case study; Open case study still opens it", async ({ page, context }) => {
     await context.route(/github\.com|sydney\.edu\.au|onrender\.com|arstennisacademy/, (route) => route.fulfill({ body: "ok" }));
     await page.goto("/");
-    const card = cards(page).first();
+    // The first card with a link of its own; the two before it are private.
+    const card = cards(page).nth(projects.findIndex((p) => p.slug === "pacific-village-explorer"));
+    await card.getByRole("link", { name: /Open case study/ }).focus();
     const [tab] = await Promise.all([context.waitForEvent("page"), card.getByRole("link", { name: "Source" }).click()]);
     expect(tab.url()).toContain("github.com");
     await tab.close();
@@ -292,7 +294,11 @@ test.describe("Selected work buttons", () => {
     await page.goto("/");
     await page.getByRole("region", { name: "Selected work" }).focus();
     await page.keyboard.press("Tab");
-    const card = cards(page).first();
+    await expect(cards(page).first().getByRole("link", { name: /Open case study/ })).toBeFocused();
+    // On to the first card with a link of its own; the two before it are private.
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    const card = cards(page).nth(projects.findIndex((p) => p.slug === "pacific-village-explorer"));
     await expect(card.getByRole("link", { name: /Open case study/ })).toBeFocused();
     await page.keyboard.press("Tab");
     const source = card.getByRole("link", { name: "Source" });
