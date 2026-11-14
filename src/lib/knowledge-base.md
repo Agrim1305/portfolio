@@ -10,9 +10,9 @@ isn't answered here, the assistant says so honestly instead of guessing.
 
 Agrim Sharma is a final-year Computer Science student at Adelaide
 University, majoring in Artificial Intelligence, graduating December 2026.
-Based in Adelaide, South Australia. Currently completing an AI engineering
-internship at Aurivox (Viemo Capital & Consulting) as part of his final
-semester. Available for graduate roles from December 2026. Looking for graduate
+Based in Adelaide, South Australia. Completed an AI engineering
+internship at Aurivox (Viemo Capital & Consulting), Aug to Nov 2026, as part
+of his final semester. Available for graduate roles from December 2026. Looking for graduate
 roles in software engineering, AI, data, and analytics.
 
 GPA: 5.35/7.0, holds a 15% International Merit Scholarship.
@@ -27,9 +27,12 @@ where people can search, track, and review games, built end to end
 including the database, login system with Google sign-in, and an admin
 area, deployed so anyone can use it.
 
-In his final semester he is interning on a voice AI prototype at Aurivox,
+In his final semester he interned on a voice AI prototype at Aurivox,
 and he recently delivered his first paid freelance project, a website and
-enquiry system for Adelaide Rising Stars Tennis Academy. He has also started
+enquiry system for Adelaide Rising Stars Tennis Academy, delivered in three
+weeks. As of November 2026 it brings in 50+ Google Search clicks a month,
+its Google Business Profile has 10 reviews, and it has helped win 10+ new
+clients. He has also started
 two side products, Baseline (voice session logging for tennis coaches) and
 Receipt Extractor (automatic GST extraction from receipts); both are early.
 
@@ -93,7 +96,7 @@ different project (graph search algorithms).
 
 Chosen as one of 4 interns from 11 shortlisted students for a 50-day
 placement with a startup building a voice AI product, based at Adelaide
-University's ThincLab. Works across the speech-to-text, LLM and
+University's ThincLab. Worked across the speech-to-text, LLM and
 text-to-speech stack of a voice-first meeting assistant, reporting to the
 founder and taking an open brief through to a working prototype. Taken for
 course credit in place of his capstone. Details of the product itself are
@@ -109,8 +112,8 @@ eight-member committee, and won grants for facility upgrades. The real
 challenge was getting two groups who didn't know each other to trust the
 process and work as one.
 
-Results: grew from around 10 to 100+ active members, secured $7,000+ in
-grants, merged two clubs into one, won Club of the Year 2025 (Jessop
+Results: grew from around 10 to 100+ active members in 18 months, lifted
+regular participation by 75%, secured $7,000+ in grants, merged two clubs into one, won Club of the Year 2025 (Jessop
 Shield). Skills: Leadership, Governance, Operations, Stakeholder
 Management.
 
@@ -200,9 +203,8 @@ a graduate role in Australia. Available for graduate roles from December
 **What kinds of problems interest you most?**
 Two threads run through Agrim's work. The first is applied AI inside real
 products: the Claude-powered recommendation engine he built for Pacific
-Village Explorer's village view (cut from the hackathon demo), speech-to-text
-work in his coursework, and now the Aurivox voice
-AI internship. The second is turning messy data into something you can act
+Village Explorer's village view (cut from the hackathon demo), and the
+Aurivox voice AI internship he completed in November 2026. The second is turning messy data into something you can act
 on. He has run his own monthly budget tool in VBA since September 2025,
 tracking expenses, planning travel and thinking about investment, and uses
 it as a real tool rather than a one-off assignment. He's most interested in
@@ -216,10 +218,14 @@ did, which he then came back to alone, fixed end-to-end, connected to
 live external data (the RAWG API), and deployed to production. It's the
 clearest evidence of the difference between building for a grade and
 shipping because he wanted it to exist. Full auth with Google sign-in, a
-normalised 9-table relational schema, and an admin panel, all live today.
-It was originally deployed on Railway, then moved to Render when the trial
-expired, with the database migrated from MySQL to PostgreSQL along the way,
-which gave him real experience across two deployment stacks.
+normalised 9-table relational schema, 40+ API endpoints, and an admin
+panel, all live today.
+It was originally deployed on Railway, moved to Render with Aiven MySQL
+when the Railway trial ended, then to Neon PostgreSQL when Aiven's free
+tier started powering the database off, which gave him real experience
+across three hosting setups. He has since redesigned it and hardened its
+security, including a fix that normalises every URL before the static file
+server sees it, so encoded or re-cased paths can't reach protected pages.
 
 **Why should we hire you over someone with more experience?**
 Agrim doesn't have years of industry experience yet, but he has a track
@@ -265,7 +271,7 @@ Yes, based in Adelaide, happy to relocate within Australia.
 
 **What's your availability / notice period / start date?**
 Graduating December 2026 with full working rights from 15 December 2026.
-Currently completing his internship at Aurivox (through November 2026).
+He completed his internship at Aurivox in November 2026.
 Available for graduate roles from December 2026, and happy to start
 conversations before then.
 

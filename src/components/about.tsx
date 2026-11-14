@@ -15,14 +15,9 @@ const principles = [
       "MetaPlay began as a group assignment. I took it the rest of the way on my own and put it in production, so today it is a live product instead of a repo I describe in interviews.",
   },
   {
-    statement: "I build so the next person can extend it without a rewrite.",
-    evidence:
-      "The Restaurant Simulator was designed around exactly that: adding a new kind of staff means adding a class, not editing the code that already works.",
-  },
-  {
     statement: "I reach for the simplest thing that solves the real problem.",
     evidence:
-      "Not the most impressive one. The point is the person on the other end, not the framework I get to use.",
+      "At the hackathon we cut the village view so we could ship a demo that worked inside 44 hours. Appropriate technology beats impressive technology.",
   },
 ];
 
@@ -113,9 +108,9 @@ export function About() {
           ))}
         </ol>
         <p className="mt-10 max-w-3xl text-lg leading-relaxed text-ink-soft">
-          Right now I am in my final semester, interning on a voice AI
-          prototype at Aurivox, and finishing the website for the tennis
-          academy I coach at. I graduate in December.
+          This year I finished a voice AI internship at Aurivox and delivered
+          a website for a local tennis academy, and I am now in my final
+          semester, graduating in December 2026.
         </p>
       </div>
     </section>

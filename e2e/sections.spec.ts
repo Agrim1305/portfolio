@@ -312,9 +312,12 @@ test.describe("Selected work buttons", () => {
 });
 
 test("case studies show the extra captures framed and whole", async ({ page }) => {
-  await page.goto("/projects/pathfinder");
-  const screen = page.getByRole("img", { name: /pathfinder\.py in debug mode/ });
+  await page.goto("/projects/pacific-village-explorer");
+  const screen = page.getByRole("img", { name: /Adaptation Methods layer open/ });
   await expect(screen).toBeVisible();
+  // Lazy-loaded below the fold on phones: measure it once it has loaded.
+  await screen.scrollIntoViewIfNeeded();
+  await expect.poll(() => screen.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
   const { natural, shown } = await screen.evaluate((img: HTMLImageElement) => ({
     natural: img.naturalWidth / img.naturalHeight,
     shown: img.getBoundingClientRect().width / img.getBoundingClientRect().height,

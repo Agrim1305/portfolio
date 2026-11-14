@@ -129,19 +129,19 @@ test.describe("section questions", () => {
 
     await cloud(page).focus();
     await expect(bubble(page)).toBeVisible();
-    await expect(cloud(page)).toHaveAccessibleDescription("What does Agrim do at Aurivox?");
+    await expect(cloud(page)).toHaveAccessibleDescription("What did Agrim do at Aurivox?");
     // Tab goes from the cloud into its question, and the tooltip stays.
     await page.keyboard.press("Tab");
-    await expect(bubble(page).getByRole("button", { name: "What does Agrim do at Aurivox?" })).toBeFocused();
+    await expect(bubble(page).getByRole("button", { name: "What did Agrim do at Aurivox?" })).toBeFocused();
     await expect(bubble(page)).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(bubble(page)).toBeHidden();
     await expect(cloud(page)).toBeFocused();
 
     await cloud(page).hover();
-    await bubble(page).getByRole("button", { name: "What does Agrim do at Aurivox?" }).click();
+    await bubble(page).getByRole("button", { name: "What did Agrim do at Aurivox?" }).click();
     await expect(page.getByRole("dialog", { name: "Aris" }).getByRole("log")).toContainText(
-      "What does Agrim do at Aurivox?",
+      "What did Agrim do at Aurivox?",
     );
   });
 
@@ -149,9 +149,9 @@ test.describe("section questions", () => {
     await page.goto("/");
     await restOn(page, "projects");
     await page.getByRole("button", { name: "Next project" }).click();
-    await expect(page.getByText("2 / 8")).toBeVisible();
+    await expect(page.getByText("2 / 6")).toBeVisible();
     await page.getByRole("button", { name: "Next project" }).click();
-    await expect(page.getByText("3 / 8")).toBeVisible();
+    await expect(page.getByText("3 / 6")).toBeVisible();
     await page.mouse.move(10, 10);
     await page.waitForTimeout(1500);
     await expect(bubble(page)).toContainText("How was Adelaide Rising Stars built?");

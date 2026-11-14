@@ -12,7 +12,6 @@ const STACK = [
   ["Node.js", "nodejs"],
   ["Python", "python"],
   ["Java", "java"],
-  ["Spring Boot", "spring-boot"],
   ["PostgreSQL", "postgresql"],
   ["Claude API", "claude"],
   ["Tailwind", "tailwind"],
