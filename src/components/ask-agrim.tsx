@@ -116,11 +116,6 @@ export function AskCard({ className = "" }: { className?: string }) {
       style={{ animationDelay: "1.1s" }}
     >
       <p className="font-display text-[20px] font-bold leading-tight lg:text-[22px]">Ask Aris</p>
-      {/* From md up the hero's cloud perches on the card's top-right corner;
-          the line wraps short of it. */}
-      <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-muted md:pr-[190px]">
-        Ask Aris about my work.
-      </p>
       <div className="mt-3 flex flex-wrap gap-2">
         {SUGGESTED_QUESTIONS.map((q) => (
           <button
