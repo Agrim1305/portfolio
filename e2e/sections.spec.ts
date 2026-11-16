@@ -58,7 +58,15 @@ test("Leadership shows only its award photo; the four club photos follow the bea
   await page.getByRole("button", { name: "Read the whole story" }).click();
   const sheet = page.getByRole("dialog", { name: "President" });
   await expect(sheet).toBeVisible();
-  const gallery = sheet.locator("figure");
+  // The award photo opens the story, whole, with its caption under it; the
+  // other four follow the beats.
+  const figures = sheet.locator("figure");
+  await expect(figures.first().locator("figcaption")).toHaveText("Club of the Year · Adelaide University Sport, 2025");
+  // Never under the title: above it on a phone, beside it from lg up.
+  const opener = (await figures.first().boundingBox())!;
+  const title = (await sheet.getByRole("heading", { name: "President" }).boundingBox())!;
+  expect(title.y >= opener.y + opener.height - 1 || title.x + title.width <= opener.x + 1).toBe(true);
+  const gallery = sheet.locator("figure:not(.panel-hero)");
   await expect(gallery).toHaveCount(4);
   await expect(gallery.locator("figcaption")).toHaveText([
     "Club of the Year, Adelaide University Sport, November 2025",
@@ -75,17 +83,15 @@ test("Leadership shows only its award photo; the four club photos follow the bea
 test.describe("the merger beats", () => {
   const beats = (page: Page) => page.locator("#leadership ol > li");
 
-  test("three equal boxes, the initial in the corner clear of the text, each held to its lines with a fade", async ({ page, isMobile }) => {
+  test("three equal boxes, the text directly under its label, each held to its lines with a fade", async ({ page, isMobile }) => {
     await page.goto("/");
     await scrollTo(page, "leadership", 900);
     const boxes = await beats(page).evaluateAll((els) =>
       els.map((li) => {
         const p = li.querySelector("p")!;
-        const letter = li.querySelector("span[aria-hidden]")!;
         const label = li.querySelector("h4")!.getBoundingClientRect();
         const box = li.getBoundingClientRect();
         const style = getComputedStyle(li);
-        const l = letter.getBoundingClientRect();
         const t = p.getBoundingClientRect();
         return {
           box: { x: box.x, top: box.top, width: box.width, height: box.height, right: box.right },
@@ -94,18 +100,15 @@ test.describe("the merger beats", () => {
           lines: Math.round(p.clientHeight / parseFloat(getComputedStyle(p).lineHeight)),
           cut: p.scrollHeight > p.clientHeight + 1,
           fades: getComputedStyle(p).maskImage !== "none",
-          letterSize: parseFloat(getComputedStyle(letter).fontSize),
-          letterClear: l.bottom <= t.top && l.left >= label.right,
-          letterInside: l.right <= box.right - parseFloat(style.paddingRight) + 1 && l.top >= box.top + parseFloat(style.paddingTop) - 1,
+          // No empty band between the label and the text.
+          gap: t.top - label.bottom,
         };
       }),
     );
     expect(boxes.map((b) => b.padding)).toEqual(Array(3).fill(boxes[0].padding));
     expect(boxes.map((b) => b.border)).toEqual(Array(3).fill(boxes[0].border));
     for (const b of boxes) {
-      expect(b.letterSize).toBe(120);
-      expect(b.letterClear).toBe(true);
-      expect(b.letterInside).toBe(true);
+      expect(b.gap).toBeLessThanOrEqual(16);
       // Held to six lines on phones and seven from md up; only a beat that
       // is cut short fades, so no line is cut without one.
       expect(b.lines).toBeLessThanOrEqual(isMobile ? 6 : 7);
@@ -141,15 +144,13 @@ test.describe("the merger beats", () => {
       boxes: [...ol.children].map((li) => {
         const p = li.querySelector("p")!;
         const r = li.getBoundingClientRect();
-        const letter = li.querySelector("span[aria-hidden]")!.getBoundingClientRect();
         return {
           label: li.querySelector("h4")!.textContent,
           left: r.left,
           width: r.width,
           top: r.top,
           bottom: r.bottom,
-          letterRight: r.right - letter.right,
-          letterClear: letter.bottom <= p.getBoundingClientRect().top,
+          gap: p.getBoundingClientRect().top - li.querySelector("h4")!.getBoundingClientRect().bottom,
           // The text's width in ch, the width of a "0" in its own font.
           measure: (() => {
             const zero = document.createElement("span");
@@ -170,7 +171,7 @@ test.describe("the merger beats", () => {
       expect(b.left).toBeCloseTo(list.left, 0);
       expect(b.width).toBeCloseTo(list.width, 0);
       if (i) expect(b.top - boxes[i - 1].bottom).toBeCloseTo(32, 0);
-      expect(b.letterClear).toBe(true);
+      expect(b.gap).toBeLessThanOrEqual(16);
       // The text at a reading measure.
       expect(b.measure).toBeLessThanOrEqual(70.5);
       expect(b.full).toBe(true);

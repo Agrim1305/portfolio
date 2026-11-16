@@ -205,11 +205,11 @@ export function CaseStudyHero({
   );
 }
 
-/* One gallery photo. The first two float beside the text on wide screens,
-   tilted slightly like prints on a desk; the third runs full width. */
+/* One gallery photo. The first two float beside the text on wide screens;
+   the third runs full width. */
 const GALLERY_SLOTS = [
-  { figure: "lg:float-right lg:ml-11 lg:mb-6 lg:mt-1.5 lg:w-[440px]", photo: "aspect-[22/15] lg:rotate-[1.5deg]" },
-  { figure: "lg:float-left lg:mr-11 lg:mb-6 lg:mt-1.5 lg:w-[300px]", photo: "aspect-[15/19] lg:-rotate-2" },
+  { figure: "lg:float-right lg:ml-11 lg:mb-6 lg:mt-1.5 lg:w-[440px]", photo: "aspect-[22/15]" },
+  { figure: "lg:float-left lg:mr-11 lg:mb-6 lg:mt-1.5 lg:w-[300px]", photo: "aspect-[15/19]" },
   { figure: "", photo: "aspect-[1020/420]" },
 ];
 

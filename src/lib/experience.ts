@@ -105,19 +105,31 @@ export const roles: Role[] = [
     org: "Adelaide University Tennis Club",
     dates: "Jul 2024 to Mar 2026",
     description:
-      "Turned a dormant club into Club of the Year 2025, growing active membership from about 10 to 100+ in 18 months and lifting regular participation by 75%, by recruiting and leading an 8-person committee, merging with the UniSA club and securing $7,000+ in grants.",
-    stats: [{ value: "10 → 100+", label: "members" }],
+      "Turned a dormant club into Club of the Year 2025, growing active membership from about 10 to 100+ in 18 months and lifting regular participation by 75%, by recruiting and leading an 8-person committee, merging with the UniSA club and securing $7,000+ in grants. I also ran the competitive program end to end: the club's entries in the University Tennis League, UniSport Nationals and the SA Challenge, internal tournaments, and a regular calendar of social tennis. I co-authored the merged club's constitution and designed its new logo.",
+    stats: [
+      { value: "10 to 100+", label: "active members in 18 months" },
+      { value: "2 to 1", label: "clubs merged" },
+      { value: "$7,000+", label: "in grants, from four applications" },
+      { value: "8", label: "committee members recruited and led" },
+      { value: "75%", label: "more regular participation" },
+      { value: "2025", label: "Club of the Year" },
+    ],
     photos: [awardPhoto, ...clubPhotos],
     beats: mergerStory,
   },
   {
     id: "coaching",
-    role: "Assistant Head Coach",
-    org: "Adelaide Rising Stars Tennis Academy",
+    role: "Tennis Coach and Assistant Head Coach",
+    org: "Tea Tree Gully Tennis Club · Adelaide Rising Stars Tennis Academy",
     dates: "Mar 2024 to Present",
     description:
-      "I coach 10+ sessions a week at Tea Tree Gully Tennis Club for more than fifty clients, from juniors to adults, one-on-one and in groups. I run junior and performance squads of up to thirty players in a two-hour block, setting the drill plan and directing assistant coaches across four courts. It has made me good at explaining the same idea a few different ways until it clicks, and at keeping a big group moving on one plan.",
-    stats: [{ value: "50+", label: "clients" }],
+      "I coach 10+ sessions a week at Tea Tree Gully Tennis Club for more than fifty clients, from juniors to adults, one-on-one and in groups. I coach for both the club and the academy, which run side by side at Tea Tree Gully, with private players from beginner to performance level. I run junior and performance squads of up to thirty players in a two-hour block, setting the drill plan and directing assistant coaches across four courts. It has made me good at explaining the same idea a few different ways until it clicks, and at keeping a big group moving on one plan.",
+    stats: [
+      { value: "50+", label: "clients" },
+      { value: "10+", label: "sessions a week" },
+      { value: "30", label: "players in the largest squads" },
+      { value: "4", label: "courts run at once" },
+    ],
     photos: COACHING_PHOTO_CONSENT ? [coachingPhoto] : [],
   },
   {
@@ -127,7 +139,10 @@ export const roles: Role[] = [
     dates: "Feb 2024 to Oct 2024",
     description:
       "Part-time customer service across two stores while studying full-time. Busy retail floor, steady standards, and a lot of practice juggling work and study at the same time.",
-    stats: [],
+    stats: [
+      { value: "2", label: "stores" },
+      { value: "Part-time", label: "alongside full-time study" },
+    ],
     photos: [],
   },
 ];

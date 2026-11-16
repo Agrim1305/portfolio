@@ -759,7 +759,7 @@ test.describe("experience", () => {
   test("every role opens its full story, and Back closes it", async ({ page }) => {
     await page.goto("/");
     const tabs = page.getByRole("tablist", { name: "Roles" }).getByRole("tab");
-    const names = ["AI Software Engineering Intern", "President", "Assistant Head Coach", "Retail Assistant"];
+    const names = ["AI Software Engineering Intern", "President", "Tennis Coach and Assistant Head Coach", "Retail Assistant"];
     const ids = ["internship", "president", "coaching", "retail"];
     for (let i = 0; i < 4; i++) {
       await tabs.nth(i).click();
@@ -822,7 +822,7 @@ test.describe("experience", () => {
 
   test("a story link opens the page with that story showing", async ({ page }) => {
     await page.goto("/#story-coaching");
-    const sheet = page.getByRole("dialog", { name: "Assistant Head Coach" });
+    const sheet = page.getByRole("dialog", { name: "Tennis Coach and Assistant Head Coach" });
     await expect(sheet).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(sheet).toBeHidden();

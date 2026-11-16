@@ -6,24 +6,6 @@ import { Sheet } from "@/components/sheet";
 
 type Step = { label: string; hint?: string; onClick: () => void } | null;
 
-/* The top of a role's story panel: a photo filling the frame, with the
-   title set over a dark gradient at its foot (case studies have their own,
-   laid out like their cards; see CaseStudyHero). Only the
-   background carries `panel-hero`, so switching crossfades the picture while
-   the title slides with the rest (see morphSwitch). */
-export function PanelHero({ background, children }: { background: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <header className="relative flex min-h-[44vh] flex-col justify-end overflow-hidden md:min-h-[min(58vh,560px)]">
-      <div className="panel-hero absolute inset-0">{background}</div>
-      {/* Keeps the floating buttons legible over a busy picture. */}
-      <div aria-hidden className="absolute inset-x-0 top-0 h-32 bg-[linear-gradient(rgb(20_20_23/0.85),rgb(20_20_23/0))]" />
-      <div className="relative bg-[linear-gradient(180deg,rgb(20_20_23/0),rgb(20_20_23/0.85)_45%,rgb(20_20_23/0.97))] px-5 pb-7 pt-28 lg:px-[90px] lg:pb-10 lg:pt-40">
-        {children}
-      </div>
-    </header>
-  );
-}
-
 /* The large panel a project card or a role grows into. A native <dialog>
    (see Sheet), so focus stays inside it and the page behind is inert; centred
    from md up, a bottom sheet on phones. The hero and the article scroll

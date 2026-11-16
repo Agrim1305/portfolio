@@ -5,7 +5,7 @@ import { flushSync } from "react-dom";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { MergerBeats } from "@/components/merger-beats";
-import { Panel, PanelHero } from "@/components/panel";
+import { Panel } from "@/components/panel";
 import { morphClose, morphOpen, morphSwitch } from "@/lib/morph";
 import { Metrics, StarStory } from "@/components/case-study";
 import { roles } from "@/lib/experience";
@@ -25,17 +25,15 @@ const sentences = (text: string) => text.split(/(?<=\.)\s+/);
 
 const storyIndex = (hash: string) => roles.findIndex((r) => hash === `#story-${r.id}`);
 
-/* The rest of a story's photos, after the story: tilted prints in two
-   columns, each whole, so no shape is cropped to fit. */
+/* The rest of a story's photos, after the story: two columns, each photo
+   whole, so no shape is cropped to fit. */
 function Gallery({ photos }: { photos: Photo[] }) {
   return (
     <div className="columns-1 gap-6 sm:columns-2">
-      {photos.map((p, i) => (
+      {photos.map((p) => (
         <figure key={p.src} className="mb-8 break-inside-avoid">
           <div
-            className={`overflow-hidden rounded-[18px] border-[5px] border-ink shadow-[0_30px_60px_rgb(0_0_0/0.5)] ${
-              i % 2 ? "rotate-[1.5deg]" : "-rotate-[1.5deg]"
-            }`}
+            className="overflow-hidden rounded-[18px] border-[5px] border-ink shadow-[0_30px_60px_rgb(0_0_0/0.5)]"
           >
             <Image src={p.src} alt={p.alt} width={p.width} height={p.height} sizes="(min-width: 1280px) 460px, (min-width: 640px) 45vw, 90vw" className="h-auto w-full" />
           </div>
@@ -242,7 +240,7 @@ export function ExperienceRoles() {
             className="role-panel relative flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-[radial-gradient(120%_90%_at_100%_0%,rgb(255_91_46/0.22),rgb(255_91_46/0)_55%),var(--surface)] px-6 pb-6 pt-[26px] shadow-[0_40px_80px_rgb(0_0_0/0.45)] lg:min-h-[520px] lg:rounded-[28px] lg:px-11 lg:py-10"
           >
             {photo && (
-              <div className="relative mb-6 aspect-[4/3] w-40 rotate-[4deg] overflow-hidden rounded-[22px] border-4 border-paper bg-[#E6E1D9] shadow-[0_20px_40px_rgb(0_0_0/0.5)] lg:absolute lg:right-9 lg:top-9 lg:mb-0">
+              <div className="relative mb-6 aspect-[4/3] w-40 overflow-hidden rounded-[22px] border-4 border-paper bg-[#E6E1D9] shadow-[0_20px_40px_rgb(0_0_0/0.5)] lg:absolute lg:right-9 lg:top-9 lg:mb-0">
                 <Image
                   src={photo.src}
                   alt={photo.alt}
@@ -253,7 +251,8 @@ export function ExperienceRoles() {
                 />
               </div>
             )}
-            <div className="flex items-center gap-3.5">
+            {/* Clear of the photo in the corner, so a long organisation wraps. */}
+            <div className={`flex items-center gap-3.5 ${photo ? "lg:pr-44" : ""}`}>
               <span
                 aria-hidden
                 className="flex size-[52px] shrink-0 items-center justify-center rounded-[14px] bg-accent font-display text-lg font-extrabold text-paper"
@@ -311,57 +310,57 @@ export function ExperienceRoles() {
         bodyRef={bodyRef}
         hero={
           current && (
-            <PanelHero
-              background={
-                current.photos[0] ? (
+            // Every role opens the same way: the organisation and dates,
+            // the title and the numbers. A role with a photo shows it whole
+            // with its caption under it: above the text on a phone, and from
+            // lg up in a column of its own beside it, level with the
+            // organisation line. Nothing is set over a photo. The top
+            // padding clears the panel's floating buttons.
+            <header
+              className={`px-5 pt-20 lg:px-[90px] lg:pt-24 ${
+                current.photos[0] ? "lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:items-start lg:gap-x-12" : ""
+              }`}
+            >
+              {current.photos[0] && (
+                <figure className="panel-hero mb-8 lg:order-last lg:mb-0">
                   <Image
                     src={current.photos[0].src}
                     alt={current.photos[0].alt}
-                    fill
-                    sizes="(min-width: 1280px) 1100px, 100vw"
-                    className="object-cover"
-                    style={{ objectPosition: current.photos[0].position ?? "50% 35%" }}
+                    width={current.photos[0].width}
+                    height={current.photos[0].height}
+                    sizes="(min-width: 1024px) 420px, 100vw"
+                    className="h-auto max-h-[min(52vh,480px)] w-auto max-w-full rounded-[18px] lg:max-h-none lg:w-full"
                   />
-                ) : (
-                  // No photo yet: the warm cover, with the org's monogram
-                  // outlined across it.
-                  <div
-                    aria-hidden
-                    className="absolute inset-0 bg-[radial-gradient(circle_at_30%_10%,#FF7A4F_0%,#B53A17_40%,#2A120B_100%)]"
-                  >
-                    <span className="absolute -bottom-12 right-6 font-display text-[14rem] font-extrabold leading-none tracking-[-0.04em] text-transparent [-webkit-text-stroke:2px_rgb(241_239_234/0.4)] lg:right-16 lg:text-[24rem]">
-                      {monogram(current.org)}
-                    </span>
-                  </div>
-                )
-              }
-            >
-              <p className="flex flex-wrap gap-x-3 font-mono text-[11px] leading-relaxed lg:text-xs">
-                <span className="text-accent-soft">{current.org}</span>
-                <span className="text-ink-muted">{current.dates}</span>
-              </p>
-              <h2
-                id="story-title"
-                className="mt-3 max-w-[860px] font-display text-[clamp(2.5rem,1.6rem+3vw,3.75rem)] font-extrabold leading-none tracking-[-0.03em] text-ink"
-              >
-                {current.role}
-              </h2>
-            </PanelHero>
+                  <figcaption className="mt-3 font-mono text-xs text-ink-faint">{current.photos[0].caption}</figcaption>
+                </figure>
+              )}
+              <div>
+                <p className="flex flex-wrap gap-x-3 font-mono text-[11px] leading-relaxed lg:text-xs">
+                  <span className="text-accent-soft">{current.org}</span>
+                  <span className="text-ink-muted">{current.dates}</span>
+                </p>
+                <h2
+                  id="story-title"
+                  className="mt-3 max-w-[860px] font-display text-[clamp(2.5rem,1.6rem+3vw,3.75rem)] font-extrabold leading-none tracking-[-0.03em] text-ink"
+                >
+                  {current.role}
+                </h2>
+                {current.stats.length > 0 && (
+                  <Metrics
+                    metrics={current.stats}
+                    // Beside a photo the numbers pair up; alone they share a row.
+                    className={`mt-8 grid-cols-2 ${
+                      current.photos[0] ? "" : current.stats.length > 4 ? "lg:grid-cols-3" : "lg:grid-cols-4"
+                    }`}
+                  />
+                )}
+              </div>
+            </header>
           )
         }
       >
         {current && (
-          <div className="px-5 pb-12 pt-6 lg:px-[90px] lg:pb-[72px] lg:pt-8">
-            {current.photos[0] && (
-              <p className="mb-8 font-mono text-xs text-ink-faint">{current.photos[0].caption}</p>
-            )}
-            {current.stats.length > 0 && (
-              <Metrics
-                metrics={current.stats}
-                className={`mb-12 grid-cols-2 lg:mb-14 ${current.stats.length > 4 ? "lg:grid-cols-3" : "lg:grid-cols-4"}`}
-              />
-            )}
-
+          <div className="px-5 pb-12 pt-12 lg:px-[90px] lg:pb-[72px] lg:pt-14">
             {current.beats ? (
               <div>
                 <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-accent-soft">The challenge</p>
