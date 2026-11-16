@@ -2,7 +2,7 @@
    role's story panel and (through the knowledge base) the chat assistant
    all read from this file. */
 
-import type { Metric, Star } from "./projects.ts";
+import { starAsKnowledge, type Metric, type Star } from "./projects.ts";
 import {
   COACHING_PHOTO_CONSENT,
   awardPhoto,
@@ -146,3 +146,22 @@ export const roles: Role[] = [
     photos: [],
   },
 ];
+
+/* Plain-text rendering of one role for the chat assistant. */
+function roleAsKnowledge(r: Role): string {
+  const lines = [
+    `### ${r.role}, ${r.org} (${r.dates})`,
+    "",
+    r.description,
+    "",
+    `Numbers: ${r.stats.map((s) => `${s.value} ${s.label}`).join("; ")}.`,
+  ];
+  if (r.beats) lines.push("", ...r.beats.map((b) => `${b.label}: ${b.text}`));
+  if (r.story) lines.push("", ...starAsKnowledge(r.story));
+  return lines.join("\n");
+}
+
+/* Every role, for the chat assistant's knowledge base. */
+export function experienceAsKnowledge(): string {
+  return roles.map(roleAsKnowledge).join("\n\n");
+}

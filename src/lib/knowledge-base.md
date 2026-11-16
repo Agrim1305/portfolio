@@ -92,53 +92,25 @@ different project (graph search algorithms).
 
 ## Experience
 
-### AI Software Engineering Intern, Viemo Capital (Aug 2026 to Nov 2026)
+Role details are generated from the site's experience data, in Agrim's own
+words (first person).
 
-Working to an open brief from the founder, he built and owned a real-time voice assistant for live meetings
-on the Claude API end to end: the voice pipeline, the data model, the
-debugging, and its cost and reliability. It answers spoken questions in a
-median of 1.9 seconds. He found and fixed the bug that froze its summaries
-after about four minutes, cut the cost of each summary update by 17%, and
-designed its consent and privacy guardrails. Action items captured in
-summaries rose from 7 of 15 to 15 of 15 across three test meetings, and he
-shipped 31 merged pull requests over the placement. The assistant is in
-internal use. The full story is under Experience on the site.
-Further details of the product are confidential, so anything beyond that
-story is something the assistant declines to discuss.
-Skills: TypeScript, React, Node.js, Express, Python, WebSockets, Claude API,
-Deepgram, Google TTS.
+{{EXPERIENCE}}
 
-### President, Adelaide University Tennis Club (Jul 2024 to Mar 2026)
+The internship at Viemo Capital: the assistant is in internal use. Further
+details of the product are confidential, so anything beyond the story above
+is something the assistant declines to discuss.
 
-Took over a club that had gone quiet and rebuilt it from scratch. Led the
-merger of two university tennis clubs during the Adelaide and UniSA
-consolidation, co-authored the new constitution, brought together an
-eight-member committee, and won grants for facility upgrades. The real
-challenge was getting two groups who didn't know each other to trust the
-process and work as one.
+More on the presidency: he took over a club that had gone quiet and rebuilt
+it from scratch. The real challenge of the merger was getting two groups
+who did not know each other to trust the process and work as one. Skills:
+Leadership, Governance, Operations, Stakeholder Management.
 
-Results: grew from around 10 to 100+ active members in 18 months, lifted
-regular participation by 75%, secured $7,000+ in grants, merged two clubs into one, won Club of the Year 2025 (Jessop
-Shield). The grants came from four applications and paid for new fencing,
-nets and poles. He ran an annual budget of about $10,000 to $11,000, and
-the club's orientation week drew about 78 people. Skills: Leadership, Governance, Operations, Stakeholder
-Management.
+More on coaching: he plans each session, adjusts feedback to the player
+and tracks progress over time. Skills: Communication, Mentoring, Planning.
 
-### Assistant Head Coach, Adelaide Rising Stars Tennis Academy (Mar 2024 to Present)
-
-Based at Tea Tree Gully Tennis Club. Coaches 10+ sessions a week for a
-client base of 50+, juniors and adults, one-on-one and in groups. Runs
-junior squads of up to 30 players in a two-hour block and directs the
-assistant coaches. Plans each session, adjusts feedback to the player,
-tracks progress over time. Built skill at explaining the same idea multiple
-ways until it clicks, and at keeping people motivated when things are hard.
-Skills: Communication, Mentoring, Planning.
-
-### Retail Assistant, IGA Supermarkets (Feb 2024 to Oct 2024)
-
-Part-time customer service across two stores (Elizabeth Downs and Hutt Street) while studying full-time.
-Busy retail floor, steady standards, practice juggling work and uni at
-the same time. Skills: Customer Service, Teamwork.
+More on retail: the two IGA stores were Elizabeth Downs and Hutt Street.
+Skills: Customer Service, Teamwork.
 
 ---
 

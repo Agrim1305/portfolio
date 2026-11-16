@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { answer, logError } from "@/lib/aris-tools.ts";
+import { experienceAsKnowledge } from "@/lib/experience";
 import { projectsAsKnowledge } from "@/lib/projects";
 
 const MODEL = "claude-haiku-4-5-20251001";
@@ -39,11 +40,12 @@ let cachedKnowledgeBase: string | null = null;
 function loadKnowledgeBase(): string {
   if (cachedKnowledgeBase) return cachedKnowledgeBase;
   const kbPath = path.join(process.cwd(), "src", "lib", "knowledge-base.md");
-  // Project facts are generated from the same data that renders the site, so
-  // the assistant and the pages can never disagree about a project.
+  // Project and role facts are generated from the same data that renders
+  // the site, so the assistant and the pages can never disagree about them.
   cachedKnowledgeBase = fs
     .readFileSync(kbPath, "utf-8")
-    .replace("{{PROJECTS}}", projectsAsKnowledge());
+    .replace("{{PROJECTS}}", projectsAsKnowledge())
+    .replace("{{EXPERIENCE}}", experienceAsKnowledge());
   return cachedKnowledgeBase;
 }
 
