@@ -79,6 +79,11 @@ export type Project = Star & {
   gallery?: Extract<ProjectMedia, { kind: "photo" }>[];
 };
 
+/* How many end-to-end tests `npx playwright test --list` counts. The Aris
+   case study and the Selected work header both quote it; update it here
+   when the suite changes. */
+export const E2E_TESTS = 384;
+
 export const projects: Project[] = [
   {
     slug: "portfolio-ai-assistant",
@@ -90,7 +95,7 @@ export const projects: Project[] = [
       "Let recruiters ask my portfolio direct questions and get grounded answers in seconds, with an assistant that only answers from a knowledge base I wrote and says when it doesn't know.",
     emphasis: "only answers from a knowledge base I wrote",
     summary:
-      "An assistant that answers only from a knowledge base I wrote, behind my own rate-limited server route, covered by a 362-test suite.",
+      `An assistant that answers only from a knowledge base I wrote, behind my own rate-limited server route, covered by a ${E2E_TESTS}-test suite.`,
     situation:
       "Recruiters skim. An assistant that answers their questions directly is only worth having if it never invents a date, a number or a claim about me. A public endpoint that calls a paid model is also something people will try to abuse, through cost or through prompt injection.",
     task:
@@ -124,7 +129,7 @@ export const projects: Project[] = [
       {
         title: "Secured and tested the site around it.",
         detail:
-          "A strict Content Security Policy, two-year HSTS with preload, and clickjacking protection. A 362-test end-to-end suite runs against the production build, including 17 automated WCAG 2.1 AA accessibility scans, each run on desktop and mobile.",
+          `A strict Content Security Policy, two-year HSTS with preload, and clickjacking protection. A ${E2E_TESTS}-test end-to-end suite runs against the production build, including 17 automated WCAG 2.1 AA accessibility scans, each run on desktop and mobile.`,
       },
     ],
     result:
@@ -132,7 +137,7 @@ export const projects: Project[] = [
     resultHighlights: ["all 17 accessibility scans", "open one of my own project pages"],
     metrics: [
       {
-        value: "362",
+        value: String(E2E_TESTS),
         label: "end-to-end tests",
         proof: { label: "e2e folder in the portfolio repo", url: "https://github.com/Agrim1305/portfolio/tree/main/e2e" },
       },

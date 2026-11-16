@@ -8,9 +8,10 @@ import { CaseStudy, CaseStudyHero, COVER, Links, ProjectCover } from "@/componen
 import { OPEN_CASE_EVENT } from "@/components/ask-agrim";
 import { Panel } from "@/components/panel";
 import { morphClose, morphOpen, morphSwitch } from "@/lib/morph";
+import { SectionHeader } from "@/components/section-header";
 import { SkipLink } from "@/components/skip-link";
 import { useRow } from "@/lib/row";
-import { projects, type Project } from "@/lib/projects";
+import { E2E_TESTS, projects, type Project } from "@/lib/projects";
 
 const slugFromPath = () => window.location.pathname.match(/^\/projects\/([^/]+)/)?.[1];
 
@@ -211,46 +212,49 @@ export function Projects() {
     >
       <SkipLink to="leadership" />
       <div className="wrap">
-        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
-          {/* From xl up the line sits beside the heading, so the card gets
-              its height. */}
-          <div className="xl:flex xl:items-end xl:gap-6">
-            <h2 className="font-display text-[3.75rem] font-extrabold uppercase leading-[0.9] tracking-[-0.03em] text-ink md:text-[clamp(3rem,1.2rem+3.1vw,4rem)]">
-              <span className="block md:inline">Selected</span>{" "}
-              {/* The reference ghosts this word almost into the page; this is the
-                  faintest grey that still clears 3:1 for large text. */}
-              <span className="block text-[#636167] md:inline">work</span>
-            </h2>
-            <p className="mt-4 text-[15px] text-ink-muted md:mt-1 lg:text-base xl:mt-0 xl:max-w-[15rem] xl:pb-0.5 xl:text-[15px] xl:leading-snug">
-              What I owned, what I did, what changed. The stack comes second.
-            </p>
+        <SectionHeader
+          label="Selected work"
+          headline="Seven projects. For each one: what I owned, what I did, and what changed."
+          numbers={[
+            { value: "4", label: "running live today" },
+            { value: "3.7x", label: "speedup on an 8-core benchmark" },
+            {
+              value: "Top 12",
+              label: "of 75 hackathon submissions",
+              proof: { label: "finalist announcement", url: "https://hack-eng.sydney.edu.au/" },
+            },
+            {
+              value: String(E2E_TESTS),
+              label: "tests behind this site",
+              proof: { label: "e2e folder in the portfolio repo", url: "https://github.com/Agrim1305/portfolio/tree/main/e2e" },
+            },
+          ]}
+        />
+        <div className="hidden items-center justify-end gap-5 md:flex">
+          <div aria-hidden className="h-[3px] w-[220px] overflow-hidden rounded-full bg-ink/12">
+            <div
+              className="h-full rounded-full bg-accent transition-[width] duration-500 motion-reduce:transition-none"
+              style={{ width: `${((active + 1) / total) * 100}%` }}
+            />
           </div>
-          <div className="hidden items-center gap-5 md:flex">
-            <div aria-hidden className="h-[3px] w-[220px] overflow-hidden rounded-full bg-ink/12 xl:w-[140px]">
-              <div
-                className="h-full rounded-full bg-accent transition-[width] duration-500 motion-reduce:transition-none"
-                style={{ width: `${((active + 1) / total) * 100}%` }}
-              />
-            </div>
-            <span aria-hidden className="min-w-14 font-mono text-sm text-ink-faint">
-              {active + 1} / {total}
-            </span>
-            {[
-              { label: "Previous project", by: -1, Icon: ArrowLeft },
-              { label: "Next project", by: 1, Icon: ArrowRight },
-            ].map(({ label, by, Icon }) => (
-              <button
-                key={label}
-                type="button"
-                aria-label={label}
-                disabled={by < 0 ? ends.start : ends.end}
-                onClick={() => step(by)}
-                className="flex size-14 items-center justify-center rounded-full border border-ink/25 text-ink transition-colors duration-300 hover:border-accent hover:bg-accent hover:text-paper disabled:pointer-events-none disabled:opacity-30"
-              >
-                <Icon className="size-5" aria-hidden />
-              </button>
-            ))}
-          </div>
+          <span aria-hidden className="min-w-14 font-mono text-sm text-ink-faint">
+            {active + 1} / {total}
+          </span>
+          {[
+            { label: "Previous project", by: -1, Icon: ArrowLeft },
+            { label: "Next project", by: 1, Icon: ArrowRight },
+          ].map(({ label, by, Icon }) => (
+            <button
+              key={label}
+              type="button"
+              aria-label={label}
+              disabled={by < 0 ? ends.start : ends.end}
+              onClick={() => step(by)}
+              className="flex size-14 items-center justify-center rounded-full border border-ink/25 text-ink transition-colors duration-300 hover:border-accent hover:bg-accent hover:text-paper disabled:pointer-events-none disabled:opacity-30"
+            >
+              <Icon className="size-5" aria-hidden />
+            </button>
+          ))}
         </div>
       </div>
 
@@ -266,7 +270,7 @@ export function Projects() {
           if (e.key === "ArrowRight") step(1);
           if (e.key === "ArrowLeft") step(-1);
         }}
-        className="mt-10"
+        className="mt-6"
       >
         <div
           ref={trackRef}

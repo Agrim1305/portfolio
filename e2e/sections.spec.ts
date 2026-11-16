@@ -50,6 +50,17 @@ test.describe("nav", () => {
   });
 });
 
+test("a cover's stack word fits inside its cover at every width", async ({ page }) => {
+  await page.goto("/");
+  const words = page.locator("#projects article > div:first-child > span");
+  expect(await words.count()).toBeGreaterThan(0);
+  for (const fits of await words.evaluateAll((els) =>
+    els.map((el) => el.getBoundingClientRect().right <= el.parentElement!.getBoundingClientRect().right),
+  )) {
+    expect(fits).toBe(true);
+  }
+});
+
 test("Leadership shows only its award photo; the four club photos follow the beats in the President story", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator("#leadership img")).toHaveCount(1);
@@ -83,55 +94,10 @@ test("Leadership shows only its award photo; the four club photos follow the bea
 test.describe("the merger beats", () => {
   const beats = (page: Page) => page.locator("#leadership ol > li");
 
-  test("three equal boxes, the text directly under its label, each held to its lines with a fade", async ({ page, isMobile }) => {
+  test("the section holds no beats, only the one way into the whole story", async ({ page }) => {
     await page.goto("/");
-    await scrollTo(page, "leadership", 900);
-    const boxes = await beats(page).evaluateAll((els) =>
-      els.map((li) => {
-        const p = li.querySelector("p")!;
-        const label = li.querySelector("h4")!.getBoundingClientRect();
-        const box = li.getBoundingClientRect();
-        const style = getComputedStyle(li);
-        const t = p.getBoundingClientRect();
-        return {
-          box: { x: box.x, top: box.top, width: box.width, height: box.height, right: box.right },
-          padding: style.padding,
-          border: style.borderWidth,
-          lines: Math.round(p.clientHeight / parseFloat(getComputedStyle(p).lineHeight)),
-          cut: p.scrollHeight > p.clientHeight + 1,
-          fades: getComputedStyle(p).maskImage !== "none",
-          // No empty band between the label and the text.
-          gap: t.top - label.bottom,
-        };
-      }),
-    );
-    expect(boxes.map((b) => b.padding)).toEqual(Array(3).fill(boxes[0].padding));
-    expect(boxes.map((b) => b.border)).toEqual(Array(3).fill(boxes[0].border));
-    for (const b of boxes) {
-      expect(b.gap).toBeLessThanOrEqual(16);
-      // Held to six lines on phones and seven from md up; only a beat that
-      // is cut short fades, so no line is cut without one.
-      expect(b.lines).toBeLessThanOrEqual(isMobile ? 6 : 7);
-      expect(b.fades).toBe(b.cut);
-    }
-    expect(boxes.some((b) => b.cut)).toBe(true);
-    if (isMobile) {
-      // Stacked.
-      for (let i = 1; i < 3; i++) expect(boxes[i].box.top).toBeGreaterThan(boxes[i - 1].box.top + boxes[i - 1].box.height);
-    } else {
-      // One row of equal columns, one top edge, one height.
-      for (const b of boxes) {
-        expect(b.box.width).toBeCloseTo(boxes[0].box.width, 0);
-        expect(b.box.height).toBeCloseTo(boxes[0].box.height, 0);
-        expect(b.box.top).toBeCloseTo(boxes[0].box.top, 0);
-      }
-    }
-    // One way into the whole story, under the grid.
-    const read = page.locator("#leadership").getByRole("button", { name: "Read the whole story" });
-    await expect(read).toHaveCount(1);
-    const last = boxes.at(-1)!.box;
-    expect((await read.boundingBox())!.y).toBeGreaterThan(last.top + last.height);
-    expect((await read.boundingBox())!.x).toBeCloseTo(boxes[0].box.x, 0);
+    await expect(beats(page)).toHaveCount(0);
+    await expect(page.locator("#leadership").getByRole("button", { name: "Read the whole story" })).toHaveCount(1);
   });
 
   test("the whole story stacks every beat in full, at the panel's width, 32px apart", async ({ page }) => {

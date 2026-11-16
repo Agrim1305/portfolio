@@ -133,9 +133,9 @@ export function ProjectCover({
       ) : (
         <span
           aria-hidden
-          className="absolute left-5 top-1/2 -translate-y-1/2 font-display text-[min(7.5rem,70cqh)] font-extrabold leading-none tracking-[-0.04em] transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03] motion-reduce:transition-none lg:left-10 lg:text-[min(18.75rem,var(--fit),70cqh)]"
-          // Side by side the word fits the cover whatever its length: 22cqw
-          // for a seven-letter word, less for a longer one.
+          className="absolute left-5 top-1/2 -translate-y-1/2 font-display text-[min(7.5rem,var(--fit),70cqh)] font-extrabold leading-none tracking-[-0.04em] transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03] motion-reduce:transition-none lg:left-10 lg:text-[min(18.75rem,var(--fit),70cqh)]"
+          // The word fits the cover whatever its length: 22cqw for a
+          // seven-letter word, less for a longer one.
           style={{ color: cover.ink, "--fit": `${154 / Math.max(7, project.stack[0].length)}cqw` } as React.CSSProperties}
         >
           {project.stack[0]}
