@@ -128,8 +128,8 @@ export const projects: Project[] = [
       },
     ],
     result:
-      "Live on agrimsharma.com. The end-to-end suite passes, including all 17 accessibility checks, and the API key has never reached the browser. The worst a successful prompt injection can do is open one of my own project pages.",
-    resultHighlights: ["all 17 accessibility checks", "open one of my own project pages"],
+      "Live on agrimsharma.com. The end-to-end suite passes, including all 17 accessibility scans, and the API key has never reached the browser. The worst a successful prompt injection can do is open one of my own project pages.",
+    resultHighlights: ["all 17 accessibility scans", "open one of my own project pages"],
     metrics: [
       {
         value: "362",

@@ -61,11 +61,7 @@ export function Hero() {
               style={{ animationDelay: "0.8s" }}
             >
               Software engineer building real-time AI systems. Computer Science (AI) at
-              Adelaide University, graduating December 2026. I build{" "}
-              <span className="text-ink">software that solves problems</span>, put AI to work
-              inside them, and{" "}
-              <span className="text-ink">ship it so real people actually use it</span>
-              .
+              Adelaide University, graduating December 2026.
             </p>
             <p
               className="hero-rise mt-5 flex items-start gap-2.5 font-mono text-[13px] leading-relaxed text-ink-muted"
