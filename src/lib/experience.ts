@@ -36,7 +36,7 @@ export const roles: Role[] = [
     org: "Viemo Capital",
     dates: "Aug 2026 to Nov 2026",
     description:
-      "Built a real-time voice assistant for live meetings on the Claude API: spoken answers in a median of 1.9 seconds, summaries that hold up in long meetings, and consent and data residency guardrails. In internal use.",
+      "Built a real-time voice assistant for live meetings on the Claude API: spoken answers in a median of 1.9 seconds, summaries that hold up in long meetings, and consent and data residency guardrails, now in internal use.",
     stats: [
       { value: "1.9 s", label: "median spoken answer" },
       { value: "15 of 15", label: "action items, up from 7 of 15" },

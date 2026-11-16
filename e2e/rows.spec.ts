@@ -78,8 +78,10 @@ for (const row of rows) {
       test.skip(isMobile, "no wheel on touch");
       await page.goto("/");
       await toRow(page, row);
-      const before = await pageY(page);
       await row.scroller(page).hover({ position: { x: 200, y: 100 } });
+      // Read after the hover: under load Playwright may scroll the row into
+      // view again to reach it, which is not the swipe's doing.
+      const before = await pageY(page);
       // Past half a card, so a mandatory snap carries on rather than
       // settling back.
       await page.mouse.wheel(800, 0);
