@@ -152,7 +152,17 @@ the same time. Skills: Customer Service, Teamwork.
   Workflow Design)
 - Career Access Mentoring Program, Adelaide University, 2025 (Industry
   Mentoring, Professional Skills). His mentor, Bart, is an APT Analyst at
-  Google Threat Intelligence; they met in person at Google Sydney.
+  Google Threat Intelligence; they met in person at Google Sydney. It was a
+  structured 14-hour mentorship, one-on-one, over four to six months, and
+  they have stayed in touch for more than a year since. Bart ran him through
+  a full mock Google interview loop (the online assessment, then technical,
+  behavioural and HR rounds), his first, which taught him to think out
+  loud, show each step of his reasoning, and treat a follow-up question as
+  part of the answer. The feedback changed how he applies: every resume is
+  written for the specific role, in the format its reader expects, and he
+  chooses what to build by where he wants to be in a few years. Bart also
+  introduced him to software engineers at Google, put him in touch with a
+  recruiter for advice, and showed him around Google's Sydney office.
 - Microsoft Certified: Azure Fundamentals (AZ-900), Microsoft, August 2026
   (Cloud Concepts, Azure Services, Governance)
 

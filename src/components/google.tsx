@@ -34,8 +34,8 @@ const photos: Photo[] = [
 
 const facts = [
   { value: "14 hours", label: "one-on-one" },
-  { value: "4 to 6 months", label: "of meetings" },
   { value: "Full loop", label: "mock Google interview" },
+  { value: "Engineers", label: "introductions to Google software engineers" },
   { value: "Sydney", label: "Google office visit" },
 ];
 
@@ -104,27 +104,35 @@ export function Google() {
         ))}
       </dl>
 
-      {/* One paragraph, set in two columns on wide screens. */}
-      <p
-        className="rise mt-10 text-base leading-[1.65] text-ink-muted lg:columns-2 lg:gap-10 lg:text-[17px]"
+      {/* Four paragraphs, set in two columns on wide screens; none breaks
+          across the columns. */}
+      <div
+        className="rise mt-10 space-y-5 text-base leading-[1.65] text-ink-muted lg:columns-2 lg:gap-10 lg:text-[17px] [&>p]:break-inside-avoid"
         style={rise(0.32)}
       >
-        A structured 14-hour mentorship through Adelaide University, spread
-        across meetings over four to six months, mentored one-on-one by an{" "}
-        <span className="hl">APT Analyst at Google Threat Intelligence</span>
-        . We have stayed in touch for more than a year since. He ran me
-        through a full mock Google interview loop, from the online
-        assessment to the technical, behavioural and HR rounds, and was
-        direct about exactly where I was weak and what to work on. He showed
-        me how each round actually works, how to structure an answer, and
-        which of my own experiences to draw on for it. We also covered how
-        engineers at that level approach software craft and problem-solving,
-        and where my strengths fit best. We met in person for the first
-        time at Google&apos;s Sydney office, where he gave me a tour, and he
-        still reviews my thinking whenever I am making a decision about my
-        career.
-      </p>
-      {/* The credential, small, under the paragraph's first column. */}
+        <p>
+          A structured 14-hour mentorship through Adelaide University, one-on-one with an{" "}
+          <span className="hl">APT Analyst at Google Threat Intelligence</span>, over four to six
+          months. We have stayed in touch for more than a year since.
+        </p>
+        <p>
+          He ran me through a full mock Google interview loop: the online assessment, then
+          technical, behavioural and HR rounds. It was my first. It taught me to think out loud,
+          to show each step of my reasoning, and to treat a follow-up question as part of the
+          answer.
+        </p>
+        <p>
+          His feedback changed how I apply. Every resume I send is written for the specific
+          role, in the format its reader expects. I also choose what to build by where I want to
+          be in a few years, not only by the next application.
+        </p>
+        <p>
+          He introduced me to software engineers at Google, put me in touch with a recruiter for
+          advice, and showed me around Google&apos;s Sydney office, where we met in person for
+          the first time.
+        </p>
+      </div>
+      {/* The credential, small, under the text's first column. */}
       <a
         href={CREDENTIAL_URL}
         target="_blank"

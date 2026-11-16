@@ -215,7 +215,8 @@ test.describe("Google bento", () => {
     await expect(pill).toHaveAttribute("target", "_blank");
     const [link, text, thumb] = await Promise.all([
       pill.boundingBox(),
-      page.locator("#google p").last().boundingBox(),
+      // The text block, four paragraphs in two columns.
+      page.locator("#google div:has(> p)").last().boundingBox(),
       pill.locator("img").boundingBox(),
     ]);
     expect(link!.height).toBeCloseTo(36, 0);
