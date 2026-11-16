@@ -6,8 +6,8 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => sessionStorage.setItem("hello", "1"));
 });
 
-const SECTIONS = ["projects", "leadership", "experience", "google", "court", "about", "contact"];
-const LABELS = ["Work", "Leadership", "Experience", "Google", "Tennis", "About", "Contact"];
+const SECTIONS = ["projects", "experience", "leadership", "mentorship", "court", "about", "contact"];
+const LABELS = ["Work", "Experience", "Leadership", "Mentorship", "Tennis", "About", "Contact"];
 const scrollTo = (page: Page, id: string, by = 0) =>
   page.locator(`#${id}`).evaluate((el, by) => window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY + by, behavior: "instant" }), by);
 
@@ -48,6 +48,17 @@ test.describe("nav", () => {
     const box = (await mark.boundingBox())!;
     expect(Math.abs(box.y + box.height / 2 - (header.y + (isMobile ? 64 : 96) / 2))).toBeLessThan(1.5);
   });
+});
+
+test("every section opens with a label, a headline and numbers that keep to their columns", async ({ page }) => {
+  await page.goto("/");
+  for (const id of SECTIONS) await expect(page.locator(`#${id} header h2`)).toHaveCount(1);
+  // A long value ("Premier League") wraps before it runs into the next one.
+  const values = page.locator("section header dd");
+  expect(await values.count()).toBeGreaterThan(15);
+  for (const fits of await values.evaluateAll((els) => els.map((el) => el.scrollWidth <= el.parentElement!.clientWidth + 1))) {
+    expect(fits).toBe(true);
+  }
 });
 
 test("a cover's stack word fits inside its cover at every width", async ({ page }) => {
@@ -147,12 +158,12 @@ test.describe("the merger beats", () => {
 });
 
 test.describe("Google bento", () => {
-  const tiles = (page: Page) => page.locator("#google figure");
+  const tiles = (page: Page) => page.locator("#mentorship figure");
 
   test("the mentor visit is the large tile, two rows tall, with the sign above the selfie beside it; captions sit on the photos", async ({ page, isMobile }) => {
     test.skip(isMobile, "the desktop bento");
     await page.goto("/");
-    await scrollTo(page, "google");
+    await scrollTo(page, "mentorship");
     await expect(tiles(page).locator("figcaption")).toHaveText([
       "Visiting my mentor at Google Sydney",
       "Google Sydney office",
@@ -175,14 +186,14 @@ test.describe("Google bento", () => {
 
   test("the credential is one small pill under the description's first column", async ({ page, isMobile }) => {
     await page.goto("/");
-    await scrollTo(page, "google");
-    const pill = page.locator("#google").getByRole("link", { name: /Certificate of Completion Credential$/ });
+    await scrollTo(page, "mentorship");
+    const pill = page.locator("#mentorship").getByRole("link", { name: /Certificate of Completion Credential$/ });
     await expect(pill).toHaveAttribute("href", "https://www.linkedin.com/feed/update/urn:li:activity:7376092779933835264/");
     await expect(pill).toHaveAttribute("target", "_blank");
     const [link, text, thumb] = await Promise.all([
       pill.boundingBox(),
       // The text block, four paragraphs in two columns.
-      page.locator("#google div:has(> p)").last().boundingBox(),
+      page.locator("#mentorship div:has(> p)").last().boundingBox(),
       pill.locator("img").boundingBox(),
     ]);
     expect(link!.height).toBeCloseTo(36, 0);
@@ -191,7 +202,7 @@ test.describe("Google bento", () => {
     expect(link!.y).toBeGreaterThan(text!.y + text!.height);
     // No full-width row any more: from lg up it fits under the first column.
     if (!isMobile) expect(link!.width).toBeLessThan(text!.width / 2);
-    await expect(page.locator("#google").getByText("Certificate of Completion", { exact: true })).toHaveCount(1);
+    await expect(page.locator("#mentorship").getByText("Certificate of Completion", { exact: true })).toHaveCount(1);
   });
 
   test("phones stack the tiles, large tile first", async ({ page, isMobile }) => {

@@ -25,6 +25,14 @@ const sentences = (text: string) => text.split(/(?<=\.)\s+/);
 
 const storyIndex = (hash: string) => roles.findIndex((r) => hash === `#story-${r.id}`);
 
+// Leadership tells the President role and opens its story, so the list here
+// leaves it out; the story itself still opens in this panel.
+const listed = roles.filter((r) => r.id !== "president");
+// A story's card in the list, or -1 for the story Leadership opens.
+const cardOf = (story: number) => listed.indexOf(roles[story]);
+// Where a story with no card here came from, and shrinks back to.
+const leadershipCard = () => document.querySelector<HTMLElement>("#leadership [data-expand]")?.parentElement ?? null;
+
 /* The rest of a story's photos, after the story: two columns, each photo
    whole, so no shape is cropped to fit. */
 function Gallery({ photos }: { photos: Photo[] }) {
@@ -71,9 +79,10 @@ export function ExperienceRoles() {
     const current = storyRef.current;
     if (current === null) return;
     const from = source.current?.isConnected ? source.current : null;
-    morphClose(from ?? panels.current[current], () => {
+    const home = from ?? panels.current[cardOf(current)] ?? leadershipCard();
+    morphClose(home, () => {
       flushSync(() => setStory(null));
-      if (!from) panels.current[current]?.querySelector<HTMLElement>("[data-expand]")?.focus({ preventScroll: true });
+      if (!from) home?.querySelector<HTMLElement>("[data-expand]")?.focus({ preventScroll: true });
     });
   }
 
@@ -97,7 +106,7 @@ export function ExperienceRoles() {
     const frame = requestAnimationFrame(() => {
       const initial = storyIndex(window.location.hash);
       if (initial < 0) return;
-      setActive(initial);
+      if (cardOf(initial) >= 0) setActive(cardOf(initial));
       setStory(initial);
     });
     window.addEventListener("popstate", onPop);
@@ -111,7 +120,7 @@ export function ExperienceRoles() {
 
   function open(i: number) {
     window.dispatchEvent(
-      new CustomEvent<StoryRequest>(STORY_EVENT, { detail: { id: roles[i].id, from: panels.current[i] } }),
+      new CustomEvent<StoryRequest>(STORY_EVENT, { detail: { id: listed[i].id, from: panels.current[i] } }),
     );
   }
 
@@ -130,11 +139,11 @@ export function ExperienceRoles() {
   // story into the card that is now showing.
   function switchStory(i: number) {
     if (story === null) return;
-    window.history.replaceState(null, "", `#story-${roles[i].id}`);
+    window.history.replaceState(null, "", `#story-${listed[i].id}`);
     source.current = null;
-    morphSwitch(i > story ? 1 : -1, bodyRef.current, () => {
+    morphSwitch(i > cardOf(story) ? 1 : -1, bodyRef.current, () => {
       flushSync(() => {
-        setStory(i);
+        setStory(roles.indexOf(listed[i]));
         setActive(i);
       });
       bodyRef.current?.scrollTo({ top: 0 });
@@ -142,7 +151,7 @@ export function ExperienceRoles() {
   }
 
   function onKeyDown(e: React.KeyboardEvent) {
-    const last = roles.length - 1;
+    const last = listed.length - 1;
     const to =
       e.key === "ArrowDown" || e.key === "ArrowRight"
         ? active === last ? 0 : active + 1
@@ -160,8 +169,10 @@ export function ExperienceRoles() {
   }
 
   const current = story === null ? null : roles[story];
-  const prev = story !== null && story > 0 ? story - 1 : null;
-  const next = story !== null && story < roles.length - 1 ? story + 1 : null;
+  // Previous and next walk the list; the President story stands alone.
+  const card = story === null ? -1 : cardOf(story);
+  const prev = card > 0 ? card - 1 : null;
+  const next = card >= 0 && card < listed.length - 1 ? card + 1 : null;
 
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,500px)_minmax(0,1fr)] lg:items-start lg:gap-[60px]">
@@ -171,7 +182,7 @@ export function ExperienceRoles() {
         onKeyDown={onKeyDown}
         className="-mx-5 flex gap-2 overflow-x-auto px-5 py-1 [scrollbar-width:none] sm:-mx-8 sm:px-8 lg:mx-0 lg:flex-col lg:gap-0 lg:overflow-visible lg:border-b lg:border-hairline lg:p-0 [&::-webkit-scrollbar]:hidden"
       >
-        {roles.map((r, i) => {
+        {listed.map((r, i) => {
           const on = i === active;
           return (
             <button
@@ -225,7 +236,7 @@ export function ExperienceRoles() {
         })}
       </div>
 
-      {roles.map((r, i) => {
+      {listed.map((r, i) => {
         const photo = r.photos[0];
         return (
           <article

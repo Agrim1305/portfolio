@@ -1,4 +1,5 @@
 import { ArrowUpRight, Mail } from "lucide-react";
+import { SectionHeader } from "@/components/section-header";
 import { GITHUB_URL, LINKEDIN_URL } from "@/components/social-links";
 
 const rise = (delay: number) => ({ "--rise-delay": `${delay}s` }) as React.CSSProperties;
@@ -10,11 +11,17 @@ export function Contact() {
         aria-hidden
         className="glow-pulse pointer-events-none absolute left-1/2 top-10 -z-10 aspect-square w-[min(90vw,520px)] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgb(255_91_46/0.3),rgb(255_91_46/0.08)_42%,transparent_68%)]"
       />
+      <div className="wrap">
+        <SectionHeader
+          label="Contact"
+          headline="Open to graduate software engineering roles from December 2026."
+        />
+      </div>
       <div className="wrap flex flex-col items-center text-center">
-        <h2 className="rise font-display text-[clamp(5.5rem,1.5rem+11vw,11.875rem)] font-extrabold uppercase leading-[0.9] tracking-[-0.035em] text-transparent [-webkit-text-stroke:1.5px_rgb(241_239_234/0.55)]">
+        <p className="rise font-display text-[clamp(5.5rem,1.5rem+11vw,11.875rem)] font-extrabold uppercase leading-[0.9] tracking-[-0.035em] text-transparent [-webkit-text-stroke:1.5px_rgb(241_239_234/0.55)]">
           <span className="block sm:inline">Let&apos;s</span>{" "}
           <span className="block sm:inline">build</span>
-        </h2>
+        </p>
 
         <p
           className="rise mt-8 max-w-2xl text-lg leading-relaxed text-ink-soft sm:text-xl"

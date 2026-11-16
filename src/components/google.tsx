@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
+import { SectionHeader } from "@/components/section-header";
 import type { Photo } from "@/lib/stories";
 
 const CREDENTIAL_URL = "https://www.linkedin.com/feed/update/urn:li:activity:7376092779933835264/";
@@ -66,22 +67,17 @@ function Tile({ photo, sizes, className = "" }: { photo: Photo; sizes: string; c
 export function Google() {
   const [lead, ...rest] = photos;
   return (
-    <section id="google" className="wrap py-20 lg:py-28">
-      <p className="rise font-mono text-[11px] uppercase tracking-[0.15em] text-accent-soft lg:text-[13px]">
-        Mentorship
-      </p>
-      <h2
-        className="rise mt-3 font-display text-[clamp(3rem,1.6rem+4.8vw,6rem)] font-extrabold leading-[0.95] tracking-[-0.04em] text-ink"
-        style={rise(0.04)}
-      >
-        Google,{" "}
-        <span className="font-serif font-medium italic tracking-normal text-accent">up close.</span>
-      </h2>
-      <p className="rise mt-4 text-base text-ink-muted lg:text-xl" style={rise(0.08)}>
+    <section id="mentorship" className="wrap py-20 lg:py-28">
+      <SectionHeader
+        label="Mentorship"
+        headline="Fourteen hours one-on-one with an analyst at Google Threat Intelligence."
+        numbers={facts}
+      />
+      <p className="rise text-[15px] text-ink-muted lg:text-lg" style={rise(0.08)}>
         Career Access Mentoring Program · Adelaide University
       </p>
 
-      <div className="rise mt-10 lg:mt-14" style={rise(0.16)}>
+      <div className="rise mt-8" style={rise(0.16)}>
         <div className="grid gap-4 lg:grid-cols-[minmax(0,700fr)_minmax(0,470fr)] lg:gap-6">
           <Tile photo={lead} sizes="(min-width: 1024px) 700px, 100vw" className="lg:row-span-2 lg:aspect-auto" />
           {rest.map((photo) => (
@@ -89,20 +85,6 @@ export function Google() {
           ))}
         </div>
       </div>
-
-      <dl
-        className="rise mt-10 grid grid-cols-2 border-y border-hairline lg:mt-12 lg:grid-cols-4"
-        style={rise(0.24)}
-      >
-        {facts.map((f) => (
-          <div key={f.value} className="flex flex-col py-5 lg:py-[22px]">
-            <dt className="order-last mt-1 text-sm text-ink-muted">{f.label}</dt>
-            <dd className="font-display text-[26px] font-extrabold leading-tight text-ink lg:text-[34px]">
-              {f.value}
-            </dd>
-          </div>
-        ))}
-      </dl>
 
       {/* Four paragraphs, set in two columns on wide screens; none breaks
           across the columns. */}

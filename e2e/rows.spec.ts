@@ -368,7 +368,7 @@ test("Lenis glides the wheel: a notch moves the page over several frames, not at
 
 test("nav anchors land with the section's heading in full view below the nav", async ({ page, isMobile }) => {
   await page.goto("/");
-  const ids = ["projects", "leadership", "experience", "google", "court", "about", "contact"];
+  const ids = ["projects", "experience", "leadership", "mentorship", "court", "about", "contact"];
   for (const id of ids) {
     if (isMobile) {
       await page.getByRole("button", { name: "Open menu" }).click();

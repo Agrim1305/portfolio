@@ -34,7 +34,7 @@ test("home page passes axe", async ({ page }) => {
 
 // Each section on its own, scrolled into view: at 1440 wide on desktop and
 // 390 on mobile.
-for (const id of ["top", "projects", "leadership", "experience", "google", "court", "about", "contact"]) {
+for (const id of ["top", "projects", "experience", "leadership", "mentorship", "court", "about", "contact"]) {
   test(`#${id} passes axe`, async ({ page }) => {
     await page.goto("/");
     await page.locator(`#${id}`).evaluate((el) => window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY, behavior: "instant" }));

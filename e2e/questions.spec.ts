@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
-const SECTIONS = ["projects", "leadership", "experience", "google", "court", "about", "contact"];
+const SECTIONS = ["projects", "experience", "leadership", "mentorship", "court", "about", "contact"];
 
 // Scrolls a section into view the way a reader stops on it, then waits for
 // the page to rest and the question to be offered.

@@ -23,10 +23,10 @@ export default async function Home() {
         <TechStrip />
         <Projects />
         <Reveal>
-          <Leadership />
+          <Experience />
         </Reveal>
         <Reveal>
-          <Experience />
+          <Leadership />
         </Reveal>
         <Reveal>
           <Google />

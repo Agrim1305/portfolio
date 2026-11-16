@@ -267,7 +267,7 @@ test.describe("the cloud's moods follow the chat stream", () => {
 test.describe("the cloud's faces", () => {
   const face = (page: import("@playwright/test").Page) => page.locator("button.dock .cloud");
   const docked = async (page: import("@playwright/test").Page) => {
-    await page.evaluate(() => window.scrollTo({ top: document.getElementById("google")!.offsetTop + 200, behavior: "instant" }));
+    await page.evaluate(() => window.scrollTo({ top: document.getElementById("mentorship")!.offsetTop + 200, behavior: "instant" }));
     await expect(page.getByRole("button", { name: "Ask Aris, Agrim's AI assistant" })).toBeVisible();
   };
 
@@ -600,9 +600,9 @@ test.describe("selected work", () => {
     await skip.focus();
     await expect(skip).toBeVisible();
     await page.keyboard.press("Enter");
-    await expect(page.locator("#leadership")).toBeFocused();
+    await expect(page.locator("#experience")).toBeFocused();
     await expect
-      .poll(() => page.evaluate(() => document.getElementById("leadership")!.getBoundingClientRect().top))
+      .poll(() => page.evaluate(() => document.getElementById("experience")!.getBoundingClientRect().top))
       .toBeLessThan(200);
   });
 
@@ -763,9 +763,20 @@ test("Leadership opens the whole merger story as the President story", async ({ 
   await expect(sheet).toBeVisible();
   await expect(sheet.getByRole("heading", { name: "What I did" })).toBeVisible();
   await expect(page).toHaveURL(/#story-president$/);
+  // It stands alone: the other roles' stories are Experience's.
+  await expect(sheet.getByRole("button", { name: /role$/ })).toHaveCount(0);
   await page.keyboard.press("Escape");
   await expect(sheet).toBeHidden();
   await expect(page).toHaveURL(/\/$/);
+});
+
+test("a shared President link opens the story, and closing it lands on Leadership's button", async ({ page }) => {
+  await page.goto("/#story-president");
+  const sheet = page.getByRole("dialog", { name: "President" });
+  await expect(sheet).toBeVisible();
+  await sheet.getByRole("button", { name: "Close" }).click();
+  await expect(sheet).toBeHidden();
+  await expect(page.getByRole("button", { name: "Read the whole story" })).toBeFocused();
 });
 
 test.describe("experience", () => {
@@ -776,7 +787,7 @@ test.describe("experience", () => {
     await page.keyboard.press("ArrowDown");
     await expect(tabs.nth(1)).toBeFocused();
     await expect(tabs.nth(1)).toHaveAttribute("aria-selected", "true");
-    await expect(page.getByRole("tabpanel")).toContainText("Turned a dormant club into Club of the Year 2025");
+    await expect(page.getByRole("tabpanel")).toContainText("I coach 10+ sessions a week");
     await page.keyboard.press("End");
     await expect(page.getByRole("tabpanel")).toContainText("Part-time customer service across two stores");
   });
@@ -784,9 +795,11 @@ test.describe("experience", () => {
   test("every role opens its full story, and Back closes it", async ({ page }) => {
     await page.goto("/");
     const tabs = page.getByRole("tablist", { name: "Roles" }).getByRole("tab");
-    const names = ["AI Software Engineering Intern", "President", "Tennis Coach and Assistant Head Coach", "Retail Assistant"];
-    const ids = ["internship", "president", "coaching", "retail"];
-    for (let i = 0; i < 4; i++) {
+    // The President role is Leadership's: its story opens from there.
+    await expect(tabs).toHaveCount(3);
+    const names = ["AI Software Engineering Intern", "Tennis Coach and Assistant Head Coach", "Retail Assistant"];
+    const ids = ["internship", "coaching", "retail"];
+    for (let i = 0; i < 3; i++) {
       await tabs.nth(i).click();
       // Off the list, so no other role slides under the pointer as the page
       // moves and takes over by hover.
@@ -821,8 +834,8 @@ test.describe("experience", () => {
     await page.goto("/");
     await page.getByRole("tabpanel").getByRole("button", { name: "Read the full story" }).click();
     await page.getByRole("button", { name: "Next role" }).click();
-    await expect(page.getByRole("dialog", { name: "President" })).toBeVisible();
-    await expect(page).toHaveURL(/#story-president$/);
+    await expect(page.getByRole("dialog", { name: "Tennis Coach and Assistant Head Coach" })).toBeVisible();
+    await expect(page).toHaveURL(/#story-coaching$/);
     await page.getByRole("button", { name: "Previous role" }).click();
     await expect(page.getByRole("dialog", { name: "AI Software Engineering Intern" })).toBeVisible();
   });
@@ -835,14 +848,14 @@ test.describe("experience", () => {
     const story = page.getByRole("dialog", { name: "AI Software Engineering Intern" });
     await expect(story).toBeVisible();
     await page.keyboard.press("ArrowRight");
-    await expect(page.getByRole("dialog", { name: "President" })).toBeVisible();
-    await expect(page).toHaveURL(/#story-president$/);
-    await expect(page.getByRole("dialog")).toContainText("Club of the Year · Adelaide University Sport, 2025");
+    await expect(page.getByRole("dialog", { name: "Tennis Coach and Assistant Head Coach" })).toBeVisible();
+    await expect(page).toHaveURL(/#story-coaching$/);
+    await expect(page.getByRole("dialog")).toContainText("Coaching juniors");
     await page.getByRole("dialog").getByRole("button", { name: "Close" }).click();
     await expect(page.getByRole("dialog")).toBeHidden();
     const focused = page.locator("[data-expand]").filter({ visible: true }).filter({ hasText: "Read the full story" });
     await expect(focused).toBeFocused();
-    await expect(focused).toHaveAccessibleDescription(/President|Adelaide University Tennis Club/);
+    await expect(focused).toHaveAccessibleDescription(/Tennis Coach|Tea Tree Gully Tennis Club/);
   });
 
   test("a story link opens the page with that story showing", async ({ page }) => {

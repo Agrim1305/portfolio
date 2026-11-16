@@ -10,9 +10,9 @@ import { scrollToElement } from "@/components/smooth-scroll";
 // In page order: the active-section highlight walks this list.
 const sections = [
   { id: "projects", label: "Work" },
-  { id: "leadership", label: "Leadership" },
   { id: "experience", label: "Experience" },
-  { id: "google", label: "Google" },
+  { id: "leadership", label: "Leadership" },
+  { id: "mentorship", label: "Mentorship" },
   { id: "court", label: "Tennis" },
   { id: "about", label: "About" },
   { id: "contact", label: "Contact" },

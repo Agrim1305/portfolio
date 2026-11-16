@@ -19,7 +19,7 @@ export function SectionHeader({
       <h2 className="mt-3 max-w-[820px] font-display text-[clamp(1.75rem,1.2rem+1.8vw,2.5rem)] font-extrabold leading-[1.05] tracking-[-0.02em] text-ink">
         {headline}
       </h2>
-      {numbers && <Metrics metrics={numbers} className="mt-8 grid-cols-2 lg:grid-cols-4" />}
+      {numbers && <Metrics metrics={numbers} className="mt-8 grid-cols-2 lg:grid-cols-4 [&_dd]:whitespace-normal" />}
     </header>
   );
 }

@@ -210,7 +210,7 @@ export function Projects() {
       data-active={active}
       className="py-20 lg:py-28"
     >
-      <SkipLink to="leadership" />
+      <SkipLink to="experience" />
       <div className="wrap">
         <SectionHeader
           label="Selected work"

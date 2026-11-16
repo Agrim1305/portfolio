@@ -2,6 +2,7 @@
 
 import { ArrowLeft, ArrowRight, Pause, Play } from "lucide-react";
 import { Journey } from "@/components/journey";
+import { SectionHeader } from "@/components/section-header";
 import { SkipLink } from "@/components/skip-link";
 import { useAutoAdvance, useRow } from "@/lib/row";
 
@@ -91,33 +92,35 @@ export function Court({ colours }: { colours: Record<string, string> }) {
     <section id="court">
       <div className="wrap relative pt-20 lg:pt-28">
         <SkipLink to="about" />
-        <div className="flex items-end justify-between gap-6">
-          <h2 className="rise font-display text-[3.75rem] font-extrabold uppercase leading-[0.95] tracking-[-0.035em] text-ink md:text-[clamp(3rem,1.2rem+3.8vw,4.75rem)]">
-            <span className="block md:inline">Built on</span>{" "}
-            <span className="block pb-1 font-serif text-[1.18em] font-medium normal-case italic leading-none tracking-normal text-accent md:inline">
-              court.
-            </span>
-          </h2>
-          <div className="hidden items-center gap-3.5 pb-2 lg:flex">
-            <span aria-hidden className="min-w-16 text-right text-[15px] text-ink-faint">
-              <span className="font-semibold text-ink">{pad(current + 1)}</span> / {pad(stops.length)}
-            </span>
-            <button type="button" aria-label="Previous stop" disabled={current === 0} onClick={() => press(-1)} className={arrow}>
-              <ArrowLeft className="size-[18px]" aria-hidden />
-            </button>
-            <button type="button" aria-label="Next stop" disabled={current === last} onClick={() => press(1)} className={arrow}>
-              <ArrowRight className="size-[18px]" aria-hidden />
-            </button>
-          </div>
-        </div>
-        <p className="rise mt-5 max-w-[62ch] text-lg leading-relaxed text-ink-muted">
+        <SectionHeader
+          label="Built on court"
+          headline="Fifteen years of competing, and the habits it gave me for work."
+          numbers={[
+            { value: "Top 90", label: "national junior ranking, India" },
+            { value: "15", label: "years on court" },
+            { value: "Premier League", label: "top grade in South Australia" },
+            { value: "50+", label: "players coached" },
+          ]}
+        />
+        <p className="rise max-w-[62ch] text-lg leading-relaxed text-ink-muted">
           I&apos;ve competed since I was a kid in India, from a top-90 national junior ranking to the Rafa Nadal
           Academy and university tennis in Australia. It taught me the habits I bring to work: training when no
           one&apos;s watching, competing under pressure, and coaching others to get better.
         </p>
+        <div className="mt-6 hidden items-center justify-end gap-3.5 lg:flex">
+          <span aria-hidden className="min-w-16 text-right text-[15px] text-ink-faint">
+            <span className="font-semibold text-ink">{pad(current + 1)}</span> / {pad(stops.length)}
+          </span>
+          <button type="button" aria-label="Previous stop" disabled={current === 0} onClick={() => press(-1)} className={arrow}>
+            <ArrowLeft className="size-[18px]" aria-hidden />
+          </button>
+          <button type="button" aria-label="Next stop" disabled={current === last} onClick={() => press(1)} className={arrow}>
+            <ArrowRight className="size-[18px]" aria-hidden />
+          </button>
+        </div>
 
         {/* Nothing in a stop takes focus, so the row itself does. */}
-        <div className="rise relative mt-10 overflow-hidden rounded-[18px] bg-surface shadow-[inset_0_0_0_1px_rgb(241_239_234/0.08)] lg:rounded-[20px]">
+        <div className="rise relative mt-10 overflow-hidden lg:mt-6 rounded-[18px] bg-surface shadow-[inset_0_0_0_1px_rgb(241_239_234/0.08)] lg:rounded-[20px]">
           {/* Announced only when the visitor moves the row, never while it
               moves by itself. */}
           <p aria-live={auto.playing ? "off" : "polite"} className="sr-only">
