@@ -61,7 +61,7 @@ export const coachingPhoto: Photo = {
 
 export const mergerStory = [
   {
-    label: "Setup",
+    label: "Situation and task",
     text: "Adelaide and UniSA were merging, so every affiliated club had to merge too. I was president of the club that was ahead on membership and results, so I ran our side of it. That meant recruiting and bringing the right people across, aligning two committees that each ran their own social and competitive tennis, leading the merged constitution, and keeping every stakeholder comfortable, the University most of all, with as few conflicts as possible.",
   },
   {
@@ -70,7 +70,7 @@ export const mergerStory = [
   },
   {
     label: "Result",
-    text: "One merged club running smoothly, both coaches retained on a model that actually worked, the members kept happy through the transition, and Club of the Year in the same year.",
+    text: "One merged club running smoothly, with both coaches retained on a model that worked and members kept on side through the transition. Over the 18 months, active membership grew from about 10 to 100+, regular participation rose 75%, four grant applications secured $7,000+ in new fencing, nets and poles, and the club won Club of the Year 2025 and the Jessop Shield. I ran an annual budget of about $10,000 to $11,000, and our orientation week drew about 78 people.",
   },
 ];
 

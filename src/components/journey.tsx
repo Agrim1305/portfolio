@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { ArrowLeft, ArrowRight, Play, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Pause, Play, X } from "lucide-react";
 import { Sheet } from "@/components/sheet";
 import { chapters, columnsOf, type JourneyMedia } from "@/lib/journey";
-import { useRow } from "@/lib/row";
+import { useAutoAdvance, useQuiet, useRow } from "@/lib/row";
 
 // Media heights by breakpoint, for next/image's sizes. Keep in step with
 // .journey-track in globals.css.
@@ -15,17 +15,6 @@ const HEIGHTS = { lg: { tall: 430, half: 187 }, md: { tall: 340, half: 142 }, ph
 // is also the lightbox's order.
 const layout = chapters.map((chapter) => ({ chapter, columns: columnsOf(chapter.media) }));
 const media = layout.flatMap(({ columns }) => columns.flatMap((c) => c.media));
-
-/* Quiet: reduced motion or Save-Data. No autoplay, no fades, no lift, a
-   still glow. Taken as quiet until the browser says otherwise. */
-const QUIET_QUERY = "(prefers-reduced-motion: reduce)";
-const saveData = () => Boolean((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData);
-function subscribeQuiet(onChange: () => void) {
-  const mq = window.matchMedia(QUIET_QUERY);
-  mq.addEventListener("change", onChange);
-  return () => mq.removeEventListener("change", onChange);
-}
-const useQuiet = () => useSyncExternalStore(subscribeQuiet, () => window.matchMedia(QUIET_QUERY).matches || saveData(), () => true);
 
 /* "A glimpse of my journey": a sideways row of chapter cards, photos and
    clips, school to university. Tall media fill a column; wide ones stack in
@@ -51,7 +40,7 @@ export function Journey({ colours }: { colours: Record<string, string> }) {
   // Set by the effect below; plays every clip or none.
   const sync = useRef(() => {});
 
-  const { ref: track, ends, step } = useRow({
+  const { ref: track, ends, go, step } = useRow({
     onMove: (at, stops) => {
       const row = track.current!;
       // Columns more than three ahead sit back at 55%, coming forward as
@@ -126,6 +115,15 @@ export function Journey({ colours }: { colours: Record<string, string> }) {
     "flex size-12 items-center justify-center rounded-full transition-[opacity,background-color,color,border-color] duration-300 disabled:pointer-events-none disabled:opacity-30";
   let index = 0;
 
+  // The strip moves on a stop every five seconds, back to the start from
+  // the end, until the visitor takes it over: a press here, or a photo
+  // opened in the lightbox.
+  const auto = useAutoAdvance(track, () => (ends.end ? go(0) : step(1)));
+  const press = (by: number) => {
+    auto.stop();
+    step(by);
+  };
+
   return (
     <div ref={root} className="journey overflow-x-clip" data-quiet={quiet || undefined}>
       <div className="wrap flex items-end justify-between gap-6">
@@ -136,11 +134,23 @@ export function Journey({ colours }: { colours: Record<string, string> }) {
           </h2>
           <p className="mt-2 text-[15px] text-ink-muted lg:text-[17px]">From a school court in India to university tennis in Adelaide.</p>
         </div>
-        <div className="hidden shrink-0 gap-3 pb-1 md:flex">
-          <button type="button" aria-label="Previous" disabled={ends.start} onClick={() => step(-1)} className={`${arrow} border border-ink/25 text-ink hover:border-ink`}>
+        <div className="flex shrink-0 gap-3 pb-1">
+          {/* Anything that moves by itself needs a way to stop it (WCAG
+              2.2.2), at every width. */}
+          {auto.available && (
+            <button
+              type="button"
+              aria-label={auto.playing ? "Pause the journey" : "Play the journey"}
+              onClick={auto.toggle}
+              className={`${arrow} border border-ink/25 text-ink hover:border-ink`}
+            >
+              {auto.playing ? <Pause className="size-[18px]" aria-hidden /> : <Play className="size-[18px]" aria-hidden />}
+            </button>
+          )}
+          <button type="button" aria-label="Previous" disabled={ends.start} onClick={() => press(-1)} className={`${arrow} hidden border border-ink/25 text-ink hover:border-ink md:flex`}>
             <ArrowLeft className="size-[18px]" aria-hidden />
           </button>
-          <button type="button" aria-label="Next" disabled={ends.end} onClick={() => step(1)} className={`${arrow} bg-ink text-paper hover:bg-accent`}>
+          <button type="button" aria-label="Next" disabled={ends.end} onClick={() => press(1)} className={`${arrow} hidden bg-ink text-paper hover:bg-accent md:flex`}>
             <ArrowRight className="size-[18px]" aria-hidden />
           </button>
         </div>
@@ -162,8 +172,8 @@ export function Journey({ colours }: { colours: Record<string, string> }) {
           className="wrap relative"
           onKeyDown={(e) => {
             if (e.target !== e.currentTarget) return;
-            if (e.key === "ArrowRight") step(1);
-            if (e.key === "ArrowLeft") step(-1);
+            if (e.key === "ArrowRight") press(1);
+            if (e.key === "ArrowLeft") press(-1);
           }}
         >
           <div ref={track} data-lenis-prevent-horizontal className="journey-track">
@@ -193,7 +203,10 @@ export function Journey({ colours }: { colours: Record<string, string> }) {
                         buttonRef={(el) => {
                           buttons.current[i] = el;
                         }}
-                        onOpen={() => setOpen(i)}
+                        onOpen={() => {
+                          auto.stop();
+                          setOpen(i);
+                        }}
                       />
                     );
                   });

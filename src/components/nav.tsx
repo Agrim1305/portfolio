@@ -10,9 +10,9 @@ import { scrollToElement } from "@/components/smooth-scroll";
 // In page order: the active-section highlight walks this list.
 const sections = [
   { id: "projects", label: "Work" },
-  { id: "leadership", label: "Leadership" },
   { id: "experience", label: "Experience" },
-  { id: "google", label: "Google" },
+  { id: "leadership", label: "Leadership" },
+  { id: "mentorship", label: "Mentorship" },
   { id: "court", label: "Tennis" },
   { id: "about", label: "About" },
   { id: "contact", label: "Contact" },
@@ -37,6 +37,14 @@ export function Nav() {
 
   // Section links point into the home page, so prefetching them (on by
   // default) would only re-download the page the visitor is already on.
+  // The Mentorship section was #google until Nov 2026; old links still land.
+  useEffect(() => {
+    if (window.location.hash !== "#google") return;
+    window.history.replaceState(null, "", "#mentorship");
+    const el = document.getElementById("mentorship");
+    if (el) scrollToElement(el);
+  }, []);
+
   useEffect(() => {
     // Highlight the last section whose top has passed a line a third of the way
     // down the viewport. A plain scroll listener, since the browser pauses rAF

@@ -33,7 +33,7 @@ export const TOOLS = [
   {
     name: "get_project",
     description:
-      "Look up one of Agrim's listed projects and get its summary: status, role, stack, links, problem, approach and impact. Use it when the visitor asks about a specific project and you want its details in front of you. It changes nothing on the visitor's screen.",
+      "Look up one of Agrim's listed projects and get its summary: status, role, stack, links, situation, task, actions and result. Use it when the visitor asks about a specific project and you want its details in front of you. It changes nothing on the visitor's screen.",
     input_schema: slugInput,
   },
   {

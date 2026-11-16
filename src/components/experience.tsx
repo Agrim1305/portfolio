@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { ExperienceRoles } from "@/components/experience-roles";
+import { SectionHeader } from "@/components/section-header";
 
 type Certification = {
   name: string;
@@ -70,33 +71,20 @@ const credentialLink =
 
 export function Experience() {
   return (
-    <section id="experience" className="wrap py-20 lg:py-28">
-      <h2 className="rise font-display text-[clamp(3rem,1.6rem+4.4vw,4.75rem)] font-extrabold leading-[1.05] tracking-[-0.03em] text-ink">
-        Where I&apos;ve{" "}
-        <span className="font-serif text-[1.18em] font-medium italic tracking-normal text-accent">
-          worked
-        </span>
-      </h2>
-      <p className="rise mt-3 text-[15px] text-ink-muted lg:text-[17px]" style={rise(0.04)}>
-        Hover a role for the short version. Read more for the full story.
-      </p>
+    <section id="experience" tabIndex={-1} className="outline-none wrap py-20 lg:py-28">
+      <SectionHeader
+        label="Experience"
+        headline="Work done for a founder, for paying clients and for players, alongside a full-time degree."
+        numbers={[
+          { value: "1.9 s", label: "median spoken answer, voice AI" },
+          { value: "31", label: "merged pull requests" },
+          { value: "50+", label: "coaching clients" },
+        ]}
+      />
 
-      <p
-        className="rise mt-5 max-w-3xl text-base leading-relaxed text-ink-soft lg:text-[17px]"
-        style={rise(0.08)}
-      >
-        Across leading a committee, coaching more than fifty clients of every
-        age and background, and working a busy retail floor, the common thread
-        is <span className="hl">working with people</span>. It&apos;s made me
-        good at reading and communicating with people from all walks of life,
-        and comfortable fitting into any environment, including the Australian
-        workplace I want to build my career in.
-      </p>
-
-      <div className="rise mt-10 lg:mt-14" style={rise(0.16)}>
+      <div className="rise" style={rise(0.16)}>
         <ExperienceRoles />
       </div>
-
 
       <div className="rise mt-16 lg:mt-20" style={rise(0.24)}>
         <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-accent-soft">

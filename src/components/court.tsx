@@ -1,9 +1,10 @@
 "use client";
 
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Pause, Play } from "lucide-react";
 import { Journey } from "@/components/journey";
+import { SectionHeader } from "@/components/section-header";
 import { SkipLink } from "@/components/skip-link";
-import { useRow } from "@/lib/row";
+import { useAutoAdvance, useRow } from "@/lib/row";
 
 type Stop = {
   /** Short name under the timeline dot. */
@@ -77,6 +78,12 @@ const pad = (n: number) => String(n).padStart(2, "0");
 export function Court({ colours }: { colours: Record<string, string> }) {
   const last = stops.length - 1;
   const { ref: trackRef, active: current, go, step } = useRow();
+  // The stops move on every five seconds, back to the first from the last.
+  const auto = useAutoAdvance(trackRef, () => (current === last ? go(0) : step(1)));
+  const press = (by: number) => {
+    auto.stop();
+    step(by);
+  };
 
   const arrow =
     "flex size-12 items-center justify-center rounded-full border border-ink/20 text-ink transition-[opacity,background-color,color,border-color] duration-300 hover:border-accent hover:bg-accent hover:text-paper disabled:pointer-events-none disabled:opacity-30";
@@ -85,36 +92,52 @@ export function Court({ colours }: { colours: Record<string, string> }) {
     <section id="court">
       <div className="wrap relative pt-20 lg:pt-28">
         <SkipLink to="about" />
-        <div className="flex items-end justify-between gap-6">
-          <h2 className="rise font-display text-[3.75rem] font-extrabold uppercase leading-[0.95] tracking-[-0.035em] text-ink md:text-[clamp(3rem,1.2rem+3.8vw,4.75rem)]">
-            <span className="block md:inline">Built on</span>{" "}
-            <span className="block pb-1 font-serif text-[1.18em] font-medium normal-case italic leading-none tracking-normal text-accent md:inline">
-              court.
-            </span>
-          </h2>
-          <div className="hidden items-center gap-3.5 pb-2 lg:flex">
-            <span aria-hidden className="min-w-16 text-right text-[15px] text-ink-faint">
-              <span className="font-semibold text-ink">{pad(current + 1)}</span> / {pad(stops.length)}
-            </span>
-            <button type="button" aria-label="Previous stop" disabled={current === 0} onClick={() => step(-1)} className={arrow}>
-              <ArrowLeft className="size-[18px]" aria-hidden />
-            </button>
-            <button type="button" aria-label="Next stop" disabled={current === last} onClick={() => step(1)} className={arrow}>
-              <ArrowRight className="size-[18px]" aria-hidden />
-            </button>
-          </div>
-        </div>
-        <p className="rise mt-5 max-w-[62ch] text-lg leading-relaxed text-ink-muted">
+        <SectionHeader
+          label="Built on court"
+          headline="Fifteen years of competing, and the habits it gave me for work."
+          numbers={[
+            { value: "Top 90", label: "national junior ranking, India" },
+            { value: "15", label: "years on court" },
+            { value: "Top grade", label: "Premier League, Tennis SA" },
+            { value: "50+", label: "players coached" },
+          ]}
+        />
+        <p className="rise max-w-[62ch] text-lg leading-relaxed text-ink-muted">
           I&apos;ve competed since I was a kid in India, from a top-90 national junior ranking to the Rafa Nadal
           Academy and university tennis in Australia. It taught me the habits I bring to work: training when no
           one&apos;s watching, competing under pressure, and coaching others to get better.
         </p>
+        <div className="mt-6 hidden items-center justify-end gap-3.5 lg:flex">
+          <span aria-hidden className="min-w-16 text-right text-[15px] text-ink-faint">
+            <span className="font-semibold text-ink">{pad(current + 1)}</span> / {pad(stops.length)}
+          </span>
+          <button type="button" aria-label="Previous stop" disabled={current === 0} onClick={() => press(-1)} className={arrow}>
+            <ArrowLeft className="size-[18px]" aria-hidden />
+          </button>
+          <button type="button" aria-label="Next stop" disabled={current === last} onClick={() => press(1)} className={arrow}>
+            <ArrowRight className="size-[18px]" aria-hidden />
+          </button>
+        </div>
 
         {/* Nothing in a stop takes focus, so the row itself does. */}
-        <div className="rise relative mt-10 overflow-hidden rounded-[18px] bg-surface shadow-[inset_0_0_0_1px_rgb(241_239_234/0.08)] lg:rounded-[20px]">
-          <p aria-live="polite" className="sr-only">
+        <div className="rise relative mt-10 overflow-hidden lg:mt-6 rounded-[18px] bg-surface shadow-[inset_0_0_0_1px_rgb(241_239_234/0.08)] lg:rounded-[20px]">
+          {/* Announced only when the visitor moves the row, never while it
+              moves by itself. */}
+          <p aria-live={auto.playing ? "off" : "polite"} className="sr-only">
             {current + 1} of {stops.length}: {stops[current].dot}
           </p>
+          {/* Anything that moves by itself needs a way to stop it (WCAG
+              2.2.2). */}
+          {auto.available && (
+            <button
+              type="button"
+              aria-label={auto.playing ? "Pause Built on court" : "Play Built on court"}
+              onClick={auto.toggle}
+              className="glass absolute right-3 top-3 z-10 flex size-11 items-center justify-center rounded-full text-ink"
+            >
+              {auto.playing ? <Pause className="size-4" aria-hidden /> : <Play className="size-4" aria-hidden />}
+            </button>
+          )}
           <div
             ref={trackRef}
             role="region"
@@ -166,7 +189,7 @@ export function Court({ colours }: { colours: Record<string, string> }) {
 
         {/* Timeline: a rail that fills up to the current stop, one dot per stop. */}
         <div className="rise mt-6 flex items-center gap-3 lg:mb-4 lg:mt-6 lg:block lg:px-[60px]">
-          <button type="button" aria-label="Previous stop" disabled={current === 0} onClick={() => step(-1)} className={`${arrow} shrink-0 lg:hidden`}>
+          <button type="button" aria-label="Previous stop" disabled={current === 0} onClick={() => press(-1)} className={`${arrow} shrink-0 lg:hidden`}>
             <ArrowLeft className="size-[18px]" aria-hidden />
           </button>
           <div className="flex flex-1 flex-col items-center gap-2.5">
@@ -181,7 +204,10 @@ export function Court({ colours }: { colours: Record<string, string> }) {
                 <button
                   key={s.dot}
                   type="button"
-                  onClick={() => go(i)}
+                  onClick={() => {
+                    auto.stop();
+                    go(i);
+                  }}
                   aria-label={`Go to ${s.dot}`}
                   aria-current={i === current ? "step" : undefined}
                   className="group absolute top-1/2 flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
@@ -207,7 +233,7 @@ export function Court({ colours }: { colours: Record<string, string> }) {
               <span className="font-semibold text-ink">{pad(current + 1)}</span> / {pad(stops.length)} · {stops[current].dot}
             </p>
           </div>
-          <button type="button" aria-label="Next stop" disabled={current === last} onClick={() => step(1)} className={`${arrow} shrink-0 border-0 bg-accent text-paper lg:hidden`}>
+          <button type="button" aria-label="Next stop" disabled={current === last} onClick={() => press(1)} className={`${arrow} shrink-0 border-0 bg-accent text-paper lg:hidden`}>
             <ArrowRight className="size-[18px]" aria-hidden />
           </button>
         </div>

@@ -11,11 +11,11 @@ isn't answered here, the assistant says so honestly instead of guessing.
 Agrim Sharma is a final-year Computer Science student at Adelaide
 University, majoring in Artificial Intelligence, graduating December 2026.
 Based in Adelaide, South Australia. Completed an AI engineering
-internship at Aurivox (Viemo Capital & Consulting), Aug to Nov 2026, as part
+internship at Viemo Capital, Aug to Nov 2026, as part
 of his final semester. Available for graduate roles from December 2026. Looking for graduate
 roles in software engineering, AI, data, and analytics.
 
-GPA: 5.35/7.0, holds a 15% International Merit Scholarship.
+Holds a 15% International Merit Scholarship.
 
 ---
 
@@ -27,7 +27,7 @@ where people can search, track, and review games, built end to end
 including the database, login system with Google sign-in, and an admin
 area, deployed so anyone can use it.
 
-In his final semester he interned on a voice AI prototype at Aurivox,
+In his final semester he interned on a voice AI prototype at Viemo Capital,
 and he recently delivered his first paid freelance project, a website and
 enquiry system for Adelaide Rising Stars Tennis Academy, delivered in three
 weeks. As of November 2026 it brings in 50+ Google Search clicks a month,
@@ -92,46 +92,25 @@ different project (graph search algorithms).
 
 ## Experience
 
-### Software Engineering Intern (Voice AI), Aurivox, Viemo Capital & Consulting (Aug 2026 to Nov 2026)
+Role details are generated from the site's experience data, in Agrim's own
+words (first person).
 
-Chosen as one of 4 interns from 11 shortlisted students for a 50-day
-placement with a startup building a voice AI product, based at Adelaide
-University's ThincLab. Worked across the speech-to-text, LLM and
-text-to-speech stack of a voice-first meeting assistant, reporting to the
-founder and taking an open brief through to a working prototype. Taken for
-course credit in place of his capstone. Details of the product itself are
-confidential. Skills: TypeScript, React, Node.js, WebSockets, speech-to-text,
-LLM integration, text-to-speech.
+{{EXPERIENCE}}
 
-### President, Adelaide University Tennis Club (Jul 2024 to Mar 2026)
+The internship at Viemo Capital: the assistant is in internal use. Further
+details of the product are confidential, so anything beyond the story above
+is something the assistant declines to discuss.
 
-Took over a club that had gone quiet and rebuilt it from scratch. Led the
-merger of two university tennis clubs during the Adelaide and UniSA
-consolidation, co-authored the new constitution, brought together an
-eight-member committee, and won grants for facility upgrades. The real
-challenge was getting two groups who didn't know each other to trust the
-process and work as one.
+More on the presidency: he took over a club that had gone quiet and rebuilt
+it from scratch. The real challenge of the merger was getting two groups
+who did not know each other to trust the process and work as one. Skills:
+Leadership, Governance, Operations, Stakeholder Management.
 
-Results: grew from around 10 to 100+ active members in 18 months, lifted
-regular participation by 75%, secured $7,000+ in grants, merged two clubs into one, won Club of the Year 2025 (Jessop
-Shield). Skills: Leadership, Governance, Operations, Stakeholder
-Management.
+More on coaching: he plans each session, adjusts feedback to the player
+and tracks progress over time. Skills: Communication, Mentoring, Planning.
 
-### Assistant Head Coach, Adelaide Rising Stars Tennis Academy (Mar 2024 to Present)
-
-Based at Tea Tree Gully Tennis Club. Coaches 10+ sessions a week for a
-client base of 50+, juniors and adults, one-on-one and in groups. Runs
-junior squads of up to 30 players in a two-hour block and directs the
-assistant coaches. Plans each session, adjusts feedback to the player,
-tracks progress over time. Built skill at explaining the same idea multiple
-ways until it clicks, and at keeping people motivated when things are hard.
-Skills: Communication, Mentoring, Planning.
-
-### Retail Assistant, IGA Supermarkets (Feb 2024 to Oct 2024)
-
-Part-time customer service across two stores (Elizabeth Downs and Hutt Street) while studying full-time.
-Busy retail floor, steady standards, practice juggling work and uni at
-the same time. Skills: Customer Service, Teamwork.
+More on retail: the two IGA stores were Elizabeth Downs and Hutt Street.
+Skills: Customer Service, Teamwork.
 
 ---
 
@@ -145,7 +124,17 @@ the same time. Skills: Customer Service, Teamwork.
   Workflow Design)
 - Career Access Mentoring Program, Adelaide University, 2025 (Industry
   Mentoring, Professional Skills). His mentor, Bart, is an APT Analyst at
-  Google Threat Intelligence; they met in person at Google Sydney.
+  Google Threat Intelligence; they met in person at Google Sydney. It was a
+  structured 14-hour mentorship, one-on-one, over four to six months, and
+  they have stayed in touch for more than a year since. Bart ran him through
+  a full mock Google interview loop (the online assessment, then technical,
+  behavioural and HR rounds), his first, which taught him to think out
+  loud, show each step of his reasoning, and treat a follow-up question as
+  part of the answer. The feedback changed how he applies: every resume is
+  written for the specific role, in the format its reader expects, and he
+  chooses what to build by where he wants to be in a few years. Bart also
+  introduced him to software engineers at Google, put him in touch with a
+  recruiter for advice, and showed him around Google's Sydney office.
 - Microsoft Certified: Azure Fundamentals (AZ-900), Microsoft, August 2026
   (Cloud Concepts, Azure Services, Governance)
 
@@ -204,7 +193,7 @@ a graduate role in Australia. Available for graduate roles from December
 Two threads run through Agrim's work. The first is applied AI inside real
 products: the Claude-powered recommendation engine he built for Pacific
 Village Explorer's village view (cut from the hackathon demo), and the
-Aurivox voice AI internship he completed in November 2026. The second is turning messy data into something you can act
+Viemo Capital voice AI internship he completed in November 2026. The second is turning messy data into something you can act
 on. He has run his own monthly budget tool in VBA since September 2025,
 tracking expenses, planning travel and thinking about investment, and uses
 it as a real tool rather than a one-off assignment. He's most interested in
@@ -218,8 +207,9 @@ did, which he then came back to alone, fixed end-to-end, connected to
 live external data (the RAWG API), and deployed to production. It's the
 clearest evidence of the difference between building for a grade and
 shipping because he wanted it to exist. Full auth with Google sign-in, a
-normalised 9-table relational schema, 40+ API endpoints, and an admin
-panel, all live today.
+normalised 9-table relational schema, 43 API routes (38 from the team
+build and 5 from his redesign), and an admin panel, all live since June
+2026.
 It was originally deployed on Railway, moved to Render with Aiven MySQL
 when the Railway trial ended, then to Neon PostgreSQL when Aiven's free
 tier started powering the database off, which gave him real experience
@@ -240,19 +230,21 @@ had access to so far.
 
 **What are you looking for in a graduate role?**
 Graduate roles in software engineering, AI, data, and analytics. Ideally somewhere the work has real users and real stakes
-quickly, not a long ramp-up before touching anything that matters.
+quickly, not a long ramp-up before touching anything that matters. In
+his own words, what is next: a graduate software engineering role where AI
+does real work inside a product people use, on a team with more scale than
+he has had so far.
 
 **What's a time you failed and what did you learn?**
-Agrim failed an advanced statistics course in second year, the first
-subject he'd ever failed. It genuinely rattled him. He'd never had to
-reckon with falling short academically, and as an international student
-the stakes felt higher than they probably were. What he took from it
-wasn't really about statistics. It was that his study approach, cramming
-close to the deadline, worked fine for subjects he found intuitive but
-broke down under real difficulty. Since then he plans study time earlier
-and spreads it out rather than relying on a late push, and treats "this
-is harder than I expected" as a signal to adjust early rather than push
-through with the same method for longer.
+During his internship Agrim pushed straight to the main branch of the
+team's shared repository without pulling first. A teammate had restructured
+the project at the same time, so the two histories diverged and the merge
+had to be resolved by hand, file by file. Nothing was lost, but it cost the
+team time that a thirty-second pull would have saved. What he does
+differently now: he confirms with everyone affected before he changes
+shared code, and he does not move forward until he has that confirmation.
+In practice that means pulling first, working on a branch, opening a pull
+request, and waiting for a review before anything merges.
 
 **How do you use AI tools in your work, and where do you draw the line on
 relying on them?**
@@ -271,7 +263,7 @@ Yes, based in Adelaide, happy to relocate within Australia.
 
 **What's your availability / notice period / start date?**
 Graduating December 2026 with full working rights from 15 December 2026.
-He completed his internship at Aurivox in November 2026.
+He completed his internship at Viemo Capital in November 2026.
 Available for graduate roles from December 2026, and happy to start
 conversations before then.
 

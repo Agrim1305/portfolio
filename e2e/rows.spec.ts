@@ -78,8 +78,10 @@ for (const row of rows) {
       test.skip(isMobile, "no wheel on touch");
       await page.goto("/");
       await toRow(page, row);
-      const before = await pageY(page);
       await row.scroller(page).hover({ position: { x: 200, y: 100 } });
+      // Read after the hover: under load Playwright may scroll the row into
+      // view again to reach it, which is not the swipe's doing.
+      const before = await pageY(page);
       // Past half a card, so a mandatory snap carries on rather than
       // settling back.
       await page.mouse.wheel(800, 0);
@@ -132,6 +134,107 @@ for (const row of rows) {
     });
   });
 }
+
+/* The two photo rows move on by themselves, one stop every five seconds;
+   Selected work never does, because its cards hold text. */
+const autoRows = [
+  { row: rows[1], button: (page: Page, verb: string) => page.getByRole("button", { name: `${verb} Built on court` }) },
+  { row: rows[2], button: (page: Page, verb: string) => page.getByRole("button", { name: `${verb} the journey` }) },
+];
+
+for (const { row, button } of autoRows) {
+  test.describe(`${row.name} moves by itself`, () => {
+    // Real time: each test waits out the five seconds at least once.
+    test.setTimeout(45_000);
+
+    test("one stop after five seconds on screen, and Selected work stays put", async ({ page }) => {
+      await page.goto("/");
+      await toRow(page, row);
+      await page.mouse.move(5, 5);
+      const stops = await stopsOf(row.scroller(page));
+      await expect(button(page, "Pause")).toBeVisible();
+      await page.waitForTimeout(3000);
+      expect(await left(row.scroller(page))).toBe(0);
+      await expect.poll(() => left(row.scroller(page)), { timeout: 6000 }).toBe(stops[1]);
+      await expect.poll(() => left(row.scroller(page)), { timeout: 8000 }).toBe(stops[2]);
+      expect(await left(rows[0].scroller(page))).toBe(0);
+    });
+
+    test("it does not move while it is off screen", async ({ page }) => {
+      await page.goto("/");
+      await page.waitForTimeout(6500);
+      expect(await left(row.scroller(page))).toBe(0);
+    });
+
+    test("it waits while the pointer is over it or its region has focus", async ({ page, isMobile }) => {
+      await page.goto("/");
+      await toRow(page, row);
+      if (!isMobile) {
+        await row.scroller(page).hover({ position: { x: 200, y: 100 } });
+        await page.waitForTimeout(6500);
+        expect(await left(row.scroller(page))).toBe(0);
+        await page.mouse.move(5, 5);
+      }
+      await row.region(page).focus({ preventScroll: true } as never);
+      await page.waitForTimeout(6500);
+      expect(await left(row.scroller(page))).toBe(0);
+      await expect(button(page, "Pause")).toBeVisible();
+    });
+
+    test("the first press stops it for good, and the button starts it again", async ({ page, isMobile }) => {
+      await page.goto("/");
+      await toRow(page, row);
+      const stops = await stopsOf(row.scroller(page));
+      // A swipe on a phone, where the journey has no arrows; a press elsewhere.
+      if (isMobile) await row.scroller(page).evaluate((el, x) => el.scrollTo({ left: x, behavior: "instant" }), stops[1]);
+      else await row.next(page).click();
+      await expect.poll(() => left(row.scroller(page))).toBe(stops[1]);
+      await expect(button(page, "Play")).toBeVisible();
+      // A click can scroll the page to reach its button; bring the row back
+      // on screen, where it would move if it were going to.
+      await toRow(page, row);
+      await page.mouse.move(5, 5);
+      await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+      await page.waitForTimeout(6500);
+      expect(await left(row.scroller(page))).toBe(stops[1]);
+
+      await button(page, "Play").click();
+      await expect(button(page, "Pause")).toBeVisible();
+      await toRow(page, row);
+      await page.mouse.move(5, 5);
+      await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+      await expect.poll(() => left(row.scroller(page)), { timeout: 9000 }).toBe(stops[2]);
+    });
+
+    test("under reduced motion it never moves and shows no button", async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.goto("/");
+      await toRow(page, row);
+      await page.mouse.move(5, 5);
+      await expect(button(page, "Pause")).toHaveCount(0);
+      await expect(button(page, "Play")).toHaveCount(0);
+      await page.waitForTimeout(6500);
+      expect(await left(row.scroller(page))).toBe(0);
+    });
+  });
+}
+
+test("opening a journey photo stops the strip for good", async ({ page }) => {
+  test.setTimeout(45_000);
+  await page.goto("/");
+  await toRow(page, rows[2]);
+  await page.mouse.move(5, 5);
+  await page.locator(".journey-track button").first().click();
+  await expect(page.locator("dialog[open]")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.locator("dialog[open]")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Play the journey" })).toBeVisible();
+  await toRow(page, rows[2]);
+  await page.mouse.move(5, 5);
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await page.waitForTimeout(6500);
+  expect(await left(rows[2].scroller(page))).toBe(0);
+});
 
 /* Records every wheel and touch listener that can hold scrolling back,
    and every wheel, touch or scrolling key that gets cancelled. */
@@ -267,7 +370,7 @@ test("Lenis glides the wheel: a notch moves the page over several frames, not at
 
 test("nav anchors land with the section's heading in full view below the nav", async ({ page, isMobile }) => {
   await page.goto("/");
-  const ids = ["projects", "leadership", "experience", "google", "court", "about", "contact"];
+  const ids = ["projects", "experience", "leadership", "mentorship", "court", "about", "contact"];
   for (const id of ids) {
     if (isMobile) {
       await page.getByRole("button", { name: "Open menu" }).click();

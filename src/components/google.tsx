@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
+import { SectionHeader } from "@/components/section-header";
 import type { Photo } from "@/lib/stories";
 
 const CREDENTIAL_URL = "https://www.linkedin.com/feed/update/urn:li:activity:7376092779933835264/";
@@ -34,8 +35,8 @@ const photos: Photo[] = [
 
 const facts = [
   { value: "14 hours", label: "one-on-one" },
-  { value: "4 to 6 months", label: "of meetings" },
   { value: "Full loop", label: "mock Google interview" },
+  { value: "Engineers", label: "introductions to Google software engineers" },
   { value: "Sydney", label: "Google office visit" },
 ];
 
@@ -66,22 +67,17 @@ function Tile({ photo, sizes, className = "" }: { photo: Photo; sizes: string; c
 export function Google() {
   const [lead, ...rest] = photos;
   return (
-    <section id="google" className="wrap py-20 lg:py-28">
-      <p className="rise font-mono text-[11px] uppercase tracking-[0.15em] text-accent-soft lg:text-[13px]">
-        Mentorship
-      </p>
-      <h2
-        className="rise mt-3 font-display text-[clamp(3rem,1.6rem+4.8vw,6rem)] font-extrabold leading-[0.95] tracking-[-0.04em] text-ink"
-        style={rise(0.04)}
-      >
-        Google,{" "}
-        <span className="font-serif font-medium italic tracking-normal text-accent">up close.</span>
-      </h2>
-      <p className="rise mt-4 text-base text-ink-muted lg:text-xl" style={rise(0.08)}>
+    <section id="mentorship" className="wrap py-20 lg:py-28">
+      <SectionHeader
+        label="Mentorship"
+        headline="Fourteen hours one-on-one with an analyst at Google Threat Intelligence."
+        numbers={facts}
+      />
+      <p className="rise text-[15px] text-ink-muted lg:text-lg" style={rise(0.08)}>
         Career Access Mentoring Program · Adelaide University
       </p>
 
-      <div className="rise mt-10 lg:mt-14" style={rise(0.16)}>
+      <div className="rise mt-8" style={rise(0.16)}>
         <div className="grid gap-4 lg:grid-cols-[minmax(0,700fr)_minmax(0,470fr)] lg:gap-6">
           <Tile photo={lead} sizes="(min-width: 1024px) 700px, 100vw" className="lg:row-span-2 lg:aspect-auto" />
           {rest.map((photo) => (
@@ -90,41 +86,35 @@ export function Google() {
         </div>
       </div>
 
-      <dl
-        className="rise mt-10 grid grid-cols-2 border-y border-hairline lg:mt-12 lg:grid-cols-4"
-        style={rise(0.24)}
-      >
-        {facts.map((f) => (
-          <div key={f.value} className="flex flex-col py-5 lg:py-[22px]">
-            <dt className="order-last mt-1 text-sm text-ink-muted">{f.label}</dt>
-            <dd className="font-display text-[26px] font-extrabold leading-tight text-ink lg:text-[34px]">
-              {f.value}
-            </dd>
-          </div>
-        ))}
-      </dl>
-
-      {/* One paragraph, set in two columns on wide screens. */}
-      <p
-        className="rise mt-10 text-base leading-[1.65] text-ink-muted lg:columns-2 lg:gap-10 lg:text-[17px]"
+      {/* Four paragraphs, set in two columns on wide screens; none breaks
+          across the columns. */}
+      <div
+        className="rise mt-10 space-y-5 text-base leading-[1.65] text-ink-muted lg:columns-2 lg:gap-10 lg:text-[17px] [&>p]:break-inside-avoid"
         style={rise(0.32)}
       >
-        A structured 14-hour mentorship through Adelaide University, spread
-        across meetings over four to six months, mentored one-on-one by an{" "}
-        <span className="hl">APT Analyst at Google Threat Intelligence</span>
-        . We have stayed in touch for more than a year since. He ran me
-        through a full mock Google interview loop, from the online
-        assessment to the technical, behavioural and HR rounds, and was
-        direct about exactly where I was weak and what to work on. He showed
-        me how each round actually works, how to structure an answer, and
-        which of my own experiences to draw on for it. We also covered how
-        engineers at that level approach software craft and problem-solving,
-        and where my strengths fit best. We met in person for the first
-        time at Google&apos;s Sydney office, where he gave me a tour, and he
-        still reviews my thinking whenever I am making a decision about my
-        career.
-      </p>
-      {/* The credential, small, under the paragraph's first column. */}
+        <p>
+          A structured 14-hour mentorship through Adelaide University, one-on-one with an{" "}
+          <span className="hl">APT Analyst at Google Threat Intelligence</span>, over four to six
+          months. We have stayed in touch for more than a year since.
+        </p>
+        <p>
+          He ran me through a full mock Google interview loop: the online assessment, then
+          technical, behavioural and HR rounds. It was my first. It taught me to think out loud,
+          to show each step of my reasoning, and to treat a follow-up question as part of the
+          answer.
+        </p>
+        <p>
+          His feedback changed how I apply. Every resume I send is written for the specific
+          role, in the format its reader expects. I also choose what to build by where I want to
+          be in a few years, not only by the next application.
+        </p>
+        <p>
+          He introduced me to software engineers at Google, put me in touch with a recruiter for
+          advice, and showed me around Google&apos;s Sydney office, where we met in person for
+          the first time.
+        </p>
+      </div>
+      {/* The credential, small, under the text's first column. */}
       <a
         href={CREDENTIAL_URL}
         target="_blank"

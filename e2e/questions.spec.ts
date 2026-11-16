@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
-const SECTIONS = ["projects", "leadership", "experience", "google", "court", "about", "contact"];
+const SECTIONS = ["projects", "experience", "leadership", "mentorship", "court", "about", "contact"];
 
 // Scrolls a section into view the way a reader stops on it, then waits for
 // the page to rest and the question to be offered.
@@ -133,19 +133,19 @@ test.describe("section questions", () => {
 
     await cloud(page).focus();
     await expect(bubble(page)).toBeVisible();
-    await expect(cloud(page)).toHaveAccessibleDescription("What did Agrim do at Aurivox?");
+    await expect(cloud(page)).toHaveAccessibleDescription("What did Agrim do at Viemo Capital?");
     // Tab goes from the cloud into its question, and the tooltip stays.
     await page.keyboard.press("Tab");
-    await expect(bubble(page).getByRole("button", { name: "What did Agrim do at Aurivox?" })).toBeFocused();
+    await expect(bubble(page).getByRole("button", { name: "What did Agrim do at Viemo Capital?" })).toBeFocused();
     await expect(bubble(page)).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(bubble(page)).toBeHidden();
     await expect(cloud(page)).toBeFocused();
 
     await cloud(page).hover();
-    await bubble(page).getByRole("button", { name: "What did Agrim do at Aurivox?" }).click();
+    await bubble(page).getByRole("button", { name: "What did Agrim do at Viemo Capital?" }).click();
     await expect(page.getByRole("dialog", { name: "Aris" }).getByRole("log")).toContainText(
-      "What did Agrim do at Aurivox?",
+      "What did Agrim do at Viemo Capital?",
     );
   });
 
@@ -153,12 +153,12 @@ test.describe("section questions", () => {
     await page.goto("/");
     await restOn(page, "projects");
     await page.getByRole("button", { name: "Next project" }).click();
-    await expect(page.getByText("2 / 6")).toBeVisible();
+    await expect(page.getByText("2 / 7")).toBeVisible();
     await page.getByRole("button", { name: "Next project" }).click();
-    await expect(page.getByText("3 / 6")).toBeVisible();
+    await expect(page.getByText("3 / 7")).toBeVisible();
     await page.mouse.move(10, 10);
     await page.waitForTimeout(1500);
-    await expect(bubble(page)).toContainText("How was Adelaide Rising Stars built?");
+    await expect(bubble(page)).toContainText("How was MetaPlay built?");
   });
 
   test("dismissed stays dismissed, and nothing shows while the chat is open or the page moves", async ({ page }) => {

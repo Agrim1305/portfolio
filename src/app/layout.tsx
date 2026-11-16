@@ -29,7 +29,7 @@ const newsreader = Newsreader({
 // and the intro.
 const title = "Agrim Sharma | Software Engineering · Adelaide";
 const description =
-  "Final-year Computer Science student at Adelaide University, majoring in Artificial Intelligence. I build software that solves problems, put AI to work inside them, and ship it so real people actually use it.";
+  "Software engineer building real-time AI systems. Computer Science (AI) at Adelaide University, graduating December 2026.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://agrimsharma.com"),

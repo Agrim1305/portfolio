@@ -6,9 +6,9 @@ import { projects } from "@/lib/projects";
    the Projects one names the card in view. */
 const QUESTIONS: Record<string, (card: number) => string> = {
   projects: (card) => `How was ${projects[card]?.title ?? projects[0].title} built?`,
+  experience: () => "What did Agrim do at Viemo Capital?",
   leadership: () => "How did Agrim merge two tennis clubs?",
-  experience: () => "What did Agrim do at Aurivox?",
-  google: () => "What did Agrim learn from his Google mentor?",
+  mentorship: () => "What did Agrim learn from his Google mentor?",
   court: () => "How did tennis shape how Agrim works?",
   about: () => "What does Agrim value in his work?",
   contact: () => "Is he eligible to work in Australia?",

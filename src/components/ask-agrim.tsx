@@ -89,7 +89,7 @@ const SUGGESTED_QUESTIONS = [
 const INTRO_MESSAGE: Message = {
   role: "assistant",
   content:
-    "Hi, I'm Aris, an AI assistant trained only on Agrim's portfolio content. Ask me anything about his projects, experience, or background, and I'll answer from what's actually here rather than guessing.",
+    "Hi, I'm Aris. Ask me anything about Agrim's work.",
 };
 
 const OPEN_EVENT = "ask:open";
@@ -116,11 +116,6 @@ export function AskCard({ className = "" }: { className?: string }) {
       style={{ animationDelay: "1.1s" }}
     >
       <p className="font-display text-[20px] font-bold leading-tight lg:text-[22px]">Ask Aris</p>
-      {/* From md up the hero's cloud perches on the card's top-right corner;
-          the line wraps short of it. */}
-      <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-muted md:pr-[190px]">
-        AI assistant · grounded in his portfolio
-      </p>
       <div className="mt-3 flex flex-wrap gap-2">
         {SUGGESTED_QUESTIONS.map((q) => (
           <button
@@ -365,7 +360,7 @@ export function AskAgrim({ heroId }: { heroId?: string }) {
                 Aris
               </p>
               <p className="font-mono text-[10px] uppercase leading-snug tracking-[0.06em] text-ink-muted">
-                Agrim&apos;s AI assistant · grounded in his portfolio
+                Agrim&apos;s AI assistant
               </p>
             </div>
             <button

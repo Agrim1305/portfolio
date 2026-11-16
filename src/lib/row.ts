@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type RefObject } from "react";
 
 // How far a mouse must move with the button down before it is a drag, not a
 // click, and how far a drag must go to carry on to the next stop rather
@@ -170,6 +170,87 @@ export function useRow({ onMove }: { onMove?: (at: number, stops: HTMLElement[])
   }
 
   return { ref, active, ends, go, step };
+}
+
+/* Quiet: reduced motion or Save-Data. Nothing moves by itself. Taken as
+   quiet until the browser says otherwise. */
+const QUIET_QUERY = "(prefers-reduced-motion: reduce)";
+const saveData = () => Boolean((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData);
+function subscribeQuiet(onChange: () => void) {
+  const mq = window.matchMedia(QUIET_QUERY);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+export const useQuiet = () =>
+  useSyncExternalStore(subscribeQuiet, () => window.matchMedia(QUIET_QUERY).matches || saveData(), () => true);
+
+// How long a row rests on a stop before it moves on by itself, how often
+// it checks, and how long after its own move a scroll still counts as its.
+const AUTO_MS = 5000;
+const TICK_MS = 250;
+const OWN_SCROLL_MS = 1500;
+
+/* Moves a photo row on by itself. `advance` runs each time the row has
+   spent five seconds in a row on screen with no mouse over it and nothing
+   in it focused; either starts the five seconds again. The first time the
+   visitor takes the row over (a drag, a swipe, a key, or `stop` from one of
+   its buttons or from opening a photo) it stops for good, and only
+   `toggle`, the row's pause and play button, starts it again. Never when
+   quiet. */
+export function useAutoAdvance(row: RefObject<HTMLElement | null>, advance: () => void) {
+  const quiet = useQuiet();
+  const [playing, setPlaying] = useState(true);
+  const latest = useRef(advance);
+  useEffect(() => {
+    latest.current = advance;
+  });
+
+  useEffect(() => {
+    const el = row.current;
+    if (!el || quiet || !playing) return;
+    let onScreen = false;
+    let hovered = false;
+    let waited = 0;
+    let ownMove = -Infinity;
+    // Where the row's focus lives: itself, or the region around it that
+    // takes the arrow keys.
+    const zone = el.closest<HTMLElement>('[role="region"]') ?? el;
+    const io = new IntersectionObserver(([e]) => (onScreen = e.isIntersecting), { threshold: 0.5 });
+    io.observe(el);
+    const timer = window.setInterval(() => {
+      const free = onScreen && !hovered && !zone.contains(document.activeElement);
+      waited = free ? waited + TICK_MS : 0;
+      if (waited < AUTO_MS) return;
+      waited = 0;
+      ownMove = performance.now();
+      latest.current();
+    }, TICK_MS);
+    // A scroll the row didn't start is the visitor's.
+    const onScroll = () => {
+      if (performance.now() - ownMove > OWN_SCROLL_MS) setPlaying(false);
+    };
+    // A finger has no hover; after a tap it would never leave.
+    const enter = (e: PointerEvent) => (hovered = e.pointerType === "mouse");
+    const leave = () => (hovered = false);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    el.addEventListener("pointerenter", enter);
+    el.addEventListener("pointerleave", leave);
+    return () => {
+      io.disconnect();
+      clearInterval(timer);
+      el.removeEventListener("scroll", onScroll);
+      el.removeEventListener("pointerenter", enter);
+      el.removeEventListener("pointerleave", leave);
+    };
+  }, [row, quiet, playing]);
+
+  return {
+    /** False when quiet: the row never moves, so it needs no button. */
+    available: !quiet,
+    playing: playing && !quiet,
+    toggle: () => setPlaying((p) => !p),
+    stop: () => setPlaying(false),
+  };
 }
 
 // The first of the stops nearest `x`.

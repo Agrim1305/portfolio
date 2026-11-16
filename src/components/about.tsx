@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { SectionHeader } from "@/components/section-header";
 
 const facts = [
   { value: "AI major", label: "Computer Science" },
@@ -26,11 +27,12 @@ const rise = (delay: number) => ({ "--rise-delay": `${delay}s` }) as React.CSSPr
 export function About() {
   return (
     <section id="about" tabIndex={-1} className="outline-none wrap py-20 lg:py-28">
-      <h2 className="rise font-display text-[clamp(3rem,1.6rem+4.8vw,6rem)] font-extrabold leading-none tracking-[-0.04em] text-ink">
-        About
-      </h2>
+      <SectionHeader
+        label="About"
+        headline="Computer Science (AI) at Adelaide University, graduating December 2026."
+      />
 
-      <div className="mt-10 grid gap-12 lg:mt-12 lg:grid-cols-[360px_minmax(0,1fr)] lg:gap-20">
+      <div className="grid gap-12 lg:grid-cols-[360px_minmax(0,1fr)] lg:gap-20">
         <div className="rise mx-auto w-full max-w-[360px]" style={rise(0.08)}>
           <div className="relative aspect-[360/400] overflow-hidden rounded-[22px]">
             <Image
@@ -108,7 +110,7 @@ export function About() {
           ))}
         </ol>
         <p className="mt-10 max-w-3xl text-lg leading-relaxed text-ink-soft">
-          This year I finished a voice AI internship at Aurivox and delivered
+          This year I finished a voice AI internship at Viemo Capital and delivered
           a website for a local tennis academy, and I am now in my final
           semester, graduating in December 2026.
         </p>

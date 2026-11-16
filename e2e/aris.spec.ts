@@ -19,8 +19,8 @@ test("the chat, the hero card and the cloud are named Aris", async ({ page }) =>
   await expect(cloud(page)).toBeVisible();
   await cloud(page).click();
   await expect(chat(page)).toBeVisible();
-  await expect(chat(page)).toContainText("Agrim's AI assistant · grounded in his portfolio");
-  await expect(chat(page).getByRole("log")).toContainText("Hi, I'm Aris, an AI assistant trained only on Agrim's portfolio content.");
+  await expect(chat(page)).toContainText("Agrim's AI assistant");
+  await expect(chat(page).getByRole("log")).toContainText("Hi, I'm Aris. Ask me anything about Agrim's work.");
 });
 
 test.describe("the pill", () => {

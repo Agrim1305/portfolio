@@ -60,12 +60,8 @@ export function Hero() {
               className="hero-rise mt-6 max-w-[34rem] text-lg leading-[1.55] text-ink-soft lg:text-xl"
               style={{ animationDelay: "0.8s" }}
             >
-              Final-year Computer Science student at Adelaide University, majoring
-              in Artificial Intelligence. I build{" "}
-              <span className="text-ink">software that solves problems</span>, put AI to work
-              inside them, and{" "}
-              <span className="text-ink">ship it so real people actually use it</span>
-              .
+              Software engineer building real-time AI systems. Computer Science (AI) at
+              Adelaide University, graduating December 2026.
             </p>
             <p
               className="hero-rise mt-5 flex items-start gap-2.5 font-mono text-[13px] leading-relaxed text-ink-muted"
@@ -73,7 +69,7 @@ export function Hero() {
             >
               <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-accent" />
               <span>
-                Voice AI intern at Aurivox, 2026 · open to graduate roles from December 2026
+                Open to graduate roles from December 2026
               </span>
             </p>
 
