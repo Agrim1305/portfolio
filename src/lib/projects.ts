@@ -82,7 +82,7 @@ export type Project = Star & {
 /* How many end-to-end tests `npx playwright test --list` counts. The Aris
    case study and the Selected work header both quote it; update it here
    when the suite changes. */
-export const E2E_TESTS = 390;
+export const E2E_TESTS = 392;
 
 export const projects: Project[] = [
   {

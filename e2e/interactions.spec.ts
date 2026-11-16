@@ -855,7 +855,7 @@ test.describe("experience", () => {
     await expect(page.getByRole("dialog")).toBeHidden();
     const focused = page.locator("[data-expand]").filter({ visible: true }).filter({ hasText: "Read the full story" });
     await expect(focused).toBeFocused();
-    await expect(focused).toHaveAccessibleDescription(/Tennis Coach|Tea Tree Gully Tennis Club/);
+    await expect(focused).toHaveAccessibleDescription(/Tennis Coach|Tea Tree Gully/);
   });
 
   test("a story link opens the page with that story showing", async ({ page }) => {

@@ -98,7 +98,7 @@ export function Court({ colours }: { colours: Record<string, string> }) {
           numbers={[
             { value: "Top 90", label: "national junior ranking, India" },
             { value: "15", label: "years on court" },
-            { value: "Premier League", label: "top grade in South Australia" },
+            { value: "Top grade", label: "Premier League, Tennis SA" },
             { value: "50+", label: "players coached" },
           ]}
         />

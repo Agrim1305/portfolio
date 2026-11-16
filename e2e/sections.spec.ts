@@ -53,12 +53,18 @@ test.describe("nav", () => {
 test("every section opens with a label, a headline and numbers that keep to their columns", async ({ page }) => {
   await page.goto("/");
   for (const id of SECTIONS) await expect(page.locator(`#${id} header h2`)).toHaveCount(1);
-  // A long value ("Premier League") wraps before it runs into the next one.
+  // A long value wraps before it runs into the next one.
   const values = page.locator("section header dd");
   expect(await values.count()).toBeGreaterThan(15);
   for (const fits of await values.evaluateAll((els) => els.map((el) => el.scrollWidth <= el.parentElement!.clientWidth + 1))) {
     expect(fits).toBe(true);
   }
+});
+
+test("an old #google link lands on Mentorship, with the address corrected", async ({ page }) => {
+  await page.goto("/#google");
+  await expect(page).toHaveURL(/#mentorship$/);
+  await expect(page.locator("#mentorship header")).toBeInViewport();
 });
 
 test("a cover's stack word fits inside its cover at every width", async ({ page }) => {

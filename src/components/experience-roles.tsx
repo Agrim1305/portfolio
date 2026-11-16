@@ -11,15 +11,6 @@ import { Metrics, StarStory } from "@/components/case-study";
 import { roles } from "@/lib/experience";
 import { STORY_EVENT, type Photo, type StoryRequest } from "@/lib/stories";
 
-// "Viemo Capital" reads as VC, "Adelaide Rising Stars" as AR.
-const monogram = (org: string) =>
-  org
-    .replace("·", "")
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join("");
-
 // The description's own sentences, word for word, one bullet each.
 const sentences = (text: string) => text.split(/(?<=\.)\s+/);
 
@@ -41,7 +32,7 @@ function Gallery({ photos }: { photos: Photo[] }) {
       {photos.map((p) => (
         <figure key={p.src} className="mb-8 break-inside-avoid">
           <div
-            className="overflow-hidden rounded-[18px] border-[5px] border-ink shadow-[0_30px_60px_rgb(0_0_0/0.5)]"
+            className="overflow-hidden rounded-[18px] shadow-[0_30px_60px_rgb(0_0_0/0.5)]"
           >
             <Image src={p.src} alt={p.alt} width={p.width} height={p.height} sizes="(min-width: 1280px) 460px, (min-width: 640px) 45vw, 90vw" className="h-auto w-full" />
           </div>
@@ -216,9 +207,9 @@ export function ExperienceRoles() {
               </span>
               <span className="lg:flex lg:flex-col lg:gap-1.5">
                 <span className="lg:font-display lg:text-2xl lg:font-bold lg:leading-[1.1]">
-                  {r.org.split(" · ")[0]}
+                  {(r.listOrg ?? r.org).split(" · ")[0]}
                   <span className="hidden lg:inline">
-                    {r.org.includes(" · ") && ` · ${r.org.split(" · ")[1]}`}
+                    {(r.listOrg ?? r.org).includes(" · ") && ` · ${(r.listOrg ?? r.org).split(" · ")[1]}`}
                   </span>
                 </span>
                 <span className={`hidden text-[15px] font-normal lg:block ${on ? "text-ink-soft" : ""}`}>
@@ -251,7 +242,7 @@ export function ExperienceRoles() {
             className="role-panel relative flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-[radial-gradient(120%_90%_at_100%_0%,rgb(255_91_46/0.22),rgb(255_91_46/0)_55%),var(--surface)] px-6 pb-6 pt-[26px] shadow-[0_40px_80px_rgb(0_0_0/0.45)] lg:min-h-[520px] lg:rounded-[28px] lg:px-11 lg:py-10"
           >
             {photo && (
-              <div className="relative mb-6 aspect-[4/3] w-40 overflow-hidden rounded-[22px] border-4 border-paper bg-[#E6E1D9] shadow-[0_20px_40px_rgb(0_0_0/0.5)] lg:absolute lg:right-9 lg:top-9 lg:mb-0">
+              <div className="relative mb-6 aspect-[4/3] w-40 overflow-hidden rounded-[18px] shadow-[0_20px_40px_rgb(0_0_0/0.5)] lg:absolute lg:right-9 lg:top-9 lg:mb-0">
                 <Image
                   src={photo.src}
                   alt={photo.alt}
@@ -263,18 +254,10 @@ export function ExperienceRoles() {
               </div>
             )}
             {/* Clear of the photo in the corner, so a long organisation wraps. */}
-            <div className={`flex items-center gap-3.5 ${photo ? "lg:pr-44" : ""}`}>
-              <span
-                aria-hidden
-                className="flex size-[52px] shrink-0 items-center justify-center rounded-[14px] bg-accent font-display text-lg font-extrabold text-paper"
-              >
-                {monogram(r.org)}
-              </span>
-              <p className="flex min-w-0 flex-col gap-1 font-mono text-xs">
-                <span className="text-ink-soft">{r.org}</span>
-                <span className="text-ink-faint">{r.dates}</span>
-              </p>
-            </div>
+            <p className={`flex flex-col gap-1 font-mono text-xs ${photo ? "lg:pr-44" : ""}`}>
+              <span className="text-ink-soft">{r.org}</span>
+              <span className="text-ink-faint">{r.dates}</span>
+            </p>
             <h3 className="mt-6 font-display text-[32px] font-extrabold leading-[1.05] tracking-[-0.025em] text-ink lg:mt-7 lg:max-w-[380px] lg:text-[38px]">
               {r.role}
             </h3>

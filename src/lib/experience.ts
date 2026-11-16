@@ -17,6 +17,8 @@ export type Role = {
   id: string;
   role: string;
   org: string;
+  /** A shorter organisation for the role list, where the full one runs long. */
+  listOrg?: string;
   dates: string;
   description: string;
   stats: Metric[];
@@ -37,7 +39,7 @@ export const roles: Role[] = [
       "Built a real-time voice assistant for live meetings on the Claude API: spoken answers in a median of 1.9 seconds, summaries that hold up in long meetings, and consent and data residency guardrails. In internal use.",
     stats: [
       { value: "1.9 s", label: "median spoken answer" },
-      { value: "15 of 15", label: "action items captured, up from 7" },
+      { value: "15 of 15", label: "action items, up from 7 of 15" },
       { value: "17%", label: "lower cost per summary" },
       { value: "31", label: "merged pull requests" },
     ],
@@ -121,6 +123,7 @@ export const roles: Role[] = [
     id: "coaching",
     role: "Tennis Coach and Assistant Head Coach",
     org: "Tea Tree Gully Tennis Club · Adelaide Rising Stars Tennis Academy",
+    listOrg: "Tea Tree Gully · Adelaide Rising Stars",
     dates: "Mar 2024 to Present",
     description:
       "I coach 10+ sessions a week at Tea Tree Gully Tennis Club for more than fifty clients, from juniors to adults, one-on-one and in groups. I coach for both the club and the academy, which run side by side at Tea Tree Gully, with private players from beginner to performance level. I run junior and performance squads of up to thirty players in a two-hour block, setting the drill plan and directing assistant coaches across four courts. It has made me good at explaining the same idea a few different ways until it clicks, and at keeping a big group moving on one plan.",

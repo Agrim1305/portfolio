@@ -23,20 +23,10 @@ export function Contact() {
           <span className="block sm:inline">build</span>
         </p>
 
-        <p
-          className="rise mt-8 max-w-2xl text-lg leading-relaxed text-ink-soft sm:text-xl"
-          style={rise(0.08)}
-        >
-          I&apos;m looking for{" "}
-          <span className="text-ink">
-            graduate roles in software engineering, AI, data, and analytics
-          </span>
-          . Email is the best way to reach me. I&apos;m based in Adelaide and
-          happy to relocate within Australia.
-        </p>
-        <p className="rise mt-5 max-w-2xl text-lg leading-relaxed text-ink-soft sm:text-xl" style={rise(0.12)}>
+        <p className="rise mt-8 max-w-2xl text-lg leading-relaxed text-ink-soft sm:text-xl" style={rise(0.08)}>
           What is next: a graduate software engineering role where AI does real work inside a
-          product people use, on a team with more scale than I have had so far.
+          product people use, on a team with more scale than I have had so far. Based in Adelaide,
+          happy to relocate within Australia. Email is the best way to reach me.
         </p>
 
         <div
