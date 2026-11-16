@@ -669,6 +669,31 @@ test.describe("selected work", () => {
     }
   });
 
+  test("the panel's buttons float over the hero, then sit on a solid bar once the body scrolls", async ({ page }) => {
+    for (const route of ["/projects/metaplay", "/#story-president"]) {
+      await page.goto("/");
+      if (route.startsWith("/#")) {
+        await page.goto(route);
+      } else {
+        const open = page.getByRole("link", { name: "Open case study for MetaPlay" });
+        await open.focus();
+        await page.keyboard.press("Enter");
+      }
+      const panel = page.locator("dialog[open]");
+      await expect(panel).toBeVisible();
+      const bar = panel.locator(".panel-body + div");
+      const background = () => bar.evaluate((el) => getComputedStyle(el).backgroundColor);
+      expect(await background()).toBe("rgba(0, 0, 0, 0)");
+      await panel.locator(".panel-body").evaluate((el) => el.scrollTo({ top: 600, behavior: "instant" }));
+      // Opaque, and as tall as its buttons, so nothing shows through or under them.
+      await expect.poll(background).toMatch(/^rgb\(/);
+      const [barBox, close] = await Promise.all([bar.boundingBox(), panel.getByRole("button", { name: /^Close/ }).boundingBox()]);
+      expect(barBox!.y + barBox!.height).toBeGreaterThanOrEqual(close!.y + close!.height);
+      await panel.locator(".panel-body").evaluate((el) => el.scrollTo({ top: 0, behavior: "instant" }));
+      await expect.poll(background).toBe("rgba(0, 0, 0, 0)");
+    }
+  });
+
   test("arrow keys slide between projects, the address follows, and closing lands on that card", async ({ page, isMobile }) => {
     test.skip(isMobile, "arrow keys are a desktop control");
     await page.goto("/");
