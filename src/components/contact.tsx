@@ -27,6 +27,10 @@ export function Contact() {
           . Email is the best way to reach me. I&apos;m based in Adelaide and
           happy to relocate within Australia.
         </p>
+        <p className="rise mt-5 max-w-2xl text-lg leading-relaxed text-ink-soft sm:text-xl" style={rise(0.12)}>
+          What is next: a graduate software engineering role where AI does real work inside a
+          product people use, on a team with more scale than I have had so far.
+        </p>
 
         <div
           className="rise mt-9 grid w-full max-w-md grid-cols-3 gap-2 sm:flex sm:w-auto sm:max-w-none sm:gap-3"

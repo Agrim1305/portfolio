@@ -258,7 +258,10 @@ had access to so far.
 
 **What are you looking for in a graduate role?**
 Graduate roles in software engineering, AI, data, and analytics. Ideally somewhere the work has real users and real stakes
-quickly, not a long ramp-up before touching anything that matters.
+quickly, not a long ramp-up before touching anything that matters. In
+his own words, what is next: a graduate software engineering role where AI
+does real work inside a product people use, on a team with more scale than
+he has had so far.
 
 **What's a time you failed and what did you learn?**
 During his internship Agrim pushed straight to the main branch of the
